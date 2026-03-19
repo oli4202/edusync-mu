@@ -59,22 +59,80 @@ body { overflow: hidden; }
     </div>
 
     <div class="playground-layout" style="flex:1;">
-        <!-- Language Panel -->
+        <!-- Left Sidebar Panel -->
         <div class="lang-panel">
-            <div class="lang-section">Web</div>
+            <div class="lang-section">Languages</div>
             <div class="lang-item active" onclick="setLang('javascript',this)"><span class="lang-icon">🟨</span>JavaScript<span class="lang-badge">Native</span></div>
-            <div class="lang-item" onclick="setLang('html',this)"><span class="lang-icon">🌐</span>HTML/CSS</div>
-            <div class="lang-section">Backend</div>
-            <div class="lang-item" onclick="setLang('python',this)"><span class="lang-icon">🐍</span>Python<span class="lang-badge">API</span></div>
-            <div class="lang-item" onclick="setLang('php',this)"><span class="lang-icon">🐘</span>PHP<span class="lang-badge">API</span></div>
-            <div class="lang-section">System</div>
-            <div class="lang-item" onclick="setLang('c',this)"><span class="lang-icon">⚙️</span>C</div>
-            <div class="lang-item" onclick="setLang('cpp',this)"><span class="lang-icon">⚙️</span>C++</div>
+            <div class="lang-item" onclick="setLang('python',this)"><span class="lang-icon">🐍</span>Python</div>
             <div class="lang-item" onclick="setLang('java',this)"><span class="lang-icon">☕</span>Java</div>
-            <div class="lang-section">SE Courses</div>
+            <div class="lang-item" onclick="setLang('cpp',this)"><span class="lang-icon">⚙️</span>C++</div>
+            <div class="lang-item" onclick="setLang('c',this)"><span class="lang-icon">⚙️</span>C</div>
+            <div class="lang-item" onclick="setLang('php',this)"><span class="lang-icon">🐘</span>PHP</div>
             <div class="lang-item" onclick="setLang('sql',this)"><span class="lang-icon">🗄️</span>SQL</div>
-            <div class="lang-section">Snippets</div>
-            <div class="lang-item" onclick="showTab('snippets')"><span class="lang-icon">📋</span>Code Templates</div>
+            
+            <div style="height:10px;"></div>
+            <div class="lang-section" style="color:var(--accent);">Practice Tracks</div>
+            
+            <!-- SP Lab -->
+            <div class="lang-section" style="cursor:pointer;background:rgba(255,255,255,.05);padding:8px 16px;" onclick="toggleCourse('sp-lab')">🔽 SP Lab (Phase 1)</div>
+            <div id="sp-lab" style="display:none;background:rgba(0,0,0,.1);">
+                <div class="lang-item" onclick="loadPractice('sp','loop',this)">⮑ Basic Loop</div>
+                <div class="lang-item" onclick="loadPractice('sp','string',this)">⮑ String</div>
+                <div class="lang-item" onclick="loadPractice('sp','array',this)">⮑ Array</div>
+                <div class="lang-item" onclick="loadPractice('sp','2darray',this)">⮑ 2D Array</div>
+                <div class="lang-item" onclick="loadPractice('sp','pattern',this)">⮑ Pattern Printing</div>
+                <div class="lang-item" onclick="loadPractice('sp','factorial',this)">⮑ Factorial</div>
+                <div class="lang-item" onclick="loadPractice('sp','armstrong',this)">⮑ Armstrong Number</div>
+                <div class="lang-item" onclick="loadPractice('sp','pointer',this)">⮑ Basic Pointer</div>
+                <div class="lang-item" onclick="loadPractice('sp','functions',this)">⮑ Functions</div>
+            </div>
+
+            <!-- DS Lab -->
+            <div class="lang-section" style="cursor:pointer;background:rgba(255,255,255,.05);padding:8px 16px;margin-top:2px;" onclick="toggleCourse('ds-lab')">🔽 DS Lab</div>
+            <div id="ds-lab" style="display:none;background:rgba(0,0,0,.1);">
+                <div class="lang-item" onclick="loadPractice('ds','pointer_recap',this)">⮑ Pointer Recap</div>
+                <div class="lang-item" onclick="loadPractice('ds','linkedlist',this)">⮑ Linked List</div>
+                <div class="lang-item" onclick="loadPractice('ds','stack',this)">⮑ Stack</div>
+                <div class="lang-item" onclick="loadPractice('ds','queue',this)">⮑ Queue</div>
+                <div class="lang-item" onclick="loadPractice('ds','sorts',this)">⮑ Select/Bubble/Insert Sort</div>
+                <div class="lang-item" onclick="loadPractice('ds','binary_search',this)">⮑ Binary Search</div>
+                <div class="lang-item" onclick="loadPractice('ds','bounds',this)">⮑ Lower/Upper Bound</div>
+                <div class="lang-item" onclick="loadPractice('ds','occurrences',this)">⮑ Occurrences & Sqrt</div>
+                <div class="lang-item" onclick="loadPractice('ds','bfs_dfs',this)">⮑ BFS & DFS</div>
+            </div>
+
+            <!-- Algo Lab -->
+            <div class="lang-section" style="cursor:pointer;background:rgba(255,255,255,.05);padding:8px 16px;margin-top:2px;" onclick="toggleCourse('algo-lab')">🔽 Algo Lab (SWE221)</div>
+            <div id="algo-lab" style="display:none;background:rgba(0,0,0,.1);">
+                <div class="lang-item" onclick="loadPractice('algo','intro',this)">⮑ Mod 1: Intro to Algo</div>
+                <div class="lang-item" onclick="loadPractice('algo','analysis',this)">⮑ Mod 2: Analysis</div>
+                <div class="lang-item" onclick="loadPractice('algo','sort_search',this)">⮑ Mod 3: Sort & Search</div>
+                <div class="lang-item" onclick="loadPractice('algo','graphs',this)">⮑ Mod 4: Graph Algos</div>
+                <div class="lang-item" onclick="loadPractice('algo','greedy',this)">⮑ Mod 5: Greedy Algos</div>
+                <div class="lang-item" onclick="loadPractice('algo','dp',this)">⮑ Mod 6: Dynamic Prog</div>
+                <div class="lang-item" onclick="loadPractice('algo','backtracking',this)">⮑ Mod 7: Backtracking</div>
+            </div>
+
+            <!-- SADP -->
+            <div class="lang-section" style="cursor:pointer;background:rgba(255,255,255,.05);padding:8px 16px;margin-top:2px;" onclick="toggleCourse('sadp-lab')">🔽 SADP (Design Patterns)</div>
+            <div id="sadp-lab" style="display:none;background:rgba(0,0,0,.1);">
+                <div class="lang-item" onclick="loadPractice('sadp','strategy',this)">⮑ Strategy</div>
+                <div class="lang-item" onclick="loadPractice('sadp','observer',this)">⮑ Observer</div>
+                <div class="lang-item" onclick="loadPractice('sadp','factory',this)">⮑ Factory</div>
+                <div class="lang-item" onclick="loadPractice('sadp','singleton',this)">⮑ Singleton</div>
+                <div class="lang-item" onclick="loadPractice('sadp','command',this)">⮑ Command</div>
+                <div class="lang-item" onclick="loadPractice('sadp','adapter',this)">⮑ Adapter</div>
+                <div class="lang-item" onclick="loadPractice('sadp','facade',this)">⮑ Facade</div>
+                <div class="lang-item" onclick="loadPractice('sadp','template',this)">⮑ Template Method</div>
+                <div class="lang-item" onclick="loadPractice('sadp','iterator',this)">⮑ Iterator</div>
+                <div class="lang-item" onclick="loadPractice('sadp','composite',this)">⮑ Composite</div>
+                <div class="lang-item" onclick="loadPractice('sadp','state',this)">⮑ State</div>
+                <div class="lang-item" onclick="loadPractice('sadp','proxy',this)">⮑ Proxy</div>
+                <div class="lang-item" onclick="loadPractice('sadp','compound',this)">⮑ Compound</div>
+            </div>
+
+            <div style="height:10px;"></div>
+            <div class="lang-item" onclick="showTab('snippets')"><span class="lang-icon">📋</span>All Snippets</div>
         </div>
 
         <!-- Editor Panel -->
@@ -95,8 +153,8 @@ body { overflow: hidden; }
         <div class="output-panel">
             <div class="output-tabs">
                 <div class="output-tab active" onclick="showTab('output',this)">Output</div>
-                <div class="output-tab" onclick="showTab('ai',this)">🤖 AI Explain</div>
-                <div class="output-tab" onclick="showTab('snippets',this)">📋 Snippets</div>
+                <div class="output-tab" onclick="showTab('problem',this)">📖 Problem/Notes</div>
+                <div class="output-tab" onclick="showTab('ai',this)">🤖 AI Code Assistant</div>
             </div>
             <div class="output-body">
                 <!-- Output Tab -->
@@ -104,24 +162,29 @@ body { overflow: hidden; }
                     <div style="color:var(--muted);font-size:12px;margin-bottom:12px;">Press ▶ Run Code to see output here</div>
                     <div class="output-console" id="consoleOutput"></div>
                 </div>
+                <!-- Problem Tab -->
+                <div id="tab-problem" style="display:none;">
+                    <div style="font-size:16px;font-weight:700;color:var(--accent);margin-bottom:8px;" id="problemTitle">Welcome to Code Playground</div>
+                    <div style="font-size:14px;line-height:1.6;color:var(--text);white-space:pre-wrap;" id="problemDesc">Select a topic from the **Practice Tracks** menu on the left (SP Lab, DS Lab, Algo Lab, SADP) to view the problem statement and starter code. 
+Or, simply write and test any code using the Language menu!</div>
+                </div>
                 <!-- AI Explain Tab -->
                 <div id="tab-ai" style="display:none;">
                     <div style="margin-bottom:12px;">
-                        <div style="font-size:13px;font-weight:600;margin-bottom:8px;">🤖 AI Code Assistant</div>
+                        <div style="font-size:13px;font-weight:600;margin-bottom:8px;">🤖 AI Assistant Tasks</div>
                         <div style="display:flex;flex-direction:column;gap:6px;">
                             <button class="btn btn-outline btn-sm" onclick="aiAction('explain')">💡 Explain this code</button>
                             <button class="btn btn-outline btn-sm" onclick="aiAction('debug')">🐛 Find bugs & fix</button>
                             <button class="btn btn-outline btn-sm" onclick="aiAction('optimize')">⚡ Optimize code</button>
-                            <button class="btn btn-outline btn-sm" onclick="aiAction('complexity')">📊 Time & space complexity</button>
-                            <button class="btn btn-outline btn-sm" onclick="aiAction('convert')">🔄 Convert to another language</button>
+                            <button class="btn btn-outline btn-sm" onclick="aiAction('complexity')">📊 Analyze complexity</button>
                         </div>
                     </div>
-                    <div class="loading" id="aiLoading"><div class="spinner"></div> AI is analyzing...</div>
+                    <div class="loading" id="aiLoading"><div class="spinner"></div> Processing...</div>
                     <div class="ai-explain-box" id="aiResult" style="display:none;"></div>
                 </div>
                 <!-- Snippets Tab -->
                 <div id="tab-snippets" style="display:none;">
-                    <div style="font-size:13px;font-weight:600;margin-bottom:12px;">📋 MU SE Code Templates</div>
+                    <div style="font-size:13px;font-weight:600;margin-bottom:12px;">📋 All Code Templates</div>
                     <div class="snippets-list" id="snippetsList"></div>
                 </div>
             </div>
@@ -267,57 +330,61 @@ ORDER BY gpa DESC;`,
 
 const snippets = {
     javascript:[
-        {title:'Bubble Sort',desc:'Classic sorting algorithm',code:`function bubbleSort(arr) {
-    for(let i=0; i<arr.length-1; i++)
-        for(let j=0; j<arr.length-i-1; j++)
-            if(arr[j]>arr[j+1]) [arr[j],arr[j+1]]=[arr[j+1],arr[j]];
-    return arr;
-}
-console.log(bubbleSort([64,34,25,12,22,11,90]));`},
-        {title:'Binary Search',desc:'Efficient search in sorted array',code:`function binarySearch(arr, target) {
-    let lo=0, hi=arr.length-1;
-    while(lo<=hi) {
-        let mid=Math.floor((lo+hi)/2);
-        if(arr[mid]===target) return mid;
-        arr[mid]<target ? lo=mid+1 : hi=mid-1;
-    }
-    return -1;
-}
-const arr=[1,3,5,7,9,11,13,15];
-console.log("Found at index:", binarySearch(arr, 7));`},
-        {title:'Linked List',desc:'Basic linked list implementation',code:`class Node { constructor(v){this.val=v;this.next=null;} }
-class LinkedList {
-    constructor(){this.head=null;}
-    push(v){let n=new Node(v);if(!this.head){this.head=n;return;}let c=this.head;while(c.next)c=c.next;c.next=n;}
-    print(){let r=[],c=this.head;while(c){r.push(c.val);c=c.next;}console.log(r.join(' -> '));}
-}
-const ll=new LinkedList();
-[1,2,3,4,5].forEach(v=>ll.push(v));
-ll.print();`},
+        {title:'Bubble Sort',desc:'Classic sorting algorithm',code:`function bubbleSort(arr) {\n    for(let i=0; i<arr.length-1; i++)\n        for(let j=0; j<arr.length-i-1; j++)\n            if(arr[j]>arr[j+1]) [arr[j],arr[j+1]]=[arr[j+1],arr[j]];\n    return arr;\n}\nconsole.log(bubbleSort([64,34,25,12,22,11,90]));`},
+        {title:'Binary Search',desc:'Efficient search in sorted array',code:`function binarySearch(arr, target) {\n    let lo=0, hi=arr.length-1;\n    while(lo<=hi) {\n        let mid=Math.floor((lo+hi)/2);\n        if(arr[mid]===target) return mid;\n        arr[mid]<target ? lo=mid+1 : hi=mid-1;\n    }\n    return -1;\n}\nconst arr=[1,3,5,7,9,11,13,15];\nconsole.log("Found at index:", binarySearch(arr, 7));`},
     ],
     python:[
-        {title:'Fibonacci',desc:'Recursive & iterative',code:`def fib_recursive(n):
-    if n <= 1: return n
-    return fib_recursive(n-1) + fib_recursive(n-2)
-
-def fib_iterative(n):
-    a, b = 0, 1
-    for _ in range(n): a, b = b, a+b
-    return a
-
-for i in range(10):
-    print(f"fib({i}) = {fib_iterative(i)}")`},
-        {title:'Stack using list',desc:'Stack data structure',code:`class Stack:
-    def __init__(self): self.items = []
-    def push(self, item): self.items.append(item)
-    def pop(self): return self.items.pop() if self.items else None
-    def peek(self): return self.items[-1] if self.items else None
-    def is_empty(self): return len(self.items) == 0
-
-s = Stack()
-for i in [1,2,3,4,5]: s.push(i)
-while not s.is_empty(): print(s.pop(), end=' ')`},
+        {title:'Fibonacci',desc:'Recursive & iterative',code:`def fib_iterative(n):\n    a, b = 0, 1\n    for _ in range(n): a, b = b, a+b\n    return a\nfor i in range(10):\n    print(f"fib({i}) = {fib_iterative(i)}")`},
     ]
+};
+
+const practiceData = {
+    sp: {
+        loop: { title: "Basic Loop", lang: "c", code: `#include<stdio.h>\n\nint main() {\n    for(int i=1;i<=10;i++) {\n        printf("%d ", i);\n    }\n    return 0;\n}`, desc: "Write a C program using a basic loop to print numbers from 1 to 10." },
+        string: { title: "String Manipulation", lang: "c", code: `#include<stdio.h>\n#include<string.h>\n\nint main() {\n    char str[] = "EduSync";\n    printf("Length: %zu\\n", strlen(str));\n    return 0;\n}`, desc: "Practice basic string operations like finding length or concatenation." },
+        array: { title: "Array Operations", lang: "c", code: `#include<stdio.h>\n\nint main() {\n    int arr[5] = {1, 2, 3, 4, 5};\n    for(int i=0; i<5; i++) printf("%d ", arr[i]);\n    return 0;\n}`, desc: "Initialize a 1D array and print its elements." },
+        '2darray': { title: "2D Array", lang: "c", code: `#include<stdio.h>\n\nint main() {\n    int mat[2][2] = {{1,2},{3,4}};\n    for(int i=0; i<2; i++) {\n        for(int j=0; j<2; j++) {\n            printf("%d ", mat[i][j]);\n        }\n        printf("\\n");\n    }\n    return 0;\n}`, desc: "Declare a 2D array and print it as a matrix." },
+        pattern: { title: "Pattern Printing", lang: "c", code: `#include<stdio.h>\n\nint main() {\n    int rows=5;\n    for(int i=1; i<=rows; i++) {\n        for(int j=1; j<=i; j++) printf("* ");\n        printf("\\n");\n    }\n    return 0;\n}`, desc: "Print a right-angled triangle pattern of stars using nested loops." },
+        factorial: { title: "Factorial", lang: "c", code: `#include<stdio.h>\n\nint main() {\n    int n=5, fact=1;\n    for(int i=1; i<=n; i++) fact *= i;\n    printf("Factorial of %d is %d\\n", n, fact);\n    return 0;\n}`, desc: "Write a program to find the factorial of a given number." },
+        armstrong: { title: "Armstrong Number", lang: "c", code: `#include<stdio.h>\n\nint main() {\n    int num=153, original, remainder, result=0;\n    original = num;\n    while(original != 0) {\n        remainder = original % 10;\n        result += remainder * remainder * remainder;\n        original /= 10;\n    }\n    if(result == num) printf("%d is an Armstrong number.\\n", num);\n    else printf("%d is not an Armstrong number.\\n", num);\n    return 0;\n}`, desc: "Check whether a given number is an Armstrong number or not (e.g. 153)." },
+        pointer: { title: "Basic Pointer", lang: "c", code: `#include<stdio.h>\n\nint main() {\n    int a=10;\n    int* p=&a;\n    printf("Value: %d, Address: %p\\n", *p, (void*)p);\n    return 0;\n}`, desc: "Declare a pointer and print the address and value of a variable." },
+        functions: { title: "Functions", lang: "c", code: `#include<stdio.h>\n\nint add(int a, int b) {\n    return a+b;\n}\n\nint main() {\n    printf("Sum: %d\\n", add(5,10));\n    return 0;\n}`, desc: "Write a program to add two numbers using a separate function." }
+    },
+    ds: {
+        pointer_recap: { title: "Pointer Recap", lang: "cpp", code: `#include<iostream>\nusing namespace std;\n\nvoid increment(int* p) {\n    (*p)++;\n}\n\nint main() {\n    int x = 42;\n    increment(&x);\n    cout << "Value: " << x << endl;\n    return 0;\n}`, desc: "Revise pointers, pass by reference, and dynamic memory allocation in C++." },
+        linkedlist: { title: "Linked List", lang: "cpp", code: `#include<iostream>\nusing namespace std;\n\nstruct Node { int data; Node* next; };\n\nint main() {\n    // Create a linked list node\n    Node* head = new Node{10, nullptr};\n    cout << "Head points to: " << head->data << endl;\n    return 0;\n}`, desc: "Implement basic operations for a Singly Linked List (insert, delete, print)." },
+        stack: { title: "Stack", lang: "cpp", code: `#include<iostream>\n#include<stack>\nusing namespace std;\n\nint main() {\n    stack<int> s;\n    s.push(10);\n    s.push(20);\n    cout << "Top: " << s.top() << endl;\n    return 0;\n}`, desc: "Implement a Stack using arrays/linked list or use STL stack." },
+        queue: { title: "Queue", lang: "cpp", code: `#include<iostream>\n#include<queue>\nusing namespace std;\n\nint main() {\n    queue<int> q;\n    q.push(10);\n    q.push(20);\n    cout << "Front: " << q.front() << endl;\n    return 0;\n}`, desc: "Implement a Queue using arrays/linked list or use STL queue." },
+        sorts: { title: "Selection, Bubble, Insertion Sort", lang: "cpp", code: `#include<iostream>\n#include<vector>\nusing namespace std;\n\nint main() {\n    vector<int> arr = {64, 25, 12, 22, 11};\n    // Implement your favorite elementary sort here\n    \n    for(int x: arr) cout << x << " ";\n    return 0;\n}`, desc: "Implement Selection Sort, Bubble Sort, and Insertion Sort." },
+        binary_search: { title: "Binary Search", lang: "cpp", code: `#include<iostream>\n#include<vector>\nusing namespace std;\n\nint binarySearch(vector<int>& arr, int target) {\n    int lo=0, hi=arr.size()-1;\n    while(lo<=hi){\n        int mid=lo+(hi-lo)/2;\n        if(arr[mid]==target) return mid;\n        if(arr[mid]<target) lo=mid+1;\n        else hi=mid-1;\n    }\n    return -1;\n}\n\nint main() {\n    vector<int> arr = {2, 5, 8, 12, 16, 23, 38, 56, 72, 91};\n    cout << "Found at index: " << binarySearch(arr, 23) << endl;\n    return 0;\n}`, desc: "Implement binary search to find a target element in a sorted array." },
+        bounds: { title: "Finding Lower / Upper Bound", lang: "cpp", code: `#include<iostream>\n#include<algorithm>\n#include<vector>\nusing namespace std;\n\nint main() {\n    vector<int> v = {10, 20, 30, 30, 20, 10};\n    sort(v.begin(), v.end());\n    auto low = lower_bound(v.begin(), v.end(), 20);\n    cout << "Lower bound of 20 at index: " << (low - v.begin()) << endl;\n    return 0;\n}`, desc: "Find the lower bound and upper bound of elements in a sorted array using standard library or custom binary search." },
+        occurrences: { title: "Item Occurrences & Square Roots", lang: "cpp", code: `#include<iostream>\nusing namespace std;\n\n// Find square root using binary search\nint mySqrt(int x) {\n    if(x==0) return 0;\n    int left=1, right=x, ans;\n    while(left<=right){\n        int mid=left+(right-left)/2;\n        if(mid<=x/mid){ ans=mid; left=mid+1; }\n        else{ right=mid-1; }\n    }\n    return ans;\n}\n\nint main() {\n    cout << "Square root of 8 is: " << mySqrt(8) << endl;\n    return 0;\n}`, desc: "Use binary search variants to find the number of occurrences of an item, or to compute integer square roots." },
+        bfs_dfs: { title: "Graph: BFS & DFS", lang: "cpp", code: `#include<iostream>\n#include<vector>\n#include<queue>\nusing namespace std;\n\nint main() {\n    cout << "Implement BFS and DFS using adjacency list." << endl;\n    return 0;\n}`, desc: "Implement basic Breadth-First Search and Depth-First Search traversals for a graph represented dynamically." }
+    },
+    algo: {
+        intro: { title: "Module 1: Intro to Algorithms", lang: "cpp", code: `// Divide and Conquer, Greedy, Dynamic Programming\n#include<iostream>\nusing namespace std;\n\nint main(){\n    cout << "Intro to Algorithmic Problem Solving!" << endl;\n    return 0;\n}`, desc: "Understand algorithmic problem-solving: Divide and Conquer, Greedy, DP, Backtracking, and Brute Force methods." },
+        analysis: { title: "Module 2: Analysis of Algorithms", lang: "cpp", code: `// Time Complexity: Big-O, Omega, Theta\\n// Space Complexity Trade-offs\n#include<iostream>\nusing namespace std;\n\nint main(){\n    cout << "Big-O Notation." << endl;\n    return 0;\n}`, desc: "Analyze Time Complexity (Big-O, Omega, Theta) & Space Complexity. Trade-offs between them and asymptotic analysis." },
+        sort_search: { title: "Module 3: Sorting & Searching", lang: "cpp", code: `#include<iostream>\n#include<vector>\nusing namespace std;\n\n// Efficient Sorting: Merge Sort, QuickSort, Heap Sort\n// Non-comparison: Counting Sort\n\nint main() {\n    cout << "Implement advanced sorting algorithms here!" << endl;\n    return 0;\n}`, desc: "Implement Merge Sort, QuickSort, Heap Sort, and Counting Sort. Review Linear and Binary Search." },
+        graphs: { title: "Module 4: Graph Algorithms", lang: "cpp", code: `#include<iostream>\n#include<vector>\nusing namespace std;\n\n// Shortest Path Algorithms & MST\nint main() {\n    cout << "Dijkstra, Bellman-Ford, Floyd-Warshall\\nKruskal, Prim" << endl;\n    return 0;\n}`, desc: "Implement Shortest Path (Dijkstra, Bellman-Ford, Floyd-Warshall) and Minimum Spanning Tree (Kruskal, Prim)." },
+        greedy: { title: "Module 5: Greedy Algorithms", lang: "cpp", code: `#include<iostream>\nusing namespace std;\n\n// Activity Selection, Fractional Knapsack, Huffman\nint main() {\n    cout << "Greedy Pattern" << endl;\n    return 0;\n}`, desc: "Implement Greedy strategies: Activity Selection Problem, Fractional Knapsack, Huffman Encoding." },
+        dp: { title: "Module 6: Dynamic Programming", lang: "cpp", code: `#include<iostream>\n#include<vector>\nusing namespace std;\n\n// Fibonacci, LCS, 0/1 Knapsack, LIS, Matrix Chain\nint main() {\n    cout << "Dynamic Programming" << endl;\n    return 0;\n}`, desc: "Implement DP Problems: Fibonacci Sequence, Longest Common Subsequence (LCS), 0/1 Knapsack, Matrix Chain Multiplication, LIS." },
+        backtracking: { title: "Module 7: Backtracking", lang: "cpp", code: `#include<iostream>\n#include<vector>\nusing namespace std;\n\n// N-Queens Problem\nint main() {\n    cout << "N-Queens using Backtracking" << endl;\n    return 0;\n}`, desc: "Understand recursion principles and implement the N-Queens problem using backtracking." }
+    },
+    sadp: {
+        strategy: { title: "Strategy Pattern", lang: "java", code: `public class Main {\n    public static void main(String[] args) {\n        System.out.println("Strategy Design Pattern");\n    }\n}`, desc: "Implement the Strategy Pattern. Define a family of algorithms, encapsulate each one, and make them interchangeable." },
+        observer: { title: "Observer Pattern", lang: "java", code: `public class Main {\n    public static void main(String[] args) {\n        System.out.println("Observer Design Pattern");\n    }\n}`, desc: "Define a one-to-many dependency between objects so that when one object changes state, all its dependents are notified." },
+        factory: { title: "Factory Pattern", lang: "java", code: `public class Main {\n    public static void main(String[] args) {\n        System.out.println("Factory Design Pattern");\n    }\n}`, desc: "Create objects without exposing the instantiation logic to the client and use a common interface." },
+        singleton: { title: "Singleton Pattern", lang: "java", code: `public class Main {\n    public static void main(String[] args) {\n        System.out.println("Singleton Design Pattern");\n    }\n}`, desc: "Ensure a class only has one instance and provide a global point of access to it." },
+        command: { title: "Command Pattern", lang: "java", code: `public class Main {\n    public static void main(String[] args) {\n        System.out.println("Command Pattern");\n    }\n}`, desc: "Encapsulate a request as an object, thereby letting you parameterize clients with different requests." },
+        adapter: { title: "Adapter Pattern", lang: "java", code: `public class Main {\n    public static void main(String[] args) {\n        System.out.println("Adapter Pattern");\n    }\n}`, desc: "Convert the interface of a class into another interface clients expect." },
+        facade: { title: "Facade Pattern", lang: "java", code: `public class Main {\n    public static void main(String[] args) {\n        System.out.println("Facade Pattern");\n    }\n}`, desc: "Provide a unified interface to a set of interfaces in a subsystem." },
+        template: { title: "Template Method Pattern", lang: "java", code: `public class Main {\n    public static void main(String[] args) {\n        System.out.println("Template Method Pattern");\n    }\n}`, desc: "Define the skeleton of an algorithm in an operation, deferring some steps to subclasses." },
+        iterator: { title: "Iterator Pattern", lang: "java", code: `public class Main {\n    public static void main(String[] args) {\n        System.out.println("Iterator Pattern");\n    }\n}`, desc: "Provide a way to access the elements of an aggregate object sequentially without exposing its underlying representation." },
+        composite: { title: "Composite Pattern", lang: "java", code: `public class Main {\n    public static void main(String[] args) {\n        System.out.println("Composite Pattern");\n    }\n}`, desc: "Compose objects into tree structures to represent part-whole hierarchies." },
+        state: { title: "State Pattern", lang: "java", code: `public class Main {\n    public static void main(String[] args) {\n        System.out.println("State Pattern");\n    }\n}`, desc: "Allow an object to alter its behavior when its internal state changes." },
+        proxy: { title: "Proxy Pattern", lang: "java", code: `public class Main {\n    public static void main(String[] args) {\n        System.out.println("Proxy Pattern");\n    }\n}`, desc: "Provide a surrogate or placeholder for another object to control access to it." },
+        compound: { title: "Compound Pattern", lang: "java", code: `public class Main {\n    public static void main(String[] args) {\n        System.out.println("Compound Pattern");\n    }\n}`, desc: "Combine two or more patterns into a solution that solves a recurring or general problem." }
+    }
 };
 
 const fileNames = {javascript:'main.js',python:'main.py',c:'main.c',cpp:'main.cpp',java:'Main.java',php:'index.php',sql:'query.sql',html:'index.html'};
@@ -476,12 +543,44 @@ async function aiAction(action) {
 }
 
 function showTab(tab, el) {
-    ['output','ai','snippets'].forEach(t => {
-        document.getElementById('tab-'+t).style.display = t===tab ? 'block' : 'none';
+    ['output','problem','ai','snippets'].forEach(t => {
+        const pane = document.getElementById('tab-'+t);
+        if(pane) pane.style.display = t===tab ? 'block' : 'none';
     });
     document.querySelectorAll('.output-tab').forEach(t=>t.classList.remove('active'));
-    if (el) el.classList.add('active');
-    else document.querySelectorAll('.output-tab')[['output','ai','snippets'].indexOf(tab)]?.classList.add('active');
+    
+    // Simple way to handle tab activation safely
+    if (el) {
+        el.classList.add('active');
+    } else {
+        // Find tab by text content if el not provided
+        document.querySelectorAll('.output-tab').forEach(t=>{
+            if(t.textContent.toLowerCase().includes(tab)) t.classList.add('active');
+        });
+    }
+}
+
+function toggleCourse(id) {
+    const el = document.getElementById(id);
+    if(el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function loadPractice(course, topic, el) {
+    const data = practiceData[course][topic];
+    if(data) {
+        // Temporarily reset language highlight
+        setLang(data.lang); 
+        
+        // Remove active class from all left menu items to show the practice item is active
+        document.querySelectorAll('.lang-item').forEach(i=>i.classList.remove('active'));
+        if(el) el.classList.add('active');
+        
+        editor.setValue(data.code);
+        
+        document.getElementById('problemTitle').textContent = data.title;
+        document.getElementById('problemDesc').textContent = data.desc;
+        showTab('problem');
+    }
 }
 
 function loadSnippets(lang) {
