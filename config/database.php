@@ -12,10 +12,11 @@ define('DB_CHARSET', 'utf8mb4');
 
 define('SITE_NAME', 'EduSync MU');
 define('SITE_URL', 'http://localhost:8000');
-
 // AI API Keys - Wrapped in defined() to avoid warnings if included multiple times
-if (!defined('CLAUDE_API_KEY')) define('CLAUDE_API_KEY', 'YOUR_CLAUDE_API_KEY_HERE');
-if (!defined('GEMINI_API_KEY')) define('GEMINI_API_KEY', 'AIzaSyC8HF-Qo1nfBhbyHvXvGBlBs-4kTkqwuoE');
+if (!defined('CLAUDE_API_KEY'))
+    define('CLAUDE_API_KEY', 'YOUR_CLAUDE_API_KEY_HERE');
+if (!defined('GEMINI_API_KEY'))
+    define('GEMINI_API_KEY', 'AIzaSyC8HF-Qo1nfBhbyHvXvGBlBs-4kTkqwuoE');
 
 function getDB()
 {

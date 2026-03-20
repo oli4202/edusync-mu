@@ -133,7 +133,7 @@ $subjects = $stmt->fetchAll();
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
                 <div class="form-group">
                     <label>Course Code</label>
-                    <input type="text" name="code" placeholder="e.g. CSE201">
+                    <input type="text" name="code" placeholder="e.g. SWE201">
                 </div>
                 <div class="form-group">
                     <label>Semester</label>

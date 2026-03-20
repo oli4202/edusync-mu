@@ -220,7 +220,7 @@ function bnDate($gMonth,$gDay) {
         <div class="cal-foot">
             <div class="fp">
                 <div class="ft">Our Programmes</div>
-                <div>■ BSc Engineering in CSE/SWE/EEE</div>
+                <div>■ BSc Engineering in SWE/CSE/EEE</div>
                 <div>■ BSc (Hons.) in Data Science</div>
                 <div>■ BBA, MBA (General/Regular), MBM</div>
                 <div>■ BSS, MSS in Economics</div>
