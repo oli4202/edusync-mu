@@ -155,6 +155,12 @@ body {
     transform: perspective(1000px) rotateX(2deg) rotateY(-2deg);
     background: rgba(255, 255, 255, 0.06);
 }
+.sql-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12px; background: rgba(0,0,0,0.2); }
+.sql-table th { background: rgba(34, 211, 238, 0.1); color: var(--accent); text-align: left; padding: 6px 10px; border: 1px solid var(--border); }
+.sql-table td { padding: 6px 10px; border: 1px solid var(--border); color: var(--text); }
+.output-line-err { color: #ff5555; font-family: monospace; white-space: pre-wrap; margin-bottom: 4px; }
+.output-line-info { color: #8be9fd; font-style: italic; margin-bottom: 4px; }
+.output-line-ok { color: #50fa7b; font-weight: 600; margin-bottom: 4px; }
 </style>
 </head>
 <body>
@@ -516,9 +522,9 @@ const practiceData = {
 
 const fileNames = {javascript:'main.js',python:'main.py',c:'main.c',cpp:'main.cpp',java:'Main.java',php:'index.php',sql:'query.sql',html:'index.html'};
 const cmModes   = {javascript:'javascript',python:'python',c:'text/x-csrc',cpp:'text/x-c++src',java:'text/x-java',php:'application/x-httpd-php',sql:'text/x-sql',html:'htmlmixed'};
-const apiLangs  = {python:true,php:true,c:true,cpp:true,java:true,sql:true};
-const runNotes  = {python:'Runs via Piston API',php:'Runs via Piston API',c:'Runs via Piston API',cpp:'Runs via Piston API',java:'Runs via Piston API',sql:'Simulated — SQLite in memory',javascript:'Runs natively in browser',html:'Renders in preview'};
-const pistonLangs={python:'python',php:'php',c:'c',cpp:'cpp',java:'java'};
+const apiLangs  = {python:true,php:true,c:true,cpp:true,java:true,sql:true,javascript:false,html:false};
+const runNotes  = {python:'Runs on Local Python 3.x',php:'Runs via CodeX Cloud API',c:'Runs via CodeX Cloud API',cpp:'Runs via CodeX Cloud API',java:'Runs via CodeX Cloud API',sql:'Runs on Local MySQL Server',javascript:'Runs natively in browser',html:'Renders in preview'};
+const codexLangs={python:'py',php:'php',c:'c',cpp:'cpp',java:'java',javascript:'js'};
 
 editor = CodeMirror.fromTextArea(document.getElementById('codeEditor'),{
     theme:'material-ocean',lineNumbers:true,autoCloseBrackets:true,
@@ -588,10 +594,12 @@ async function runCode() {
             runJavaScript(code);
         } else if (currentLang === 'html') {
             runHTML(code);
+        } else if (currentLang === 'python') {
+            await runPythonLocal(code);
         } else if (currentLang === 'sql') {
-            runSQL(code);
+            await runSQL(code);
         } else if (apiLangs[currentLang]) {
-            await runViaPiston(code, currentLang);
+            await runViaCodeX(code, currentLang);
         }
     } catch(e) {
         addOutput('Error: ' + e.message, 'err');
@@ -625,47 +633,153 @@ function runHTML(code) {
     addOutput('✓ HTML opened in new window', 'ok');
 }
 
-function runSQL(code) {
-    addOutput('-- SQL Execution (simulated)', 'info');
-    addOutput('-- Note: In production, connect to your MySQL database.', 'info');
-    const stmts = code.split(';').map(s=>s.trim()).filter(Boolean);
-    stmts.forEach(stmt => {
-        if (stmt.toUpperCase().startsWith('SELECT'))
-            addOutput('→ SELECT executed. Results would appear from your DB.', 'out');
-        else if (stmt.toUpperCase().startsWith('INSERT'))
-            addOutput('→ INSERT executed. Row added.', 'ok');
-        else if (stmt.toUpperCase().startsWith('CREATE'))
-            addOutput('→ CREATE TABLE executed.', 'ok');
-        else
-            addOutput('→ Statement executed: ' + stmt.substring(0,50)+'...', 'out');
-    });
+async function runSQL(code) {
+    addOutput('Connecting to Local MySQL...', 'info');
+    try {
+        const resp = await fetch('../ajax/run-sql.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ code })
+        });
+        const data = await resp.json();
+        if (data.success) {
+            data.results.forEach(res => {
+                addOutput(`> ${res.stmt}`, 'info');
+                if (res.type === 'table') {
+                    if (res.rows.length === 0) {
+                        addOutput('Empty set (0 rows)', 'ok');
+                    } else {
+                        renderSQLTable(res.columns, res.rows);
+                        addOutput(`${res.rowCount} rows in set`, 'ok');
+                    }
+                } else {
+                    addOutput(`${res.message}. Affected rows: ${res.affectedRows}`, 'ok');
+                }
+            });
+        } else {
+            addOutput(data.error || 'Unknown SQL error', 'err');
+            if (data.stmt) addOutput('At statement: ' + data.stmt, 'err');
+        }
+    } catch (e) {
+        addOutput('Failed to execute SQL: ' + e.message, 'err');
+    }
 }
 
-async function runViaPiston(code, lang) {
-    addOutput(`Running ${lang} via Piston API...`, 'info');
+function renderSQLTable(cols, rows) {
+    const table = document.createElement('table');
+    table.className = 'sql-table';
+    
+    const thead = document.createElement('thead');
+    const tr = document.createElement('tr');
+    cols.forEach(c => {
+        const th = document.createElement('th');
+        th.textContent = c;
+        tr.appendChild(th);
+    });
+    thead.appendChild(tr);
+    table.appendChild(thead);
+    
+    const tbody = document.createElement('tbody');
+    rows.forEach(r => {
+        const tr = document.createElement('tr');
+        cols.forEach(c => {
+            const td = document.createElement('td');
+            td.textContent = r[c] === null ? 'NULL' : r[c];
+            tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    
+    document.getElementById('consoleOutput').appendChild(table);
+}
+
+async function runPythonLocal(code) {
+    addOutput('Starting Local Python Execution...', 'info');
+    const stdinValue = document.getElementById('customInput').value || "";
+    try {
+        const resp = await fetch('../ajax/run-python.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ code, input: stdinValue })
+        });
+        const data = await resp.json();
+        if (data.success) {
+            if (data.output) {
+                data.output.split('\n').forEach(l => addOutput(l, 'out'));
+            } else {
+                addOutput('✓ Code ran with no output.', 'ok');
+            }
+        } else {
+            addOutput(data.error || 'Unknown Python error', 'err');
+        }
+    } catch (e) {
+        addOutput('Failed to execute Python locally: ' + e.message, 'err');
+    }
+}
+
+function renderSQLTable(cols, rows) {
+    const table = document.createElement('table');
+    table.className = 'sql-table';
+    
+    const thead = document.createElement('thead');
+    const tr = document.createElement('tr');
+    cols.forEach(c => {
+        const th = document.createElement('th');
+        th.textContent = c;
+        tr.appendChild(th);
+    });
+    thead.appendChild(tr);
+    table.appendChild(thead);
+    
+    const tbody = document.createElement('tbody');
+    rows.forEach(r => {
+        const tr = document.createElement('tr');
+        cols.forEach(c => {
+            const td = document.createElement('td');
+            td.textContent = r[c] === null ? 'NULL' : r[c];
+            tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    
+    document.getElementById('consoleOutput').appendChild(table);
+}
+
+async function runViaCodeX(code, lang) {
+    addOutput(`Requesting execution for ${lang}...`, 'info');
     const stdinValue = document.getElementById('customInput').value || "";
     
     try {
-        const resp = await fetch('https://emkc.org/api/v2/piston/execute', {
+        const resp = await fetch('https://api.codex.jaagrav.in/', {
             method:'POST',
             headers:{'Content-Type':'application/json'},
             body:JSON.stringify({
-                language: pistonLangs[lang] || lang,
-                version: '*',
-                files:[{name: fileNames[lang], content: code}],
-                stdin: stdinValue
+                language: codexLangs[lang] || lang,
+                code: code,
+                input: stdinValue
             })
         });
         const data = await resp.json();
-        if (data.run) {
-            if (data.run.stdout) data.run.stdout.split('\n').forEach(l => addOutput(l, 'out'));
-            if (data.run.stderr) data.run.stderr.split('\n').filter(Boolean).forEach(l => addOutput(l, 'err'));
-            if (!data.run.stdout && !data.run.stderr) addOutput('✓ Code ran with no output.', 'ok');
-        } else {
-            addOutput('API error: ' + JSON.stringify(data), 'err');
+        
+        // CodeX returns { status, output, error, time, timestamp }
+        if (data.output) {
+            data.output.split('\n').forEach(l => addOutput(l, 'out'));
+        }
+        if (data.error) {
+            data.error.split('\n').filter(Boolean).forEach(l => addOutput(l, 'err'));
+        }
+        
+        if (!data.output && !data.error) {
+            addOutput('✓ Code ran with no output.', 'ok');
+        }
+        
+        if (data.time) {
+            addOutput(`Execution time: ${data.time}ms`, 'info');
         }
     } catch(e) {
-        addOutput('Could not connect to execution API. Check your internet connection.', 'err');
+        addOutput('Could not connect to execution API. Please try again later.', 'err');
     }
 }
 
