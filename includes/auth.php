@@ -157,6 +157,77 @@ function callClaudeAPI($prompt, $systemPrompt = '') {
     return ['success' => false, 'text' => "API Error: " . $errorMsg];
 }
 
+// ── Gemini AI API Call ───────────────────────────────────────
+function callGeminiAPI($prompt, $systemPrompt = '') {
+    $apiKey = GEMINI_API_KEY;
+    
+    // Provide a simulated response if no real API key is configured
+    if (empty($apiKey) || $apiKey === 'AIzaSyXXXXXXXXXXXXXXXXXXXXXXX' || $apiKey === 'YOUR_GEMINI_API_KEY_HERE') {
+        sleep(1); 
+        return ['success' => true, 'text' => "✨ (Simulated Gemini response)\nTo use the real Google Gemini API, please set your actual key in config/database.php.\n\nYour prompt was: " . $prompt];
+    }
+    
+    $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $apiKey;
+    
+    $params = [
+        'contents' => [
+            ['parts' => [['text' => ($systemPrompt ? $systemPrompt . "\n\n" : "") . $prompt]]]
+        ],
+        'generationConfig' => [
+            'maxOutputTokens' => 1500,
+            'temperature' => 0.7
+        ]
+    ];
+    
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST           => true,
+        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+        CURLOPT_POSTFIELDS     => json_encode($params),
+        CURLOPT_TIMEOUT        => 30,
+    ]);
+    
+    $response = curl_exec($ch);
+    $error = curl_error($ch);
+    curl_close($ch);
+    
+    if ($error) return ['success' => false, 'text' => 'Curl Error: ' . $error];
+    
+    $decoded = json_decode($response, true);
+    if (isset($decoded['candidates'][0]['content']['parts'][0]['text'])) {
+        return ['success' => true, 'text' => $decoded['candidates'][0]['content']['parts'][0]['text']];
+    }
+    
+    $errorMsg = $decoded['error']['message'] ?? 'Gemini AI request failed.';
+    return ['success' => false, 'text' => "Gemini API Error: " . $errorMsg];
+}
+
+// ── Unified AI Fallback Handler ──────────────────────────────
+function callAI($prompt, $systemPrompt = '') {
+    // 1. Try Gemini (Free Tier + Simulation)
+    if (defined('GEMINI_API_KEY') && !empty(GEMINI_API_KEY)) {
+        return callGeminiAPI($prompt, $systemPrompt);
+    }
+    
+    // 2. Try Claude (Paid Tier Fallback)
+
+    if (defined('CLAUDE_API_KEY') && !empty(CLAUDE_API_KEY) && 
+        CLAUDE_API_KEY !== 'YOUR_CLAUDE_API_KEY_HERE') {
+        return callClaudeAPI($prompt, $systemPrompt);
+    }
+    
+    // 3. Setup Instructions (If no keys are configured)
+    return [
+        'success' => false, 
+        'text' => "💡 AI features are not yet configured.\n\n" .
+                  "1. Go to [aistudio.google.com/apikey](https://aistudio.google.com/apikey)\n" .
+                  "2. Create a FREE Gemini API key\n" .
+                  "3. Paste it in `edusync/config/database.php`\n\n" .
+                  "Once added, AI suggestions and exam prep tools will be activated immediately! 🚀"
+    ];
+}
+
 // ── Time ago helper ──────────────────────────────────────────
 function timeAgo($datetime) {
     $time = time() - strtotime($datetime);

@@ -1,268 +1,291 @@
 <?php
-// pages/calendar.php
+// pages/calendar.php — PDF-style MU Academic Calendar
 require_once __DIR__ . '/../includes/auth.php';
 requireLogin();
 $user = currentUser();
-$db   = getDB();
-$currentPage = 'calendar';
 
-// Handle Month / Year logic
-$m = isset($_GET['m']) ? intval($_GET['m']) : intval(date('m'));
-$y = isset($_GET['y']) ? intval($_GET['y']) : intval(date('Y'));
+$holidays = [
+    '2026-02-04' => ['Shab-e-Barat (Based on the moon sighting)', 'islamic'],
+    '2026-02-21' => ['International Mother Language Day', 'national'],
+    '2026-03-17' => ['Shab-e-Qadr (Based on the moon sighting)', 'islamic'],
+    '2026-03-19' => ['Eid-ul-Fitr (Based on the moon sighting)', 'islamic'],
+    '2026-03-20' => ['Eid-ul-Fitr', 'islamic'],
+    '2026-03-21' => ['Eid-ul-Fitr', 'islamic'],
+    '2026-03-22' => ['Eid-ul-Fitr', 'islamic'],
+    '2026-03-23' => ['Eid-ul-Fitr', 'islamic'],
+    '2026-03-26' => ['Independence & National Day', 'national'],
+    '2026-04-14' => ["Bengali New Year's Day", 'national'],
+    '2026-05-01' => ['May Day & Buddha Purnima (Based on the moon sighting)', 'national'],
+    '2026-05-26' => ['Eid-ul-Adha (Based on the moon sighting)', 'islamic'],
+    '2026-05-27' => ['Eid-ul-Adha', 'islamic'],
+    '2026-05-28' => ['Eid-ul-Adha', 'islamic'],
+    '2026-05-29' => ['Eid-ul-Adha', 'islamic'],
+    '2026-05-30' => ['Eid-ul-Adha', 'islamic'],
+    '2026-05-31' => ['Eid-ul-Adha (End)', 'islamic'],
+    '2026-06-26' => ['Ashura (Based on the moon sighting)', 'islamic'],
+    '2026-08-05' => ['July Mass Uprising Day', 'national'],
+    '2026-08-26' => ['Eid-e-Milad-Un-Nabi (Based on the moon sighting)', 'islamic'],
+    '2026-09-04' => ['Janmashtami', 'religious'],
+    '2026-10-20' => ['Durga Puja (Nabami)', 'religious'],
+    '2026-10-21' => ['Durga Puja (Vijaya Dashami)', 'religious'],
+    '2026-12-16' => ['Victory Day', 'national'],
+    '2026-12-25' => ['Christmas Day', 'religious'],
+];
 
-if ($m < 1) { $m = 12; $y--; }
-if ($m > 12) { $m = 1; $y++; }
+$monthNotes = [
+    2  => ['04 February : Shab-e-Barat (Based on the moon sighting)', '21 February : International Mother Language Day'],
+    3  => ['17 March : Shab-e-Qadr (Based on the moon sighting)  20 March : Jumatul Bidah', '19 March - 23 March : Eid-ul-Fitr (Based on the moon sighting)', '26 March : Independence and National Day'],
+    4  => ["14 April : Bengali New Year's Day"],
+    5  => ['01 May : May Day & Buddha Purnima (Based on the moon sighting)', '26-31 May : Eid-ul-Adha (Based on the moon sighting)'],
+    6  => ['26 June : Ashura (Based on the moon sighting)'],
+    8  => ['05 August : July Mass Uprising Day', '26 August : Eid-e-Milad-Un-Nabi (Based on the moon sighting)'],
+    9  => ['04 September : Janmashtami'],
+    10 => ['20-21 October : Durga Puja (Nabami, Vijaya Dashami)'],
+    12 => ['16 December : Victory Day', '25 December : Christmas Day'],
+];
 
-$prevM = $m - 1; $prevY = $y;
-$nextM = $m + 1; $nextY = $y;
+$viewYear  = 2026;
+$viewMonth = (int)($_GET['month'] ?? date('n'));
+$viewMonth = max(1, min(12, $viewMonth));
+$monthNames = ['','January','February','March','April','May','June','July','August','September','October','November','December'];
+$monthName  = $monthNames[$viewMonth];
+$daysInMonth    = cal_days_in_month(CAL_GREGORIAN, $viewMonth, $viewYear);
+$firstDayOfWeek = (int)date('w', mktime(0,0,0,$viewMonth,1,$viewYear));
+$prevMonth = $viewMonth-1 < 1  ? 12 : $viewMonth-1;
+$nextMonth = $viewMonth+1 > 12 ? 1  : $viewMonth+1;
+$today = date('Y-m-d');
 
-$monthName = date('F', mktime(0, 0, 0, $m, 1, $y));
-$daysInMonth = cal_days_in_month(CAL_GREGORIAN, $m, $y);
-$firstDayOfWeek = date('N', mktime(0, 0, 0, $m, 1, $y)); // 1 (Mon) to 7 (Sun)
-
-// Fetch user tasks for this month
-$stmt = $db->prepare("
-    SELECT t.id, t.title, t.priority, t.due_date, s.color, s.name as subject_name 
-    FROM tasks t 
-    LEFT JOIN subjects s ON t.subject_id = s.id 
-    WHERE t.user_id = ? AND MONTH(t.due_date) = ? AND YEAR(t.due_date) = ?
-");
-$stmt->execute([$user['id'], $m, $y]);
-$tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Map tasks by day
-$calendarData = [];
-foreach ($tasks as $task) {
-    if ($task['due_date']) {
-        $dayNum = intval(date('d', strtotime($task['due_date'])));
-        $calendarData[$dayNum][] = [
-            'type'  => 'task',
-            'title' => $task['title'],
-            'color' => $task['color'] ?: '#64748b',
-            'subject' => $task['subject_name']
-        ];
-    }
+function toBn($n) {
+    $d=['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
+    return preg_replace_callback('/\d/',fn($m)=>$d[$m[0]],(string)$n);
 }
-
-// Metropolitan University Sylhet Academic Calendar Events (3 Semesters, 4 Months Each)
-// Spring (Jan-Apr), Summer (May-Aug), Fall (Sep-Dec) - No Midterms, only Finals.
-$muEvents = [];
-
-// Selected Holidays
-if ($m == 2) $muEvents[21][] = ['type'=>'holiday', 'title'=>'Intl. Mother Language Day', 'color'=>'#fbbf24'];
-if ($m == 3) $muEvents[26][] = ['type'=>'holiday', 'title'=>'Independence Day', 'color'=>'#fbbf24'];
-if ($m == 4) $muEvents[14][] = ['type'=>'holiday', 'title'=>'Pohela Boishakh', 'color'=>'#fbbf24'];
-if ($m == 5) $muEvents[1][]  = ['type'=>'holiday', 'title'=>'May Day', 'color'=>'#fbbf24'];
-if ($m == 12) $muEvents[16][] = ['type'=>'holiday', 'title'=>'Victory Day', 'color'=>'#fbbf24'];
-
-// Start of Semester
-if (in_array($m, [1, 5, 9])) {
-    $semName = ($m == 1) ? 'Spring' : (($m == 5) ? 'Summer' : 'Fall');
-    $muEvents[5][] = ['type'=>'holiday', 'title'=>"$semName Semester Classes Begin", 'color'=>'#34d399'];
+function bnDate($gMonth,$gDay) {
+    // Simplified mapping for demonstration matching the user's logic
+    $off=[1=>17,2=>18,3=>17,4=>17,5=>17,6=>18,7=>17,8=>16,9=>16,10=>15,11=>15,12=>16];
+    $o=$off[$gMonth]??17;
+    $d1=$gDay+$o; if($d1>30)$d1-=30;
+    $d2=$d1+1;   if($d2>30)$d2-=30;
+    return toBn($d1).' '.toBn($d2);
 }
-
-// Final Exams (Always the 4th month of the semester)
-if (in_array($m, [4, 8, 12])) {
-    $semName = ($m == 4) ? 'Spring' : (($m == 8) ? 'Summer' : 'Fall');
-    $muEvents[15][] = ['type'=>'exam', 'title'=>"$semName Semester Final Exams Begin", 'color'=>'#f87171'];
-    $muEvents[28][] = ['type'=>'deadline', 'title'=>"$semName Semester Ends", 'color'=>'#818cf8'];
-}
-
-// Merge MU Events into calendar
-foreach ($muEvents as $d => $evts) {
-    if (!isset($calendarData[$d])) $calendarData[$d] = [];
-    $calendarData[$d] = array_merge($calendarData[$d], $evts);
-}
-
-// Get upcoming global tasks (for sidebar widget)
-$upcomingStmt = $db->prepare("SELECT title, due_date FROM tasks WHERE user_id=? AND due_date >= CURRENT_DATE AND status!='done' ORDER BY due_date ASC LIMIT 4");
-$upcomingStmt->execute([$user['id']]);
-$upcomingList = $upcomingStmt->fetchAll();
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Academic Calendar — EduSync MU</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Academic Calendar 2026 — EduSync MU</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Noto+Serif+Bengali:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
 <style>
-/* Adjust colors specific to calendar */
-.cal-layout { display:grid; grid-template-columns:1fr 300px; gap:24px; margin-top:20px; align-items:start; }
-@media(max-width:1000px) { .cal-layout { grid-template-columns:1fr; } }
-.cal-card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:24px; box-shadow:0 8px 30px rgba(0,0,0,0.2); }
-.cal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; }
-.cal-title { font-family:'Syne', sans-serif; font-size:24px; font-weight:700; display:flex; align-items:center; gap:12px; }
-.cal-nav { display:flex; gap:10px; }
-.cal-nav button { background:var(--card2); border:1px solid var(--border); color:var(--text); width:36px; height:36px; border-radius:8px; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; }
-.cal-nav button:hover { background:rgba(34,211,238,0.1); border-color:var(--accent); color:var(--accent); }
-
-/* The Grid */
-.cal-grid { display:grid; grid-template-columns:repeat(7, 1fr); gap:8px; }
-.cal-day-header { text-align:center; font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:1px; padding-bottom:12px; border-bottom:1px solid var(--border); margin-bottom:8px; }
-.cal-cell { 
-    background:var(--card2); border:1px solid transparent; border-radius:12px; 
-    min-height:100px; padding:8px; display:flex; flex-direction:column; gap:6px;
-    transition:all 0.2s; position:relative;
-}
-.cal-cell:hover { border-color:rgba(34,211,238,0.3); background:#151b2b; }
-.cal-cell.empty { background:transparent; border:none; }
-.cal-cell.today { border:1px solid var(--accent); background:rgba(34,211,238,0.03); }
-.cal-date-num { font-size:14px; font-weight:600; color:var(--muted); align-self:flex-end; margin-bottom:4px; }
-.cal-cell.today .cal-date-num { color:var(--accent); background:rgba(34,211,238,0.15); width:24px; height:24px; display:flex; align-items:center; justify-content:center; border-radius:50%; }
-
-/* Events */
-.cal-event {
-    font-size:11px; padding:4px 8px; border-radius:6px; background:rgba(255,255,255,0.05);
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer;
-    border-left:3px solid var(--accent); font-weight:500; transition:transform 0.2s;
-}
-.cal-event:hover { transform:translateX(2px); filter:brightness(1.2); }
-.evt-holiday { border-left-color:var(--warn); background:rgba(251,191,36,0.1); color:#fde68a; }
-.evt-exam { border-left-color:#f87171; background:rgba(248,113,113,0.1); color:#fca5a5; }
-.evt-task { border-left-color:var(--accent); }
-
-/* Side Panel */
-.side-widget { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:20px; margin-bottom:20px; }
-.widget-title { font-family:'Syne',sans-serif; font-size:16px; font-weight:700; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
-.widget-item { display:flex; gap:12px; margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid var(--border); }
-.widget-item:last-child { margin-bottom:0; padding-bottom:0; border-bottom:none; }
-.widget-date { flex-shrink:0; background:var(--card2); border-radius:8px; width:44px; height:44px; display:flex; flex-direction:column; align-items:center; justify-content:center; }
-.w-mon { font-size:10px; color:var(--accent); font-weight:700; text-transform:uppercase; }
-.w-day { font-size:16px; font-family:'Syne',sans-serif; font-weight:800; }
-.w-info { flex:1; display:flex; flex-direction:column; justify-content:center; }
-.w-title { font-size:13px; font-weight:600; line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.cal-main{margin-left:240px;padding:20px 24px;min-height:100vh;}
+.month-pills{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:16px;}
+.mpill{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);color:var(--muted);text-decoration:none;transition:all .2s;}
+.mpill:hover{border-color:#c8102e;color:#c8102e;}
+.mpill.on{background:#c8102e;color:#fff;border-color:#c8102e;}
+.nav-row{display:flex;align-items:center;justify-content:space-between;max-width:880px;margin:0 auto 10px;}
+.nvbtn{background:#1a2a6c;color:#fff;border:none;border-radius:6px;padding:7px 16px;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;}
+.nvbtn:hover{opacity:.85;}
+.cur-lbl{font-family:'Arial Black',sans-serif;font-size:20px;font-weight:900;color:var(--text);}
+.cal-card{background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 6px 32px rgba(0,0,0,.22);max-width:880px;margin:0 auto;color:#111;}
+.mu-top{background:#fff;padding:14px 20px 8px;text-align:center;border-bottom:4px solid #c8102e;}
+.mu-bn{font-size:13px;color:#1a2a6c;font-family:'Noto Serif Bengali',serif;font-weight:600;margin-bottom:2px;}
+.mu-en{font-family:'Times New Roman',serif;font-size:28px;font-weight:900;color:#1a2a6c;letter-spacing:2px;line-height:1.1;}
+.mu-u{font-size:14px;font-weight:400;letter-spacing:5px;color:#c8102e;display:block;}
+.mu-tag{font-size:9.5px;color:#c8102e;font-style:italic;margin-top:2px;}
+.mu-fnd{font-size:9px;color:#555;margin-top:1px;}
+.yr{font-family:'Arial Black',sans-serif;font-size:56px;font-weight:900;letter-spacing:-3px;line-height:1;margin:4px 0;}
+.yr .c1{color:#1a2a6c;}.yr .c2{color:#999;}.yr .c3{color:#c8102e;}
+.mbar{display:flex;justify-content:space-between;align-items:center;padding:8px 18px;background:#f5f5f5;border-bottom:2px solid #ccc;}
+.mbar-name{font-family:'Arial Black',sans-serif;font-size:22px;font-weight:900;color:#1a2a6c;}
+.mbar-bn{font-size:10px;color:#666;font-family:'Noto Serif Bengali',serif;margin-top:1px;}
+.mbar-yr{font-family:'Arial Black',sans-serif;font-size:26px;font-weight:900;color:#c8102e;}
+.dnames{display:grid;grid-template-columns:repeat(7,1fr);}
+.dname{padding:9px 0;text-align:center;font-size:14px;font-weight:900;letter-spacing:.5px;border:0.5px solid #ccc;}
+.dname.red{background:#c8102e;color:#fff;font-size:16px;}
+.dname.gray{background:#e8e8e8;color:#444;}
+.dname.lgray{background:#f0f0f0;color:#555;}
+.cgrid{display:grid;grid-template-columns:repeat(7,1fr);border-left:0.5px solid #ccc;border-top:0.5px solid #ccc;}
+.cc{background:#fff;border-right:0.5px solid #ccc;border-bottom:0.5px solid #ccc;min-height:96px;padding:5px 7px;cursor:pointer;position:relative;}
+.cc:hover{background:#f0f8ff;}
+.cc.emp{background:#f2f2f2;cursor:default;}
+.cc.hday{background:#fffbf0;}
+.cc.tday{background:#e8f0fe;}
+.dn{font-family:'Arial Black',sans-serif;font-size:24px;font-weight:900;line-height:1;display:block;color:#1a1a1a;}
+.cc.scol .dn{color:#c8102e;}
+.cc.tday .dn{color:#1a2a6c;}
+.bnd{font-size:9px;color:#888;font-family:'Noto Serif Bengali',serif;display:block;margin-top:1px;line-height:1.3;}
+.hpill{display:block;font-size:8.5px;font-weight:700;margin-top:3px;padding:1px 4px;border-radius:2px;line-height:1.5;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.hp-islamic{background:#d1fae5;color:#065f46;border-left:2px solid #059669;}
+.hp-national{background:#fee2e2;color:#991b1b;border-left:2px solid #dc2626;}
+.hp-religious{background:#fef3c7;color:#92400e;border-left:2px solid #d97706;}
+.tring{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:#1a2a6c;color:#fff!important;font-size:17px!important;}
+.cal-notes{padding:10px 16px;background:#f9f9f9;border-top:2px solid #ddd;font-size:11px;color:#333;line-height:2;}
+.cal-foot{background:#1a2a6c;color:#fff;display:grid;grid-template-columns:1fr auto 1fr;gap:12px;padding:12px 18px;align-items:start;}
+.fp{font-size:9.5px;line-height:1.9;color:#ccc;}
+.fp .ft{color:#fbbf24;font-weight:700;font-size:10.5px;margin-bottom:3px;}
+.fc{text-align:center;}
+.fc .fn{font-family:'Times New Roman',serif;font-size:16px;font-weight:900;letter-spacing:1px;}
+.fc .fu{font-size:8px;letter-spacing:4px;color:#9bb;}
+.fc .fa{font-size:9px;color:#bbb;line-height:1.9;margin-top:5px;}
+.fs{font-size:9.5px;line-height:1.9;color:#ccc;text-align:right;}
+.fs .ft{color:#fbbf24;font-weight:700;font-size:10.5px;margin-bottom:3px;}
+.cal-tagline{background:#c8102e;padding:8px;text-align:center;font-size:13px;font-weight:700;letter-spacing:2px;color:#fff;}
+.badge-row{background:#fff;padding:6px 16px;display:flex;gap:10px;justify-content:center;align-items:center;border-top:1px solid #eee;}
+.gb{background:#1a2a6c;color:#fff;padding:4px 10px;border-radius:3px;font-size:9.5px;font-weight:700;letter-spacing:.5px;}
+.eb{background:#555;color:#fff;padding:4px 10px;border-radius:3px;font-size:9.5px;letter-spacing:.5px;}
+@media(max-width:900px){.sidebar{display:none;}.cal-main{margin-left:0;padding:10px;}.cc{min-height:65px;}.dn{font-size:17px;}.cal-foot{grid-template-columns:1fr;}.fs{text-align:left;}}
+@media(max-width:580px){.cc{min-height:44px;padding:2px 3px;}.dn{font-size:13px;}.bnd,.hpill{display:none;}.yr{font-size:38px;}}
 </style>
 </head>
 <body>
 <?php include '../includes/sidebar.php'; ?>
-
-<main class="main">
-    <div class="topbar">
-        <div>
-            <div class="page-title">📅 Academic Calendar</div>
-            <div class="page-sub">Metropolitan University Sylhet</div>
-        </div>
-        <a href="tasks.php?new=1" class="btn btn-primary">+ Add Deadline</a>
+<main class="cal-main">
+    <div class="month-pills">
+        <?php for($m=1;$m<=12;$m++): ?>
+        <a href="?month=<?=$m?>" class="mpill <?=$m===$viewMonth?'on':''?>"><?=$monthNames[$m]?></a>
+        <?php endfor; ?>
     </div>
-
-    <div class="cal-layout">
-        <!-- Main Calendar -->
-        <div class="cal-card">
-            <div class="cal-header">
-                <div class="cal-title">
-                    <?= $monthName ?> <?= $y ?>
-                </div>
-                <div class="cal-nav">
-                    <button onclick="window.location.href='calendar.php?m=<?= $prevM ?>&y=<?= $prevY ?>'">←</button>
-                    <button onclick="window.location.href='calendar.php?m=<?= date('m') ?>&y=<?= date('Y') ?>'">Today</button>
-                    <button onclick="window.location.href='calendar.php?m=<?= $nextM ?>&y=<?= $nextY ?>'">→</button>
+    <div class="nav-row">
+        <a href="?month=<?=$prevMonth?>" class="nvbtn">← <?=$monthNames[$prevMonth]?></a>
+        <div class="cur-lbl"><?=$monthName?> 2026</div>
+        <a href="?month=<?=$nextMonth?>" class="nvbtn"><?=$monthNames[$nextMonth]?> →</a>
+    </div>
+    <div class="cal-card">
+        <div class="mu-top">
+            <div class="mu-bn">মেট্রোপলিটন ইউনিভার্সিটি</div>
+            <div class="mu-en">Metropolitan<span class="mu-u">U N I V E R S I T Y</span></div>
+            <div class="mu-tag">The First Permanently Chartered Private University in Sylhet</div>
+            <div class="mu-fnd">Founder: Dr. Toufique Rahman Chowdhury</div>
+            <div class="yr"><span class="c1">2</span><span class="c2">0</span><span class="c2">2</span><span class="c3">6</span></div>
+        </div>
+        <?php
+        $bnM=[1=>'পৌষ-মাঘ ১৪৩২ বাংলা',2=>'মাঘ-ফাল্গুন ১৪৩২ বাংলা',3=>'ফাল্গুন-চৈত্র ১৪৩২ বাংলা',4=>'চৈত্র-বৈশাখ ১৪৩৩ বাংলা',5=>'বৈশাখ-জ্যৈষ্ঠ ১৪৩৩ বাংলা',6=>'জ্যৈষ্ঠ-আষাঢ় ১৪৩৩ বাংলা',7=>'আষাঢ়-শ্রাবণ ১৪৩৩ বাংলা',8=>'শ্রাবণ-ভাদ্র ১৪৩৩ বাংলা',9=>'ভাদ্র-আশ্বিন ১৪৩৩ বাংলা',10=>'আশ্বিন-কার্তিক ১৪৩৩ বাংলা',11=>'কার্তিক-অগ্রহায়ণ ১৪৩৩ বাংলা',12=>'অগ্রহায়ণ-পৌষ ১৪৩৩ বাংলা'];
+        $hjM=[1=>'রজব-শাবান ১৪৪৭ হিজরী',2=>'শাবান-রমজান ১৪৪৭ হিজরী',3=>'রমজান-শাওয়াল ১৪৪৭ হিজরী',4=>'শাওয়াল-জিলকদ ১৪৪৭ হিজরী',5=>'জিলকদ-জিলহজ ১৪৪৭ হিজরী',6=>'জিলহজ-মহরম ১৪৪৮ হিজরী',7=>'মহরম-সফর ১৪৪৮ হিজরী',8=>'সফর-রবিউল আউয়াল ১৪৪৮ হিজরী',9=>'রবিউল আউয়াল-রবিউল সানি ১৪৪৮ হিজরী',10=>'রবিউল সানি-জমাদিউল আউয়াল ১৪৪৮ হিজরী',11=>'জমাদিউল আউয়াল-জমাদিউল সানি ১৪৪৮ হিজরী',12=>'জমাদিউল সানি-রজব ১৪৪৮ হিজরী'];
+        ?>
+        <div class="mbar">
+            <div>
+                <div class="mbar-name"><?=$monthName?></div>
+                <div class="mbar-bn"><?=$bnM[$viewMonth]??''?></div>
+                <div class="mbar-bn" style="color:#888;"><?=$hjM[$viewMonth]??''?></div>
+            </div>
+            <div class="mbar-yr">2026</div>
+        </div>
+        <div class="dnames">
+            <div class="dname red">SUN</div>
+            <div class="dname lgray">MON</div>
+            <div class="dname lgray">TUE</div>
+            <div class="dname lgray">WED</div>
+            <div class="dname lgray">THU</div>
+            <div class="dname gray">FRI</div>
+            <div class="dname red">SAT</div>
+        </div>
+        <div class="cgrid">
+            <?php
+            for($e=0;$e<$firstDayOfWeek;$e++) echo '<div class="cc emp"></div>';
+            for($d=1;$d<=$daysInMonth;$d++){
+                $ds=sprintf('%04d-%02d-%02d',$viewYear,$viewMonth,$d);
+                $dow=(int)date('w',mktime(0,0,0,$viewMonth,$d,$viewYear));
+                $isWE=$dow===0||$dow===6;
+                $isT=($ds===$today);
+                $h=$holidays[$ds]??null;
+                $cls='cc'.($isWE?' scol':'').($isT?' tday':'').($h?' hday':'');
+                $bn=bnDate($viewMonth,$d);
+                $hType=$h?$h[1]:'';
+                $hName=$h?mb_substr($h[0],0,26):'';
+                echo '<div class="'.$cls.'" onclick="showDay(\''.$ds.'\',\''.addslashes($hName).'\')">';
+                if($isT){
+                    echo '<span class="dn"><span class="tring">'.$d.'</span></span>';
+                } else {
+                    echo '<span class="dn">'.$d.'</span>';
+                }
+                echo '<span class="bnd">'.$bn.'</span>';
+                if($h) echo '<span class="hpill hp-'.$hType.'">'.htmlspecialchars($hName).'</span>';
+                echo '</div>';
+            }
+            $trail=(7-(($firstDayOfWeek+$daysInMonth)%7))%7;
+            for($e=0;$e<$trail;$e++) echo '<div class="cc emp"></div>';
+            ?>
+        </div>
+        <?php if(!empty($monthNotes[$viewMonth])): ?>
+        <div class="cal-notes">
+            <?php foreach($monthNotes[$viewMonth] as $n): ?>
+            <div><?=htmlspecialchars($n)?></div>
+            <?php endforeach; ?>
+        </div>
+        <?php endif; ?>
+        <div class="badge-row">
+            <span class="gb">Govt. &amp; UGC Approved</span>
+            <span class="eb">Established 2003</span>
+        </div>
+        <div class="cal-foot">
+            <div class="fp">
+                <div class="ft">Our Programmes</div>
+                <div>■ BSc Engineering in CSE/SWE/EEE</div>
+                <div>■ BSc (Hons.) in Data Science</div>
+                <div>■ BBA, MBA (General/Regular), MBM</div>
+                <div>■ BSS, MSS in Economics</div>
+                <div>■ LLB (Hons.) and LLM</div>
+                <div>■ BA (Hons.), MA in English</div>
+                <div>■ MA in ELT</div>
+            </div>
+            <div class="fc">
+                <div class="fn">Metropolitan</div>
+                <div class="fu">U N I V E R S I T Y</div>
+                <div class="fa">
+                    Bateshwar, Sylhet-3104, Bangladesh<br>
+                    +88 01313 050044, 66<br>
+                    info@metrouni.edu.bd<br>
+                    www.metrouni.edu.bd
                 </div>
             </div>
-
-            <div class="cal-grid">
-                <div class="cal-day-header">Mon</div>
-                <div class="cal-day-header">Tue</div>
-                <div class="cal-day-header">Wed</div>
-                <div class="cal-day-header">Thu</div>
-                <div class="cal-day-header">Fri</div>
-                <div class="cal-day-header">Sat</div>
-                <div class="cal-day-header">Sun</div>
-
-                <?php
-                // Empty cells before the first day of the month
-                // Note: $firstDayOfWeek is 1-7 (Mon-Sun)
-                for ($i = 1; $i < $firstDayOfWeek; $i++) {
-                    echo '<div class="cal-cell empty"></div>';
-                }
-
-                // Days of the month
-                $todayD = intval(date('d'));
-                $todayM = intval(date('m'));
-                $todayY = intval(date('Y'));
-
-                for ($d = 1; $d <= $daysInMonth; $d++) {
-                    $isToday = ($d == $todayD && $m == $todayM && $y == $todayY) ? 'today' : '';
-                    echo "<div class='cal-cell $isToday'>";
-                    echo "<div class='cal-date-num'>$d</div>";
-
-                    if (isset($calendarData[$d])) {
-                        foreach ($calendarData[$d] as $evt) {
-                            $evtClass = 'evt-task';
-                            $style = '';
-                            if ($evt['type'] === 'holiday') $evtClass = 'evt-holiday';
-                            if ($evt['type'] === 'exam') $evtClass = 'evt-exam';
-                            if ($evt['type'] === 'task' && !empty($evt['color'])) {
-                                $style = "border-left-color: {$evt['color']};";
-                            }
-                            
-                            $title = htmlspecialchars($evt['title']);
-                            if(isset($evt['subject']) && $evt['subject']) {
-                                $title = htmlspecialchars($evt['subject']) . ': ' . $title;
-                            }
-                            
-                            echo "<div class='cal-event $evtClass' style='$style' title=\"$title\">$title</div>";
-                        }
-                    }
-
-                    echo "</div>";
-                }
-
-                // Fill remaining cells to complete the grid (optional, but looks cleaner)
-                $totalCells = ($firstDayOfWeek - 1) + $daysInMonth;
-                $remCells = 42 - $totalCells; // Always show 6 rows for consistency
-                if($remCells >= 7 && $totalCells <= 35) $remCells -= 7; // if 5 rows are enough
-                
-                for ($i = 0; $i < $remCells; $i++) {
-                    echo '<div class="cal-cell empty"></div>';
-                }
-                ?>
+            <div class="fs">
+                <div class="ft">Scholarships and Special Waivers</div>
+                <div>■ Merit, Tribal and Need Based</div>
+                <div>■ Freedom Fighters Quota</div>
+                <div>■ Chairman Scholarship</div>
+                <div>■ Vice Chancellor Scholarship</div>
+                <div>■ Physically Differently abled Students</div>
+                <div>■ Siblings Quota</div>
             </div>
         </div>
-
-        <!-- Side Panel -->
-        <div>
-            <div class="side-widget">
-                <div class="widget-title">📌 MU Guidelines</div>
-                <div style="font-size:13px; color:var(--muted); line-height:1.6;">
-                    <p style="margin-bottom:10px;">Welcome to the MU SE Academic Calendar. Keep track of your assignments, quizzes, and university events.</p>
-                    <ul style="padding-left:16px; margin-bottom:10px;">
-                        <li>MU runs on a tri-semester system (Spring, Summer, Fall) of 4 months each.</li>
-                        <li>Final exams are held at the end of each semester. There are no midterms.</li>
-                        <li>Campus holidays are highlighted in <span style="color:#fbbf24">yellow</span>.</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="side-widget">
-                <div class="widget-title">⏳ Upcoming Deadlines</div>
-                <?php if(empty($upcomingList)): ?>
-                    <div style="font-size:13px; color:var(--muted); text-align:center; padding:20px 0;">No upcoming deadlines. You're all caught up! ✨</div>
-                <?php else: ?>
-                    <?php foreach($upcomingList as $up): 
-                        $uDate = strtotime($up['due_date']);
-                    ?>
-                    <div class="widget-item">
-                        <div class="widget-date">
-                            <span class="w-mon"><?= date('M', $uDate) ?></span>
-                            <span class="w-day"><?= date('d', $uDate) ?></span>
-                        </div>
-                        <div class="w-info">
-                            <div class="w-title"><?= htmlspecialchars($up['title']) ?></div>
-                            <div style="font-size:11px; color:var(--muted); margin-top:2px;">
-                                <?= (date('Y-m-d', $uDate) == date('Y-m-d')) ? '<span style="color:var(--warn)">Due Today</span>' : 'Due in ' . ceil(($uDate - time())/86400) . ' days' ?>
-                            </div>
-                        </div>
-                    </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-                <a href="tasks.php" class="btn btn-outline" style="width:100%; margin-top:10px; justify-content:center;">View all tasks</a>
-            </div>
-        </div>
+        <div class="cal-tagline">...Committed To Excellence</div>
     </div>
 </main>
-
+<div id="popup" style="display:none;position:absolute;background:#fff;border:1.5px solid #1a2a6c;border-radius:10px;padding:14px 18px;box-shadow:0 8px 28px rgba(0,0,0,.18);z-index:600;min-width:220px;max-width:300px;">
+    <div id="pp-title" style="font-weight:700;font-size:14px;color:#1a2a6c;margin-bottom:8px;"></div>
+    <div id="pp-body" style="font-size:12px;color:#444;line-height:1.7;"></div>
+    <button onclick="document.getElementById('popup').style.display='none'" style="margin-top:10px;background:#c8102e;color:#fff;border:none;border-radius:5px;padding:5px 14px;cursor:pointer;font-size:11px;font-weight:700;">Close</button>
+</div>
+<script>
+const holidays = <?=json_encode($holidays)?>;
+function showDay(ds, hname) {
+    const pop = document.getElementById('popup');
+    const d = new Date(ds + 'T00:00:00');
+    const lbl = d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+    document.getElementById('pp-title').textContent = lbl;
+    let html = '';
+    if (holidays[ds]) {
+        const types = {islamic:'#059669', national:'#dc2626', religious:'#d97706'};
+        const h = holidays[ds];
+        const c = types[h[1]] || '#555';
+        html += `<div style="border-left:3px solid ${c};padding:5px 8px;background:${c}18;border-radius:3px;color:${c};font-weight:600;margin-bottom:6px;">${h[0]}</div>`;
+    }
+    const today = new Date().toISOString().split('T')[0];
+    if (ds === today) html += '<div style="color:#1a2a6c;font-weight:700;font-size:11px;">⚡ Today</div>';
+    if (!html) html = '<span style="color:#999;font-size:11px;">No holiday on this day.</span>';
+    document.getElementById('pp-body').innerHTML = html;
+    const card = document.querySelector('.cal-card');
+    const r = card.getBoundingClientRect();
+    pop.style.left = Math.max(10, r.left + r.width/2 - 140 + window.scrollX) + 'px';
+    pop.style.top  = (r.top + 160 + window.scrollY) + 'px';
+    pop.style.display = 'block';
+}
+document.addEventListener('click', e => {
+    const pop = document.getElementById('popup');
+    if (!pop.contains(e.target) && !e.target.closest('.cc')) {
+        pop.style.display = 'none';
+    }
+});
+</script>
 </body>
 </html>

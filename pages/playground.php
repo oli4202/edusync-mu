@@ -11,46 +11,154 @@ $currentPage = 'playground';
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Code Playground — EduSync MU</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-ocean.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <link rel="stylesheet" href="../assets/css/style.css">
 <style>
-body { overflow: hidden; }
-.playground-layout { display:grid; grid-template-columns:200px 1fr 340px; height:calc(100vh - 80px); gap:0; }
-.lang-panel { background:var(--card2); border-right:1px solid var(--border); padding:16px 0; overflow-y:auto; }
-.lang-item { display:flex; align-items:center; gap:10px; padding:10px 16px; cursor:pointer; transition:all .2s; border-left:2px solid transparent; font-size:13px; color:var(--muted); }
-.lang-item:hover,.lang-item.active { color:var(--text); background:rgba(34,211,238,.06); border-left-color:var(--accent); }
-.lang-icon { font-size:18px; width:24px; text-align:center; }
-.lang-badge { font-size:10px; padding:1px 6px; border-radius:10px; background:rgba(34,211,238,.1); color:var(--accent); margin-left:auto; }
-.editor-panel { display:flex; flex-direction:column; background:#282a36; }
-.editor-topbar { display:flex; align-items:center; justify-content:space-between; padding:10px 16px; background:#1e1f2e; border-bottom:1px solid rgba(255,255,255,.08); }
-.file-name { font-family:monospace; font-size:13px; color:#f8f8f2; }
-.run-btn { background:linear-gradient(135deg,#50fa7b,#00b894); border:none; border-radius:8px; padding:8px 20px; color:#1e1f2e; font-weight:700; font-family:'Syne',sans-serif; font-size:13px; cursor:pointer; transition:all .2s; display:flex; align-items:center; gap:6px; }
-.run-btn:hover { opacity:.9; transform:translateY(-1px); }
-.run-btn:disabled { opacity:.5; cursor:not-allowed; }
-.editor-wrap { flex:1; overflow:hidden; }
-.CodeMirror { height:100% !important; font-size:14px !important; font-family:'Fira Code','Cascadia Code',monospace !important; line-height:1.6 !important; }
-.output-panel { background:var(--card2); border-left:1px solid var(--border); display:flex; flex-direction:column; }
-.output-tabs { display:flex; border-bottom:1px solid var(--border); }
-.output-tab { padding:10px 16px; font-size:12px; font-weight:600; cursor:pointer; color:var(--muted); border-bottom:2px solid transparent; transition:all .2s; }
-.output-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
-.output-body { flex:1; overflow-y:auto; padding:16px; }
-.output-console { font-family:monospace; font-size:13px; line-height:1.7; white-space:pre-wrap; }
-.output-line-out { color:#f8f8f2; }
-.output-line-err { color:#ff5555; }
-.output-line-info { color:#8be9fd; }
-.output-line-ok { color:#50fa7b; }
-.ai-explain-box { background:rgba(34,211,238,.05); border:1px solid rgba(34,211,238,.15); border-radius:10px; padding:14px; font-size:13px; line-height:1.8; white-space:pre-wrap; margin-top:12px; }
-.snippets-list { display:flex; flex-direction:column; gap:8px; }
-.snippet-card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:12px; cursor:pointer; transition:all .2s; }
-.snippet-card:hover { border-color:var(--accent); }
-.snippet-title { font-size:13px; font-weight:600; margin-bottom:4px; }
-.snippet-desc { font-size:11px; color:var(--muted); }
-.lang-section { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; padding:10px 16px 4px; margin-top:8px; }
+:root {
+    --bg: #020617;
+    --card: rgba(15, 23, 42, 0.4);
+    --card2: rgba(30, 41, 59, 0.6);
+    --border: rgba(255, 255, 255, 0.08);
+    --accent: #22d3ee;
+    --accent2: #818cf8;
+    --text: #f8fafc;
+    --muted: #94a3b8;
+    --glass: rgba(15, 23, 42, 0.4);
+}
+body { 
+    overflow: hidden; 
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg);
+}
+#three-bg {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    z-index: -1;
+    pointer-events: none;
+}
+.main { 
+    margin-left: 240px; 
+    background: transparent !important;
+    backdrop-filter: blur(10px);
+}
+.playground-layout { 
+    display: grid; 
+    grid-template-columns: 240px 1fr 340px; 
+    height: calc(100vh - 64px); 
+    gap: 0; 
+}
+.lang-panel { 
+    background: var(--glass); 
+    border-right: 1px solid var(--border); 
+    padding: 16px 0; 
+    overflow-y: auto; 
+    backdrop-filter: blur(15px);
+}
+.lang-item { 
+    display: flex; 
+    align-items: center; 
+    gap: 12px; 
+    padding: 12px 20px; 
+    cursor: pointer; 
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 14px; 
+    color: var(--muted);
+    border-radius: 12px;
+    margin: 4px 12px;
+}
+.lang-item:hover, .lang-item.active { 
+    color: var(--text); 
+    background: rgba(34, 211, 238, 0.1); 
+    transform: perspective(1000px) translate3d(5px, 0, 10px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+.lang-item.active {
+    border-left: 3px solid var(--accent);
+    color: var(--accent);
+}
+.editor-panel { 
+    display: flex; 
+    flex-direction: column; 
+    background: rgba(0, 0, 0, 0.2); 
+    border-right: 1px solid var(--border);
+}
+.editor-topbar { 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    padding: 12px 20px; 
+    background: rgba(15, 23, 42, 0.8); 
+    border-bottom: 1px solid var(--border); 
+}
+.run-btn { 
+    background: linear-gradient(135deg, var(--accent), var(--accent2)); 
+    border: none; 
+    border-radius: 10px; 
+    padding: 10px 24px; 
+    color: #0f172a; 
+    font-weight: 800; 
+    font-family: 'Syne', sans-serif; 
+    font-size: 14px; 
+    cursor: pointer; 
+    transition: all 0.3s; 
+    display: flex; 
+    align-items: center; 
+    gap: 8px;
+    box-shadow: 0 4px 15px rgba(34, 211, 238, 0.3);
+}
+.run-btn:hover { 
+    transform: scale(1.05) translateY(-2px); 
+    box-shadow: 0 8px 25px rgba(34, 211, 238, 0.5); 
+}
+.CodeMirror { 
+    height: 100% !important; 
+    font-size: 15px !important; 
+    background: #0f172a !important; /* Ensure a dark but readable base */
+    color: #f8fafc !important;
+}
+.editor-wrap {
+    flex: 1;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    margin: 10px;
+    border-radius: 12px;
+    background: #0f172a;
+    box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);
+}
+
+.output-panel { 
+    background: var(--glass); 
+    backdrop-filter: blur(20px);
+    display: flex; 
+    flex-direction: column; 
+}
+.output-tab { 
+    padding: 14px 20px; 
+    font-size: 13px; 
+    font-weight: 700; 
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+.glass-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    transition: transform 0.4s;
+}
+.glass-card:hover {
+    transform: perspective(1000px) rotateX(2deg) rotateY(-2deg);
+    background: rgba(255, 255, 255, 0.06);
+}
 </style>
 </head>
 <body>
+<canvas id="three-bg"></canvas>
 <?php include '../includes/sidebar.php'; ?>
 <main class="main" style="padding:0;margin-left:240px;height:100vh;display:flex;flex-direction:column;">
     <div style="padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--card2);">
@@ -132,6 +240,10 @@ body { overflow: hidden; }
             </div>
 
             <div style="height:10px;"></div>
+            <div class="lang-section" style="color:var(--accent);">External Tools</div>
+            <div class="lang-item" onclick="loadExternalCompiler('https://www.programiz.com/c-programming/online-compiler/', this)"><span class="lang-icon">🌐</span>Programiz C Compiler</div>
+
+            <div style="height:10px;"></div>
             <div class="lang-item" onclick="showTab('snippets')"><span class="lang-icon">📋</span>All Snippets</div>
         </div>
 
@@ -158,9 +270,15 @@ body { overflow: hidden; }
             </div>
             <div class="output-body">
                 <!-- Output Tab -->
-                <div id="tab-output">
-                    <div style="color:var(--muted);font-size:12px;margin-bottom:12px;">Press ▶ Run Code to see output here</div>
-                    <div class="output-console" id="consoleOutput"></div>
+                <div id="tab-output" style="display:flex; flex-direction:column; height:100%;">
+                    <div style="font-size:13px; font-weight:600; margin-bottom:8px;">📥 Custom Input (stdin)</div>
+                    <textarea id="customInput" placeholder="Enter input for your program here..." style="width:100%; height:80px; background:rgba(0,0,0,0.2); border:1px solid var(--border); color:var(--text); padding:8px; border-radius:6px; font-family:monospace; font-size:13px; margin-bottom:12px; resize:vertical; outline:none; transition:border 0.2s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+
+                    <div style="font-size:13px; font-weight:600; margin-bottom:8px; margin-top:4px; color:var(--accent); display:flex; justify-content:space-between;">
+                        <span>📤 Output Console</span>
+                        <span style="font-size:11px; font-weight:400; color:var(--muted);">Press ▶ Run Code</span>
+                    </div>
+                    <div class="output-console" id="consoleOutput" style="flex:1; overflow-y:auto; background:rgba(0,0,0,0.2); border:1px solid var(--border); border-radius:6px; padding:10px;"></div>
                 </div>
                 <!-- Problem Tab -->
                 <div id="tab-problem" style="display:none;">
@@ -188,6 +306,15 @@ Or, simply write and test any code using the Language menu!</div>
                     <div class="snippets-list" id="snippetsList"></div>
                 </div>
             </div>
+        </div>
+
+        <!-- Iframe Panel for External Compilers -->
+        <div class="iframe-panel" id="iframePanel" style="display:none; grid-column: 2 / 4; background:#fff; flex-direction:column;">
+            <div style="padding:10px 16px; background:var(--card2); border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:13px; font-weight:600; color:var(--text);"><span class="icon">🌐</span> External Compiler</span>
+                <button class="btn btn-outline" style="padding:4px 12px; font-size:12px;" onclick="setLang('javascript')">Close & Return</button>
+            </div>
+            <iframe id="extCompiler" src="" style="width:100%; height:100%; flex:1; border:none;"></iframe>
         </div>
     </div>
 </main>
@@ -394,7 +521,8 @@ const runNotes  = {python:'Runs via Piston API',php:'Runs via Piston API',c:'Run
 const pistonLangs={python:'python',php:'php',c:'c',cpp:'cpp',java:'java'};
 
 editor = CodeMirror.fromTextArea(document.getElementById('codeEditor'),{
-    theme:'dracula',lineNumbers:true,autoCloseBrackets:true,
+    theme:'material-ocean',lineNumbers:true,autoCloseBrackets:true,
+
     indentUnit:4,tabSize:4,indentWithTabs:false,
     extraKeys:{'Ctrl-Enter':runCode,'Cmd-Enter':runCode}
 });
@@ -402,7 +530,29 @@ editor.setValue(starters.javascript);
 editor.setOption('mode','javascript');
 document.getElementById('runNote').textContent = runNotes.javascript;
 
+function loadExternalCompiler(url, el) {
+    document.querySelectorAll('.lang-item').forEach(i=>i.classList.remove('active'));
+    if(el) el.classList.add('active');
+    
+    document.querySelector('.editor-panel').style.display = 'none';
+    document.querySelector('.output-panel').style.display = 'none';
+    const iframePanel = document.getElementById('iframePanel');
+    iframePanel.style.display = 'flex';
+    document.getElementById('extCompiler').src = url;
+}
+
+function revertToInternal() {
+    const ep = document.querySelector('.editor-panel');
+    const op = document.querySelector('.output-panel');
+    if(ep) ep.style.display = 'flex';
+    if(op) op.style.display = 'flex';
+    
+    const iframePanel = document.getElementById('iframePanel');
+    if(iframePanel) iframePanel.style.display = 'none';
+}
+
 function setLang(lang, el) {
+    revertToInternal();
     currentLang = lang;
     document.querySelectorAll('.lang-item').forEach(i=>i.classList.remove('active'));
     el?.classList.add('active');
@@ -493,6 +643,8 @@ function runSQL(code) {
 
 async function runViaPiston(code, lang) {
     addOutput(`Running ${lang} via Piston API...`, 'info');
+    const stdinValue = document.getElementById('customInput').value || "";
+    
     try {
         const resp = await fetch('https://emkc.org/api/v2/piston/execute', {
             method:'POST',
@@ -500,7 +652,8 @@ async function runViaPiston(code, lang) {
             body:JSON.stringify({
                 language: pistonLangs[lang] || lang,
                 version: '*',
-                files:[{name: fileNames[lang], content: code}]
+                files:[{name: fileNames[lang], content: code}],
+                stdin: stdinValue
             })
         });
         const data = await resp.json();
@@ -597,6 +750,36 @@ function loadSnippet(code) {
     editor.setValue(code);
     showTab('output');
 }
+
+// --- 3D BACKGROUND ---
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('three-bg'), alpha: true, antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+
+const geometry = new THREE.BufferGeometry();
+const vertices = [];
+for (let i = 0; i < 2000; i++) {
+    vertices.push(THREE.MathUtils.randFloatSpread(10), THREE.MathUtils.randFloatSpread(10), THREE.MathUtils.randFloatSpread(10));
+}
+geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+const particles = new THREE.Points(geometry, new THREE.PointsMaterial({ color: 0x22d3ee, size: 0.015, transparent: true, opacity: 0.5 }));
+scene.add(particles);
+camera.position.z = 5;
+
+function animate() {
+    requestAnimationFrame(animate);
+    particles.rotation.x += 0.0005;
+    particles.rotation.y += 0.001;
+    renderer.render(scene, camera);
+}
+animate();
+
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
 
 loadSnippets('javascript');
 </script>

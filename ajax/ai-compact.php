@@ -26,5 +26,6 @@ Write a COMPACT, exam-ready answer in maximum 10 lines.
 - Do not repeat yourself
 Start directly with the answer content.";
 
-$result = callClaudeAPI($prompt);
+$result = callAI($prompt);
 echo json_encode(['text' => $result['text']]);
+

@@ -163,7 +163,20 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px;margin-t
                     <span class="badge badge-yellow"><?= $question['marks'] ?> marks</span>
                     <?php endif; ?>
                 </div>
-                <div class="q-text"><?= htmlspecialchars($question['question_text']) ?></div>
+                <div class="q-text"><?= nl2br(htmlspecialchars($question['question_text'])) ?></div>
+                
+                <?php if (!empty($question['image_path'])): ?>
+                    <?php if (str_ends_with(strtolower($question['image_path']), '.pdf')): ?>
+                        <div style="margin:16px 0;">
+                            <a href="../<?= htmlspecialchars($question['image_path']) ?>" target="_blank" class="btn btn-outline" style="color:var(--accent);"><span style="font-size:18px">📄</span> View Attached PDF/Document</a>
+                        </div>
+                    <?php else: ?>
+                        <div style="margin:16px 0; border:1px solid var(--border); border-radius:10px; overflow:hidden;">
+                            <img src="../<?= htmlspecialchars($question['image_path']) ?>" alt="Question Attachments" style="max-width:100%; display:block;">
+                        </div>
+                    <?php endif; ?>
+                <?php endif; ?>
+
                 <?php if ($question['topic']): ?>
                 <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">🏷 Topic: <?= htmlspecialchars($question['topic']) ?></div>
                 <?php endif; ?>

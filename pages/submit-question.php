@@ -28,6 +28,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
            ->execute([$courseId, $user['id'], $questionText, $qType, $examYear ?: null, $examSem ?: null, $marks, $topic]);
         $qId = $db->lastInsertId();
 
+        // Handle File Upload
+        if (isset($_FILES['question_file']) && $_FILES['question_file']['error'] === UPLOAD_ERR_OK) {
+            $tmpName = $_FILES['question_file']['tmp_name'];
+            $fileName = basename($_FILES['question_file']['name']);
+            $uploadDir = __DIR__ . '/../assets/uploads/questions/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
+            
+            $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+            $newName = "q_{$qId}_" . time() . ".$ext";
+            $destPath = $uploadDir . $newName;
+            
+            if (move_uploaded_file($tmpName, $destPath)) {
+                $imagePath = 'assets/uploads/questions/' . $newName;
+                $db->prepare("UPDATE questions SET image_path=? WHERE id=?")->execute([$imagePath, $qId]);
+            }
+        }
+
         // Save topic tag
         if ($topic) {
             $db->prepare("INSERT INTO question_topics (question_id, topic_name) VALUES (?,?)")->execute([$qId, $topic]);
@@ -87,7 +106,7 @@ select option{background:var(--card);}
 
     <div class="tip">💡 <strong>Tip:</strong> Add a compact answer along with your question to help your fellow students! The more complete your submission, the faster it gets approved.</div>
 
-    <form method="POST">
+    <form method="POST" enctype="multipart/form-data">
         <div class="card">
             <div class="card-title">📖 Question Details</div>
             <label>Course *</label>
@@ -139,6 +158,9 @@ select option{background:var(--card);}
 
             <label>Question Text *</label>
             <textarea name="question_text" rows="4" placeholder="Type or paste the full exam question here..." required><?= htmlspecialchars($_POST['question_text'] ?? '') ?></textarea>
+            
+            <label>Attach Question Image / PDF (Optional)</label>
+            <input type="file" name="question_file" accept=".jpg,.jpeg,.png,.pdf,.heic" style="padding:10px; background:rgba(255,255,255,.05); cursor:pointer;">
         </div>
 
         <div class="card">

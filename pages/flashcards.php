@@ -21,10 +21,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'ai_generate') {
         $topic = clean($_POST['topic']);
         $count = min(intval($_POST['count'] ?? 5), 10);
-        $result = callClaudeAPI(
+        $result = callAI(
             "Generate exactly $count flashcard question-answer pairs for the topic: \"$topic\" for a Software Engineering university student. Return ONLY a JSON array with objects having \"question\" and \"answer\" keys. No extra text.",
             "You are a flashcard generator. Return only valid JSON array."
         );
+
         if ($result['success']) {
             $json = $result['text'];
             // Extract JSON from response
