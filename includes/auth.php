@@ -120,6 +120,12 @@ function getFlash()
     return null;
 }
 
+// ── Main AI Dispatcher ───────────────────────────────────────
+function callAI($prompt, $systemPrompt = '')
+{
+    return callClaudeAPI($prompt, $systemPrompt);
+}
+
 // ── AI API — Gemini (free) + Claude (fallback) ────────────────
 function callClaudeAPI($prompt, $systemPrompt = '')
 {
@@ -131,19 +137,24 @@ function callClaudeAPI($prompt, $systemPrompt = '')
             return $result;
     }
 
-    // 2. Fallback to Claude if key is set
+    // 2. Try Hugging Face next (FREE)
+    $hfKey = defined('HF_API_KEY') ? HF_API_KEY : '';
+    if ($hfKey && $hfKey !== 'YOUR_HF_API_KEY_HERE') {
+        $result = callHuggingFaceAPI($prompt, $systemPrompt, $hfKey);
+        if ($result['success'])
+            return $result;
+    }
+
+    // 3. Fallback to Claude (Paid/Key required)
     $claudeKey = defined('CLAUDE_API_KEY') ? CLAUDE_API_KEY : '';
     if (!$claudeKey || $claudeKey === 'YOUR_CLAUDE_API_KEY_HERE') {
         return [
             'success' => false,
-            'text' => "⚠️ No AI API key configured.\n\n" .
-            "To enable AI features (FREE):\n" .
-            "1. Go to: aistudio.google.com/apikey\n" .
-            "2. Click 'Create API Key'\n" .
-            "3. Copy the key\n" .
-            "4. Open: config/database.php\n" .
-            "5. Set: define('GEMINI_API_KEY', 'your-key-here');\n\n" .
-            "Gemini API is completely FREE with 1500 requests/day!"
+            'text' => "⚠️ No Working AI API Key Configured.\n\n" .
+            "To enable AI features for FREE:\n" .
+            "1. Google Gemini (Recommended): aistudio.google.com/apikey\n" .
+            "2. Hugging Face: huggingface.co/settings/tokens\n\n" .
+            "Paste your key in `config/database.php` and you're good to go!"
         ];
     }
 
@@ -177,50 +188,112 @@ function callClaudeAPI($prompt, $systemPrompt = '')
     return ['success' => false, 'text' => 'AI request failed. Check your API key.'];
 }
 
-// ── Google Gemini API (FREE tier) ────────────────────────────
-function callGeminiAPI($prompt, $systemPrompt = '', $apiKey = '')
-{
+// ── Google Gemini API — tries multiple models until one works ─
+function callGeminiAPI($prompt, $systemPrompt = '', $apiKey = '') {
     $fullPrompt = $systemPrompt
         ? $systemPrompt . "\n\n" . $prompt
         : $prompt;
 
     $data = [
         'contents' => [[
-                'parts' => [['text' => $fullPrompt]]
-            ]],
+            'parts' => [['text' => $fullPrompt]]
+        ]],
         'generationConfig' => [
-            'temperature' => 0.7,
+            'temperature'     => 0.7,
             'maxOutputTokens' => 1500,
         ]
     ];
 
-    $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' . $apiKey;
+    // Try models in order — first working one wins
+    $models = [
+        'gemini-2.0-flash',
+        'gemini-2.0-flash-lite',
+        'gemini-1.5-flash-latest',
+        'gemini-1.5-flash-8b',
+        'gemini-pro',
+    ];
+
+    $base = 'https://generativelanguage.googleapis.com/v1beta/models/';
+
+    foreach ($models as $model) {
+        $url = $base . $model . ':generateContent?key=' . $apiKey;
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST           => true,
+            CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+            CURLOPT_POSTFIELDS     => json_encode($data),
+            CURLOPT_TIMEOUT        => 30,
+            CURLOPT_SSL_VERIFYPEER => false,
+        ]);
+        $response = curl_exec($ch);
+        $httpCode  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode === 200) {
+            $decoded = json_decode($response, true);
+            $text = $decoded['candidates'][0]['content']['parts'][0]['text'] ?? '';
+            if ($text) {
+                return ['success' => true, 'text' => $text];
+            }
+        }
+    }
+    return [
+        'success' => false,
+        'text'    => 'Gemini API key is set but all models returned an error. ' .
+                     'Please check your key at aistudio.google.com/apikey'
+    ];
+}
+
+// ── Hugging Face API (FREE Inference) ────────────────────────
+function callHuggingFaceAPI($prompt, $systemPrompt = '', $apiKey = '')
+{
+    if (!$apiKey || $apiKey === 'YOUR_HF_API_KEY_HERE') {
+        return ['success' => false, 'text' => 'Hugging Face API key not set.'];
+    }
+
+    $fullPrompt = $systemPrompt ? "<s>[INST] $systemPrompt\n\n$prompt [/INST]" : "<s>[INST] $prompt [/INST]";
+
+    $data = [
+        'inputs' => $fullPrompt,
+        'parameters' => [
+            'max_new_tokens' => 1000,
+            'temperature' => 0.7,
+            'return_full_text' => false
+        ]
+    ];
+
+    // Using Mistral 7B as a reliable free model
+    $url = 'https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2';
 
     $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST => true,
-        CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+        CURLOPT_HTTPHEADER => [
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $apiKey
+        ],
         CURLOPT_POSTFIELDS => json_encode($data),
         CURLOPT_TIMEOUT => 30,
         CURLOPT_SSL_VERIFYPEER => false,
     ]);
+
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
-    if ($httpCode !== 200) {
-        return ['success' => false, 'text' => 'Gemini API error: HTTP ' . $httpCode];
+    if ($httpCode === 200) {
+        $decoded = json_decode($response, true);
+        $text = $decoded[0]['generated_text'] ?? '';
+        if ($text) {
+            return ['success' => true, 'text' => trim($text)];
+        }
     }
 
-    $decoded = json_decode($response, true);
-    $text = $decoded['candidates'][0]['content']['parts'][0]['text'] ?? '';
-    if ($text) {
-        return ['success' => true, 'text' => $text];
-    }
-    return ['success' => false, 'text' => 'Gemini returned empty response.'];
+    return ['success' => false, 'text' => 'Hugging Face API error: HTTP ' . $httpCode];
 }
-
 
 // ── Time ago helper ──────────────────────────────────────────
 function timeAgo($datetime)

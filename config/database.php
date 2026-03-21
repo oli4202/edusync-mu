@@ -17,6 +17,8 @@ if (!defined('CLAUDE_API_KEY'))
     define('CLAUDE_API_KEY', 'YOUR_CLAUDE_API_KEY_HERE');
 if (!defined('GEMINI_API_KEY'))
     define('GEMINI_API_KEY', 'AIzaSyC8HF-Qo1nfBhbyHvXvGBlBs-4kTkqwuoE');
+if (!defined('HF_API_KEY'))
+    define('HF_API_KEY', 'YOUR_HF_API_KEY_HERE');
 
 function getDB()
 {
