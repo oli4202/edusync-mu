@@ -11,12 +11,14 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // ── Check if logged in ──────────────────────────────────────
-function isLoggedIn() {
+function isLoggedIn()
+{
     return isset($_SESSION['user_id']) && !empty($_SESSION['user_id']);
 }
 
 // ── Require login — redirect if not ────────────────────────
-function requireLogin() {
+function requireLogin()
+{
     if (!isLoggedIn()) {
         header('Location: ' . SITE_URL . '/pages/login.php');
         exit();
@@ -24,7 +26,8 @@ function requireLogin() {
 }
 
 // ── Require admin ────────────────────────────────────────────
-function requireAdmin() {
+function requireAdmin()
+{
     requireLogin();
     if ($_SESSION['user_role'] !== 'admin') {
         header('Location: ' . SITE_URL . '/pages/dashboard.php');
@@ -33,8 +36,10 @@ function requireAdmin() {
 }
 
 // ── Get current user ─────────────────────────────────────────
-function currentUser() {
-    if (!isLoggedIn()) return null;
+function currentUser()
+{
+    if (!isLoggedIn())
+        return null;
     $db = getDB();
     $stmt = $db->prepare("SELECT * FROM users WHERE id = ?");
     $stmt->execute([$_SESSION['user_id']]);
@@ -42,7 +47,8 @@ function currentUser() {
 }
 
 // ── Register user ────────────────────────────────────────────
-function registerUser($name, $email, $password, $studentId = '', $batch = '', $semester = 1) {
+function registerUser($name, $email, $password, $studentId = '', $batch = '', $semester = 1)
+{
     $db = getDB();
     // Check if email exists
     $stmt = $db->prepare("SELECT id FROM users WHERE email = ?");
@@ -57,13 +63,14 @@ function registerUser($name, $email, $password, $studentId = '', $batch = '', $s
 }
 
 // ── Login user ───────────────────────────────────────────────
-function loginUser($email, $password) {
+function loginUser($email, $password)
+{
     $db = getDB();
     $stmt = $db->prepare("SELECT * FROM users WHERE email = ?");
     $stmt->execute([$email]);
     $user = $stmt->fetch();
     if ($user && password_verify($password, $user['password'])) {
-        $_SESSION['user_id']   = $user['id'];
+        $_SESSION['user_id'] = $user['id'];
         $_SESSION['user_name'] = $user['name'];
         $_SESSION['user_role'] = $user['role'];
         // Update streak & last_active
@@ -72,34 +79,39 @@ function loginUser($email, $password) {
         $streak = $user['streak'];
         if ($user['last_active'] === $yesterday) {
             $streak++;
-        } elseif ($user['last_active'] !== $today) {
+        }
+        elseif ($user['last_active'] !== $today) {
             $streak = 1;
         }
         $db->prepare("UPDATE users SET streak=?, last_active=? WHERE id=?")
-           ->execute([$streak, $today, $user['id']]);
+            ->execute([$streak, $today, $user['id']]);
         return ['success' => true, 'user' => $user];
     }
     return ['success' => false, 'message' => 'Invalid email or password.'];
 }
 
 // ── Logout ───────────────────────────────────────────────────
-function logoutUser() {
+function logoutUser()
+{
     session_destroy();
     header('Location: ' . SITE_URL . '/pages/login.php');
     exit();
 }
 
 // ── Sanitize input ───────────────────────────────────────────
-function clean($input) {
+function clean($input)
+{
     return htmlspecialchars(strip_tags(trim($input)), ENT_QUOTES, 'UTF-8');
 }
 
 // ── Flash messages ───────────────────────────────────────────
-function setFlash($type, $message) {
+function setFlash($type, $message)
+{
     $_SESSION['flash'] = ['type' => $type, 'message' => $message];
 }
 
-function getFlash() {
+function getFlash()
+{
     if (isset($_SESSION['flash'])) {
         $flash = $_SESSION['flash'];
         unset($_SESSION['flash']);
@@ -108,132 +120,119 @@ function getFlash() {
     return null;
 }
 
-// ── Claude AI API Call ───────────────────────────────────────
-function callClaudeAPI($prompt, $systemPrompt = '') {
-    $apiKey = CLAUDE_API_KEY;
-    
-    // Provide a simulated response if no real API key is configured
-    if (empty($apiKey) || $apiKey === 'YOUR_CLAUDE_API_KEY_HERE') {
-        sleep(1); // Simulate network delay
-        if (stripos($prompt, 'Summarize these notes') !== false) {
-            return ['success' => true, 'text' => "📌 Key Points\n• This is a simulated AI summary.\n• Please configure CLAUDE_API_KEY in config/database.php to use the real AI.\n\n🧠 Core Concepts\n• AI Integration\n• UI/UX Testing\n\n⚡ Quick Facts to Remember\n• The Note Summarizer UI is fully functional! Add your Anthropic key to get real summaries."];
-        }
-        return ['success' => true, 'text' => "This is a simulated AI response.\nPlease add your actual CLAUDE_API_KEY in config/database.php to enable real AI processing by Claude 3.5 Sonnet.\n\nYour prompt length was: " . strlen($prompt) . " characters."];
+// ── AI API — Gemini (free) + Claude (fallback) ────────────────
+function callClaudeAPI($prompt, $systemPrompt = '')
+{
+    // 1. Try Gemini first — FREE (1500 req/day, no credit card)
+    $geminiKey = defined('GEMINI_API_KEY') ? GEMINI_API_KEY : '';
+    if ($geminiKey && $geminiKey !== 'YOUR_GEMINI_API_KEY_HERE') {
+        $result = callGeminiAPI($prompt, $systemPrompt, $geminiKey);
+        if ($result['success'])
+            return $result;
     }
-    
+
+    // 2. Fallback to Claude if key is set
+    $claudeKey = defined('CLAUDE_API_KEY') ? CLAUDE_API_KEY : '';
+    if (!$claudeKey || $claudeKey === 'YOUR_CLAUDE_API_KEY_HERE') {
+        return [
+            'success' => false,
+            'text' => "⚠️ No AI API key configured.\n\n" .
+            "To enable AI features (FREE):\n" .
+            "1. Go to: aistudio.google.com/apikey\n" .
+            "2. Click 'Create API Key'\n" .
+            "3. Copy the key\n" .
+            "4. Open: config/database.php\n" .
+            "5. Set: define('GEMINI_API_KEY', 'your-key-here');\n\n" .
+            "Gemini API is completely FREE with 1500 requests/day!"
+        ];
+    }
+
+    // Claude API call
     $data = [
-        'model'      => 'claude-3-5-sonnet-20241022',
+        'model' => 'claude-sonnet-4-20250514',
         'max_tokens' => 1500,
-        'messages'   => [['role' => 'user', 'content' => $prompt]]
+        'messages' => [['role' => 'user', 'content' => $prompt]]
     ];
-    if ($systemPrompt) {
+    if ($systemPrompt)
         $data['system'] = $systemPrompt;
-    }
+
     $ch = curl_init('https://api.anthropic.com/v1/messages');
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_POST           => true,
-        CURLOPT_HTTPHEADER     => [
+        CURLOPT_POST => true,
+        CURLOPT_HTTPHEADER => [
             'Content-Type: application/json',
-            'x-api-key: ' . $apiKey,
+            'x-api-key: ' . $claudeKey,
             'anthropic-version: 2023-06-01'
         ],
-        CURLOPT_POSTFIELDS     => json_encode($data),
-        CURLOPT_TIMEOUT        => 30,
+        CURLOPT_POSTFIELDS => json_encode($data),
+        CURLOPT_TIMEOUT => 30,
     ]);
     $response = curl_exec($ch);
-    $error = curl_error($ch);
     curl_close($ch);
-    
-    if ($error) return ['success' => false, 'text' => 'Curl Error: ' . $error];
-    
     $decoded = json_decode($response, true);
     if (isset($decoded['content'][0]['text'])) {
         return ['success' => true, 'text' => $decoded['content'][0]['text']];
     }
-    
-    // Provide the actual API error if it fails (helps with debugging)
-    $errorMsg = $decoded['error']['message'] ?? 'AI request failed.';
-    return ['success' => false, 'text' => "API Error: " . $errorMsg];
+    return ['success' => false, 'text' => 'AI request failed. Check your API key.'];
 }
 
-// ── Gemini AI API Call ───────────────────────────────────────
-function callGeminiAPI($prompt, $systemPrompt = '') {
-    $apiKey = GEMINI_API_KEY;
-    
-    // Provide a simulated response if no real API key is configured
-    if (empty($apiKey) || $apiKey === 'AIzaSyXXXXXXXXXXXXXXXXXXXXXXX' || $apiKey === 'YOUR_GEMINI_API_KEY_HERE') {
-        sleep(1); 
-        return ['success' => true, 'text' => "✨ (Simulated Gemini response)\nTo use the real Google Gemini API, please set your actual key in config/database.php.\n\nYour prompt was: " . $prompt];
-    }
-    
-    $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $apiKey;
-    
-    $params = [
-        'contents' => [
-            ['parts' => [['text' => ($systemPrompt ? $systemPrompt . "\n\n" : "") . $prompt]]]
-        ],
+// ── Google Gemini API (FREE tier) ────────────────────────────
+function callGeminiAPI($prompt, $systemPrompt = '', $apiKey = '')
+{
+    $fullPrompt = $systemPrompt
+        ? $systemPrompt . "\n\n" . $prompt
+        : $prompt;
+
+    $data = [
+        'contents' => [[
+                'parts' => [['text' => $fullPrompt]]
+            ]],
         'generationConfig' => [
+            'temperature' => 0.7,
             'maxOutputTokens' => 1500,
-            'temperature' => 0.7
         ]
     ];
-    
+
+    $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' . $apiKey;
+
     $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_POST           => true,
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_POSTFIELDS     => json_encode($params),
-        CURLOPT_TIMEOUT        => 30,
+        CURLOPT_POST => true,
+        CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+        CURLOPT_POSTFIELDS => json_encode($data),
+        CURLOPT_TIMEOUT => 30,
+        CURLOPT_SSL_VERIFYPEER => false,
     ]);
-    
     $response = curl_exec($ch);
-    $error = curl_error($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
-    
-    if ($error) return ['success' => false, 'text' => 'Curl Error: ' . $error];
-    
+
+    if ($httpCode !== 200) {
+        return ['success' => false, 'text' => 'Gemini API error: HTTP ' . $httpCode];
+    }
+
     $decoded = json_decode($response, true);
-    if (isset($decoded['candidates'][0]['content']['parts'][0]['text'])) {
-        return ['success' => true, 'text' => $decoded['candidates'][0]['content']['parts'][0]['text']];
+    $text = $decoded['candidates'][0]['content']['parts'][0]['text'] ?? '';
+    if ($text) {
+        return ['success' => true, 'text' => $text];
     }
-    
-    $errorMsg = $decoded['error']['message'] ?? 'Gemini AI request failed.';
-    return ['success' => false, 'text' => "Gemini API Error: " . $errorMsg];
+    return ['success' => false, 'text' => 'Gemini returned empty response.'];
 }
 
-// ── Unified AI Fallback Handler ──────────────────────────────
-function callAI($prompt, $systemPrompt = '') {
-    // 1. Try Gemini (Free Tier + Simulation)
-    if (defined('GEMINI_API_KEY') && !empty(GEMINI_API_KEY)) {
-        return callGeminiAPI($prompt, $systemPrompt);
-    }
-    
-    // 2. Try Claude (Paid Tier Fallback)
-
-    if (defined('CLAUDE_API_KEY') && !empty(CLAUDE_API_KEY) && 
-        CLAUDE_API_KEY !== 'YOUR_CLAUDE_API_KEY_HERE') {
-        return callClaudeAPI($prompt, $systemPrompt);
-    }
-    
-    // 3. Setup Instructions (If no keys are configured)
-    return [
-        'success' => false, 
-        'text' => "💡 AI features are not yet configured.\n\n" .
-                  "1. Go to [aistudio.google.com/apikey](https://aistudio.google.com/apikey)\n" .
-                  "2. Create a FREE Gemini API key\n" .
-                  "3. Paste it in `edusync/config/database.php`\n\n" .
-                  "Once added, AI suggestions and exam prep tools will be activated immediately! 🚀"
-    ];
-}
 
 // ── Time ago helper ──────────────────────────────────────────
-function timeAgo($datetime) {
+function timeAgo($datetime)
+{
     $time = time() - strtotime($datetime);
-    if ($time < 60)      return 'just now';
-    if ($time < 3600)    return floor($time/60) . ' min ago';
-    if ($time < 86400)   return floor($time/3600) . ' hr ago';
-    if ($time < 604800)  return floor($time/86400) . ' days ago';
+    if ($time < 60)
+        return 'just now';
+    if ($time < 3600)
+        return floor($time / 60) . ' min ago';
+    if ($time < 86400)
+        return floor($time / 3600) . ' hr ago';
+    if ($time < 604800)
+        return floor($time / 86400) . ' days ago';
     return date('M j, Y', strtotime($datetime));
 }

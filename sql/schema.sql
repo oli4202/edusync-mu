@@ -281,30 +281,30 @@ CREATE TABLE question_topics (
 -- ============================================================
 INSERT INTO courses (name, code, year, semester) VALUES
 -- Year 1
-('Introduction to Programming (C)', 'CSE101', 1, 1),
+('Introduction to Programming (C)', 'SWE101', 1, 1),
 ('Discrete Mathematics', 'MATH101', 1, 1),
-('Digital Logic Design', 'CSE102', 1, 2),
+('Digital Logic Design', 'SWE102', 1, 2),
 ('English & Communication', 'ENG101', 1, 2),
 -- Year 2
-('Data Structures & Algorithms', 'CSE201', 2, 3),
-('Object Oriented Programming (Java)', 'CSE202', 2, 3),
-('Database Management Systems', 'CSE203', 2, 4),
-('Computer Architecture & Organization', 'CSE204', 2, 4),
+('Data Structures & Algorithms', 'SWE201', 2, 3),
+('Object Oriented Programming (Java)', 'SWE202', 2, 3),
+('Database Management Systems', 'SWE203', 2, 4),
+('Computer Architecture & Organization', 'SWE204', 2, 4),
 ('Numerical Methods', 'MATH201', 2, 4),
 -- Year 3
-('Software Engineering', 'CSE301', 3, 5),
-('Operating Systems', 'CSE302', 3, 5),
-('Computer Networks', 'CSE303', 3, 6),
-('Web Technologies', 'CSE304', 3, 6),
-('Theory of Computation', 'CSE305', 3, 6),
-('Artificial Intelligence', 'CSE306', 3, 6),
+('Software Engineering', 'SWE301', 3, 5),
+('Operating Systems', 'SWE302', 3, 5),
+('Computer Networks', 'SWE303', 3, 6),
+('Web Technologies', 'SWE304', 3, 6),
+('Theory of Computation', 'SWE305', 3, 6),
+('Artificial Intelligence', 'SWE306', 3, 6),
 -- Year 4
-('Software Project Management', 'CSE401', 4, 7),
-('Compiler Design', 'CSE402', 4, 7),
-('Information Security', 'CSE403', 4, 7),
-('Machine Learning', 'CSE404', 4, 8),
-('Distributed Systems', 'CSE405', 4, 8),
-('Mobile Application Development', 'CSE406', 4, 8);
+('Software Project Management', 'SWE401', 4, 7),
+('Compiler Design', 'SWE402', 4, 7),
+('Information Security', 'SWE403', 4, 7),
+('Machine Learning', 'SWE404', 4, 8),
+('Distributed Systems', 'SWE405', 4, 8),
+('Mobile Application Development', 'SWE406', 4, 8);
 
 -- ============================================================
 -- SEED DATA — Admin user (password: admin123)
