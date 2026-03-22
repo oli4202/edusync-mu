@@ -60,7 +60,7 @@ $currentPage = 'ai';
     <div style="margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;">
         <div>
             <div class="page-title">🤖 AI Study Assistant</div>
-            <div style="color:var(--muted);font-size:13px;margin-top:2px;">Powered by Claude AI — 7 specialized tools for MU Sylhet SE students</div>
+            <div style="color:var(--muted);font-size:13px;margin-top:2px;">Powered by Gemini AI — 7 specialized tools for MU Sylhet SE students</div>
         </div>
     </div>
 
@@ -202,8 +202,7 @@ document.getElementById('toolInput')?.addEventListener('input', function() {
 });
 
 async function callAI(prompt) {
-    const resp = await fetch('../ajax/ai-suggest.php', {
-
+    const resp = await fetch('../admin/ajax/ai-suggest.php', {
         method:'POST', headers:{'Content-Type':'application/json'},
         body:JSON.stringify({prompt})
     });
@@ -234,7 +233,7 @@ async function sendChat() {
     const data = await callAI(systemPrompt + '\n\nConversation:\n' + historyFormatted);
 
     thinking.remove();
-    const aiText = data.text || 'Sorry, I could not process that. Please try again.';
+    const aiText = data.text || data.error || 'Sorry, I could not process that. Please try again.';
     chatHistory.push({role:'assistant', content:aiText});
 
     msgs.innerHTML += `<div class="msg msg-ai">${escHtml(aiText)}</div>`;
