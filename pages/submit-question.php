@@ -130,7 +130,7 @@ select option{background:var(--card);}
                     <label>Exam Semester</label>
                     <select name="exam_semester">
                         <option value="">Select semester</option>
-                        <?php foreach (['1st','2nd','3rd','4th','5th','6th','7th','8th'] as $s): ?>
+                        <?php foreach (['1.1','1.2','1.3','2.1','2.2','2.3','3.1','3.2','3.3','4.1','4.2','4.3'] as $s): ?>
                         <option value="<?= $s ?>" <?= (($_POST['exam_semester'] ?? '') === $s) ? 'selected' : '' ?>><?= $s ?></option>
                         <?php endforeach; ?>
                     </select>

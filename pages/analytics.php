@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'log')
     header('Location: analytics.php'); exit;
 }
 
-$subjectList = $db->prepare("SELECT id,name FROM subjects WHERE user_id=? ORDER BY name");
+$subjectList = $db->prepare("SELECT id, name, code, year, semester FROM subjects WHERE user_id=? ORDER BY year ASC, semester ASC, name ASC");
 $subjectList->execute([$user['id']]); $subs = $subjectList->fetchAll();
 ?>
 <!DOCTYPE html>
@@ -143,9 +143,24 @@ $subjectList->execute([$user['id']]); $subs = $subjectList->fetchAll();
                 <label>Subject</label>
                 <select name="subject_id">
                     <option value="">— General —</option>
-                    <?php foreach ($subs as $s): ?>
-                    <option value="<?= $s['id'] ?>"><?= htmlspecialchars($s['name']) ?></option>
+                    <?php
+                    $currentYear = null;
+                    $currentSemester = null;
+                    foreach ($subs as $s):
+                        if ($s['year'] != $currentYear || $s['semester'] != $currentSemester):
+                            if ($currentYear !== null) echo '</optgroup>';
+                            $yearLabel = $s['year'] . 'st Year';
+                            if ($s['year'] == 2) $yearLabel = '2nd Year';
+                            if ($s['year'] == 3) $yearLabel = '3rd Year';
+                            if ($s['year'] >= 4) $yearLabel = $s['year'] . 'th Year';
+                            echo '<optgroup label="' . $yearLabel . ' - Semester ' . $s['semester'] . '">';
+                            $currentYear = $s['year'];
+                            $currentSemester = $s['semester'];
+                        endif;
+                    ?>
+                    <option value="<?= $s['id'] ?>"><?= htmlspecialchars($s['code'] ? $s['code'] . ': ' . $s['name'] : $s['name']) ?></option>
                     <?php endforeach; ?>
+                    <?php if (!empty($subs)) echo '</optgroup>'; ?>
                 </select>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">

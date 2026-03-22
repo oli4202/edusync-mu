@@ -203,9 +203,24 @@ $lowAttCourses = array_filter($courseStats, fn($s) => $s['pct'] < 75);
                 <label>Course</label>
                 <select name="course" style="min-width:220px;">
                     <option value="">All Courses</option>
-                    <?php foreach ($courses as $c): ?>
+                    <?php
+                    $currentYear = null;
+                    $currentSemester = null;
+                    foreach ($courses as $c):
+                        if ($c['year'] != $currentYear || $c['semester'] != $currentSemester):
+                            if ($currentYear !== null) echo '</optgroup>';
+                            $yearLabel = $c['year'] . 'st Year';
+                            if ($c['year'] == 2) $yearLabel = '2nd Year';
+                            if ($c['year'] == 3) $yearLabel = '3rd Year';
+                            if ($c['year'] >= 4) $yearLabel = $c['year'] . 'th Year';
+                            echo '<optgroup label="' . $yearLabel . ' - Semester ' . $c['semester'] . '">';
+                            $currentYear = $c['year'];
+                            $currentSemester = $c['semester'];
+                        endif;
+                    ?>
                     <option value="<?= $c['id'] ?>" <?= $filterCourse==$c['id']?'selected':'' ?>><?= htmlspecialchars($c['code'].' — '.$c['name']) ?></option>
                     <?php endforeach; ?>
+                    <?php if (!empty($courses)) echo '</optgroup>'; ?>
                 </select>
             </div>
             <div>
@@ -261,9 +276,24 @@ $lowAttCourses = array_filter($courseStats, fn($s) => $s['pct'] < 75);
                 <label>Course *</label>
                 <select name="course_id" required>
                     <option value="">Select course...</option>
-                    <?php foreach ($courses as $c): ?>
+                    <?php
+                    $currentYear = null;
+                    $currentSemester = null;
+                    foreach ($courses as $c):
+                        if ($c['year'] != $currentYear || $c['semester'] != $currentSemester):
+                            if ($currentYear !== null) echo '</optgroup>';
+                            $yearLabel = $c['year'] . 'st Year';
+                            if ($c['year'] == 2) $yearLabel = '2nd Year';
+                            if ($c['year'] == 3) $yearLabel = '3rd Year';
+                            if ($c['year'] >= 4) $yearLabel = $c['year'] . 'th Year';
+                            echo '<optgroup label="' . $yearLabel . ' - Semester ' . $c['semester'] . '">';
+                            $currentYear = $c['year'];
+                            $currentSemester = $c['semester'];
+                        endif;
+                    ?>
                     <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['code'].' — '.$c['name']) ?></option>
                     <?php endforeach; ?>
+                    <?php if (!empty($courses)) echo '</optgroup>'; ?>
                 </select>
             </div>
             <div class="form-row">

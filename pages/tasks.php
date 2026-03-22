@@ -43,7 +43,7 @@ $inProgress = array_filter($allTasks, fn($t) => $t['status'] === 'in_progress');
 $done = array_filter($allTasks, fn($t) => $t['status'] === 'done');
 
 // Subjects for dropdown
-$subjects = $db->prepare("SELECT id, name, color FROM subjects WHERE user_id=? ORDER BY name");
+$subjects = $db->prepare("SELECT id, name, code, year, semester FROM subjects WHERE user_id=? ORDER BY year ASC, semester ASC, name ASC");
 $subjects->execute([$user['id']]);
 $subjectList = $subjects->fetchAll();
 ?>
@@ -181,9 +181,24 @@ $subjectList = $subjects->fetchAll();
                     <label>Subject</label>
                     <select name="subject_id">
                         <option value="">— None —</option>
-                        <?php foreach ($subjectList as $s): ?>
-                        <option value="<?= $s['id'] ?>"><?= htmlspecialchars($s['name']) ?></option>
+                        <?php
+                        $currentYear = null;
+                        $currentSemester = null;
+                        foreach ($subjectList as $s):
+                            if ($s['year'] != $currentYear || $s['semester'] != $currentSemester):
+                                if ($currentYear !== null) echo '</optgroup>';
+                                $yearLabel = $s['year'] . 'st Year';
+                                if ($s['year'] == 2) $yearLabel = '2nd Year';
+                                if ($s['year'] == 3) $yearLabel = '3rd Year';
+                                if ($s['year'] >= 4) $yearLabel = $s['year'] . 'th Year';
+                                echo '<optgroup label="' . $yearLabel . ' - Semester ' . $s['semester'] . '">';
+                                $currentYear = $s['year'];
+                                $currentSemester = $s['semester'];
+                            endif;
+                        ?>
+                        <option value="<?= $s['id'] ?>"><?= htmlspecialchars($s['code'] ? $s['code'] . ': ' . $s['name'] : $s['name']) ?></option>
                         <?php endforeach; ?>
+                        <?php if (!empty($subjectList)) echo '</optgroup>'; ?>
                     </select>
                 </div>
                 <div class="form-group">

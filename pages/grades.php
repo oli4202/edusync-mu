@@ -80,7 +80,7 @@ $overallAvg = count($grades) ? round(array_sum(array_map(fn($g)=>$g['score']/$g[
 $best = count($grades) ? max(array_map(fn($g)=>$g['score']/$g['max_score']*100, $grades)) : 0;
 
 // User subjects for form
-$subjects = $db->prepare("SELECT * FROM subjects WHERE user_id=? ORDER BY name");
+$subjects = $db->prepare("SELECT * FROM subjects WHERE user_id=? ORDER BY year ASC, semester ASC, name ASC");
 $subjects->execute([$user['id']]);
 $mySubjects = $subjects->fetchAll();
 
@@ -276,9 +276,24 @@ $chartData   = array_map(fn($g) => round($g['score']/$g['max_score']*100,1), $ch
                 <label>Subject (optional)</label>
                 <select name="subject_id">
                     <option value="">No subject</option>
-                    <?php foreach ($mySubjects as $s): ?>
-                    <option value="<?= $s['id'] ?>"><?= htmlspecialchars($s['name']) ?></option>
+                    <?php
+                    $currentYear = null;
+                    $currentSemester = null;
+                    foreach ($mySubjects as $s):
+                        if ($s['year'] != $currentYear || $s['semester'] != $currentSemester):
+                            if ($currentYear !== null) echo '</optgroup>';
+                            $yearLabel = $s['year'] . 'st Year';
+                            if ($s['year'] == 2) $yearLabel = '2nd Year';
+                            if ($s['year'] == 3) $yearLabel = '3rd Year';
+                            if ($s['year'] >= 4) $yearLabel = $s['year'] . 'th Year';
+                            echo '<optgroup label="' . $yearLabel . ' - Semester ' . $s['semester'] . '">';
+                            $currentYear = $s['year'];
+                            $currentSemester = $s['semester'];
+                        endif;
+                    ?>
+                    <option value="<?= $s['id'] ?>"><?= htmlspecialchars($s['code'] ? $s['code'] . ': ' . $s['name'] : $s['name']) ?></option>
                     <?php endforeach; ?>
+                    <?php if (!empty($mySubjects)) echo '</optgroup>'; ?>
                 </select>
             </div>
             <div class="form-row">

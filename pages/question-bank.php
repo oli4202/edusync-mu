@@ -130,11 +130,26 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
             <label>Course</label>
             <select name="course">
                 <option value="">All Courses</option>
-                <?php foreach ($courses as $c): ?>
+                <?php
+                $currentYear = null;
+                $currentSemester = null;
+                foreach ($courses as $c):
+                    if ($c['year'] != $currentYear || $c['semester'] != $currentSemester):
+                        if ($currentYear !== null) echo '</optgroup>';
+                        $yearLabel = $c['year'] . 'st Year';
+                        if ($c['year'] == 2) $yearLabel = '2nd Year';
+                        if ($c['year'] == 3) $yearLabel = '3rd Year';
+                        if ($c['year'] >= 4) $yearLabel = $c['year'] . 'th Year';
+                        echo '<optgroup label="' . $yearLabel . ' - Semester ' . $c['semester'] . '">';
+                        $currentYear = $c['year'];
+                        $currentSemester = $c['semester'];
+                    endif;
+                ?>
                 <option value="<?= $c['id'] ?>" <?= $courseId == $c['id'] ? 'selected' : '' ?>>
                     <?= htmlspecialchars($c['code']) ?> — <?= htmlspecialchars($c['name']) ?>
                 </option>
                 <?php endforeach; ?>
+                <?php if (!empty($courses)) echo '</optgroup>'; ?>
             </select>
         </div>
         <div class="filter-group">

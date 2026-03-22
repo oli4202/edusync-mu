@@ -277,34 +277,117 @@ CREATE TABLE question_topics (
 );
 
 -- ============================================================
--- SEED DATA — MU Sylhet SE Courses
+-- SEED DATA — MU Sylhet SE Courses (Complete 4-Year Curriculum)
 -- ============================================================
 INSERT INTO courses (name, code, year, semester) VALUES
--- Year 1
-('Introduction to Programming (C)', 'SWE101', 1, 1),
-('Discrete Mathematics', 'MATH101', 1, 1),
-('Digital Logic Design', 'SWE102', 1, 2),
-('English & Communication', 'ENG101', 1, 2),
--- Year 2
-('Data Structures & Algorithms', 'SWE201', 2, 3),
-('Object Oriented Programming (Java)', 'SWE202', 2, 3),
-('Database Management Systems', 'SWE203', 2, 4),
-('Computer Architecture & Organization', 'SWE204', 2, 4),
-('Numerical Methods', 'MATH201', 2, 4),
--- Year 3
-('Software Engineering', 'SWE301', 3, 5),
-('Operating Systems', 'SWE302', 3, 5),
-('Computer Networks', 'SWE303', 3, 6),
-('Web Technologies', 'SWE304', 3, 6),
-('Theory of Computation', 'SWE305', 3, 6),
-('Artificial Intelligence', 'SWE306', 3, 6),
--- Year 4
-('Software Project Management', 'SWE401', 4, 7),
-('Compiler Design', 'SWE402', 4, 7),
-('Information Security', 'SWE403', 4, 7),
-('Machine Learning', 'SWE404', 4, 8),
-('Distributed Systems', 'SWE405', 4, 8),
-('Mobile Application Development', 'SWE406', 4, 8);
+-- Year 1: Foundation & Programming
+-- Semester 1.1
+('Communicative English Language I', 'GED 101', 1, 1),
+('Differential & Integral Calculus', 'MAT 111', 1, 1),
+('Basic Electrical and Electronic Circuits', 'SWE 111', 1, 1),
+('Introduction to Software Engineering', 'SWE 131', 1, 1),
+('Bangladesh Studies', 'GED 105', 1, 1),
+-- Semester 1.2
+('Linear Algebra & Differential Equations', 'MAT 112', 1, 2),
+('Discrete Mathematics', 'MAT 113', 1, 2),
+('Basic Physics', 'PHY 111', 1, 2),
+('Structured Programming', 'SWE 121', 1, 2),
+('Structured Programming Lab', 'SWE 122', 1, 2),
+-- Semester 1.3
+('Data Structures', 'SWE 123', 1, 3),
+('Data Structure Lab', 'SWE 124', 1, 3),
+('Management Information Systems', 'SWE 133', 1, 3),
+('Project on Python Development', 'SWE 182', 1, 3),
+('Digital Logic Design', 'SWE 215', 1, 3),
+('Digital Logic Design Lab', 'SWE 216', 1, 3),
+
+-- Year 2: Core Engineering & Architecture
+-- Semester 2.1
+('Algorithm', 'SWE 221', 2, 1),
+('Algorithm Lab', 'SWE 222', 2, 1),
+('Database Management System', 'SWE 225', 2, 1),
+('Database Management System Lab', 'SWE 226', 2, 1),
+('Theory of Computation', 'SWE 311', 2, 1),
+('Computer Architecture', 'SWE 211', 2, 1),
+-- Semester 2.2
+('Numerical Analysis', 'MAT 211', 2, 2),
+('Software Architecture and Design Patterns', 'SWE 233', 2, 2),
+('Software Architecture and Design Patterns Lab', 'SWE 234', 2, 2),
+('Object Oriented Programming', 'SWE 223', 2, 2),
+('Object Oriented Programming Lab', 'SWE 224', 2, 2),
+('Project on Java GUI Development', 'SWE 282', 2, 2),
+-- Semester 2.3
+('Artificial Intelligence', 'SWE 315', 2, 3),
+('Artificial Intelligence Lab', 'SWE 316', 2, 3),
+('Web Programming Practice Lab', 'SWE 322', 2, 3),
+('Software UX and UI Design Practice Lab', 'SWE 324', 2, 3),
+('Operating Systems', 'SWE 213', 2, 3),
+('Operating Systems Lab', 'SWE 214', 2, 3),
+
+-- Year 3: Specialized Tracks & Management
+-- Semester 3.1
+('Computer Networking', 'SWE 313', 3, 1),
+('Computer Networking Lab', 'SWE 314', 3, 1),
+('Machine Learning', 'SWE 317', 3, 1),
+('Machine Learning Lab', 'SWE 318', 3, 1),
+('Basic Statistics and Probability', 'SWE 341', 3, 1),
+('Digital Marketing', 'SWE 449', 3, 1),
+-- Semester 3.2
+('Mobile App Development Practice Lab', 'SWE 422', 3, 2),
+('Embedded System & IoT', 'SWE 465', 3, 2),
+('Embedded System & IoT Lab', 'SWE 466', 3, 2),
+('Software Requirement Engineering', 'SWE 431', 3, 2),
+('Data Science Fundamentals', 'SWE 451', 3, 2),
+('Data Science Lab', 'SWE 452', 3, 2),
+-- Semester 3.3
+('Software Project Management', 'SWE 431', 3, 3),
+('Entrepreneurship Development', 'SWE 443', 3, 3),
+('Introduction to Cryptography', 'SWE 461', 3, 3),
+('Final Year Project', 'SWE 482', 3, 3),
+('Cloud Computing', 'SWE 319', 3, 3),
+('Cybersecurity Fundamentals', 'SWE 462', 3, 3),
+
+-- Year 4: Research & Professional Practice
+-- Semester 4.1
+('Internship', 'SWE 484', 4, 1),
+('Advanced Machine Learning', 'SWE 457', 4, 1),
+('Advanced Machine Learning Lab', 'SWE 458', 4, 1),
+('Natural Language Processing', 'SWE 459', 4, 1),
+('NLP Lab', 'SWE 460', 4, 1),
+('Blockchain Technology', 'SWE 463', 4, 1),
+-- Semester 4.2
+('Final Year Project Phase II', 'SWE 482', 4, 2),
+('Deep Learning', 'SWE 457', 4, 2),
+('Computer Graphics', 'SWE 453', 4, 2),
+('Computer Graphics Lab', 'SWE 454', 4, 2),
+('Distributed Systems', 'SWE 464', 4, 2),
+('Professional Ethics', 'SWE 447', 4, 2),
+-- Semester 4.3
+('Final Year Viva', 'SWE 485', 4, 3),
+('Research Methodology', 'SWE 483', 4, 3),
+('Advanced Topics in Software Engineering', 'SWE 486', 4, 3),
+('Career Development', 'SWE 487', 4, 3),
+('Industry Project', 'SWE 488', 4, 3),
+
+-- Additional General Education & Math Subjects
+('English II', 'GED 102', 1, 1),
+('Functional Bangla', 'GED 103', 1, 1),
+('History of Bangladesh', 'GED 104', 1, 1),
+('Meteorology', 'MAT 212', 2, 2),
+('Complex Analysis', 'MAT 213', 3, 1),
+('Linear Programming', 'MAT 214', 3, 2),
+('Graph Theory', 'MAT 215', 3, 3),
+
+-- Additional Specialized Electives
+('Compiler Design', 'SWE 321', 3, 1),
+('Compiler Design Lab', 'SWE 322', 3, 1),
+('Software Testing', 'SWE 333', 3, 2),
+('Software Testing Lab', 'SWE 334', 3, 2),
+('E-Commerce Systems', 'SWE 343', 3, 3),
+('Decision Support Systems', 'SWE 331', 4, 1),
+('Accounting for Engineers', 'SWE 441', 4, 2),
+('Engineering Economics', 'SWE 445', 4, 2),
+('Ethics & Cyber Law', 'SWE 447', 4, 3);
 
 -- ============================================================
 -- SEED DATA — Admin user (password: admin123)

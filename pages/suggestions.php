@@ -138,7 +138,94 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px;}
             <div class="tool-title">AI Study Plan Generator</div>
             <div class="tool-desc">Enter your exam date and subjects → AI builds a personalized day-by-day study plan.</div>
             <label>Subjects to Study (comma-separated)</label>
-            <input type="text" id="planSubjects" placeholder="e.g. DSA, OOP, DBMS, OS">
+            <input type="text" id="planSubjects" list="subjectList" placeholder="e.g. DSA, OOP, DBMS, OS">
+            <datalist id="subjectList">
+                <!-- Year 1: Foundation & Programming -->
+                <!-- Semester 1.1 (11th Batch) -->
+                <option value="GED 101: Communicative English Language I">
+                <option value="MAT 111: Differential & Integral Calculus">
+                <option value="SWE 111: Basic Electrical and Electronic Circuits">
+                <option value="SWE 131: Introduction to Software Engineering">
+                <option value="GED 105: Bangladesh Studies">
+                <!-- Semester 1.2 (10th Batch) -->
+                <option value="MAT 112: Linear Algebra & Differential Equations">
+                <option value="MAT 113: Discrete Mathematics">
+                <option value="PHY 111: Basic Physics">
+                <option value="SWE 121: Structured Programming">
+                <option value="SWE 122: Structured Programming Lab">
+                <!-- Semester 1.3 (9th Batch) -->
+                <option value="SWE 123: Data Structures">
+                <option value="SWE 124: Data Structure Lab">
+                <option value="SWE 133: Management Information Systems">
+                <option value="SWE 182: Project on Python Development">
+                <option value="SWE 215: Digital Logic Design">
+                <option value="SWE 216: Digital Logic Design Lab">
+                <!-- Year 2: Core Engineering & Architecture -->
+                <!-- Semester 2.1 (8th Batch) -->
+                <option value="SWE 221: Algorithm">
+                <option value="SWE 222: Algorithm Lab">
+                <option value="SWE 225: Database Management System">
+                <option value="SWE 226: Database Management System Lab">
+                <option value="SWE 311: Theory of Computation">
+                <!-- Semester 2.2 (7th Batch) -->
+                <option value="MAT 211: Numerical Analysis">
+                <option value="SWE 233: Software Architecture and Design Patterns">
+                <option value="SWE 234: Software Architecture and Design Patterns Lab">
+                <option value="SWE 282: Project on Java GUI Development">
+                <option value="SWE 326: Problem Solving with Competitive Programming Lab-1">
+                <!-- Semester 2.3 (6th Batch) -->
+                <option value="SWE 315: Artificial Intelligence">
+                <option value="SWE 316: Artificial Intelligence Lab">
+                <option value="SWE 322: Web Programming Practice Lab">
+                <option value="SWE 324: Software UX and UI Design Practice Lab">
+                <!-- Year 3: Specialized Tracks & Management -->
+                <!-- Semester 3.1 (5th Batch) -->
+                <option value="SWE 313: Computer Networking">
+                <option value="SWE 314: Computer Networking Lab">
+                <option value="SWE 317: Machine Learning">
+                <option value="SWE 318: Machine Learning Lab">
+                <option value="SWE 341: Basic Statistics and Probability">
+                <option value="SWE 449: Digital Marketing">
+                <!-- Semester 3.2 (4th Batch) -->
+                <option value="SWE 422: Mobile App Development Practice Lab">
+                <option value="SWE 465: Embedded System & IoT">
+                <option value="SWE 466: Embedded System & IoT Lab">
+                <option value="SWE 431: Software Requirement Engineering">
+                <!-- Semester 3.3 (3rd Batch) -->
+                <option value="SWE 431: Software Project Management">
+                <option value="SWE 443: Entrepreneurship Development">
+                <option value="SWE 461: Introduction to Cryptography">
+                <option value="SWE 482: Final Year Project">
+                <!-- Year 4: Research & Professional Practice -->
+                <!-- Semesters 4.1 - 4.3 -->
+                <option value="SWE 484: Internship">
+                <option value="SWE 485: Final Year Viva">
+                <!-- Reserved Subjects (Not in Spring 2026 Routine) -->
+                <!-- General Education -->
+                <option value="GED 102: English II">
+                <option value="GED 103: Functional Bangla">
+                <option value="GED 104: History of Bangladesh">
+                <option value="MAT 212: Meteorology">
+                <!-- Core Computing -->
+                <option value="SWE 211: Computer Architecture">
+                <option value="SWE 213/214: Operating Systems & Lab">
+                <option value="SWE 223/224: OOP & Lab">
+                <!-- Specialized Electives -->
+                <option value="SWE 319: Cloud Computing">
+                <option value="SWE 328: Comp. Programming 2">
+                <option value="SWE 451/452: Data Science">
+                <option value="SWE 453/454: Graphics">
+                <option value="SWE 457/458: Deep Learning">
+                <option value="SWE 459/460: NLP">
+                <option value="SWE 463/464: Blockchain">
+                <!-- Professional/Management -->
+                <option value="SWE 331: Decision Support System">
+                <option value="SWE 333: Testing">
+                <option value="SWE 343: E-Commerce">
+                <option value="SWE 441: Accounting">
+                <option value="SWE 445: Economics">
+                <option value="SWE 447: Ethics & Cyber Law">
+            </datalist>
             <label>Days Until Exam</label>
             <input type="number" id="planDays" placeholder="e.g. 14" min="1" max="90">
             <label>Daily Study Hours Available</label>
