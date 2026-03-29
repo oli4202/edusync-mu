@@ -70,7 +70,7 @@ Once logged in, use the left sidebar to access different modules:
 
 ## 🔒 Security Implementations Focus
 
-For grading purposes, please note the following security standards applied in this project:
+ Following security standards applied in this project:
 1.  **SQL Queries Protected:** Every database interaction is routed through PHP Data Objects (PDO). We exclusively use prepared statements (`$db->prepare(...)` and `$stmt->execute([...])`) across all CRUD operations to prevent SQL Injection.
 2.  **Passwords Stored Safely:** All passwords are hashed using bcrypt via PHP's built-in `password_hash()` before database insertion. Authentication uses `password_verify()`.
 3.  **Error Handling:** The `config/database.php` connection uses `PDO::ERRMODE_EXCEPTION` to cleanly catch and handle server errors without exposing stack traces.
