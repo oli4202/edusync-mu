@@ -67,6 +67,24 @@ $subjectList->execute([$user['id']]); $subs = $subjectList->fetchAll();
 .modal { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:28px; width:100%; max-width:440px; }
 .modal h3 { font-family:'Syne',sans-serif; font-size:18px; font-weight:700; margin-bottom:20px; }
 .form-group { margin-bottom:16px; }
+.modal select, .modal input[type="number"], .modal input[type="date"], .modal input[type="text"] {
+    background: rgba(10, 6, 6, 0.1);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: 8px;
+    width: 100%;
+}
+/* CHANGED: Lines 68-76 target the dropdown text specifically */
+.modal select option {
+    background: #111; 
+    color: #94a3b8; /* Darker gray for option text */
+}
+optgroup {
+    background: rgba(34, 211, 238, 0.1) !important;
+    color: #00d9ff !important;
+    font-weight: 600;
+}
 </style>
 </head>
 <body>
@@ -80,7 +98,6 @@ $subjectList->execute([$user['id']]); $subs = $subjectList->fetchAll();
         <button class="btn btn-primary" onclick="document.getElementById('logModal').classList.add('active')">+ Log Study Hours</button>
     </div>
 
-    <!-- Stats -->
     <div class="grid-4" style="margin-bottom:24px;">
         <div class="stat-card cyan">
             <div class="stat-icon">⏱</div>
@@ -104,7 +121,6 @@ $subjectList->execute([$user['id']]); $subs = $subjectList->fetchAll();
         </div>
     </div>
 
-    <!-- Charts -->
     <div class="grid-2" style="margin-bottom:24px;">
         <div class="chart-card">
             <div class="card-title">📈 Weekly Study Hours</div>
@@ -133,7 +149,6 @@ $subjectList->execute([$user['id']]); $subs = $subjectList->fetchAll();
     </div>
 </main>
 
-<!-- Log Modal -->
 <div class="modal-overlay" id="logModal">
     <div class="modal">
         <h3>⏱ Log Study Hours</h3>
@@ -149,10 +164,10 @@ $subjectList->execute([$user['id']]); $subs = $subjectList->fetchAll();
                     foreach ($subs as $s):
                         if ($s['year'] != $currentYear || $s['semester'] != $currentSemester):
                             if ($currentYear !== null) echo '</optgroup>';
-                            $yearLabel = $s['year'] . 'st Year';
+                            $yearLabel = $s['year'] . '1st Year';
                             if ($s['year'] == 2) $yearLabel = '2nd Year';
                             if ($s['year'] == 3) $yearLabel = '3rd Year';
-                            if ($s['year'] >= 4) $yearLabel = $s['year'] . 'th Year';
+                            if ($s['year'] >= 4) $yearLabel = $s['year'] . '4th Year';
                             echo '<optgroup label="' . $yearLabel . ' - Semester ' . $s['semester'] . '">';
                             $currentYear = $s['year'];
                             $currentSemester = $s['semester'];
@@ -175,7 +190,14 @@ $subjectList->execute([$user['id']]); $subs = $subjectList->fetchAll();
             </div>
             <div class="form-group">
                 <label>Notes</label>
-                <input type="text" name="notes" placeholder="What did you study?">
+                <input type="text" name="notes" list="studyNoteList" placeholder="What did you study?">
+                <datalist id="studyNoteList">
+                    <option value="Reviewed lecture slides and class notes">
+                    <option value="Solved previous questions and short problems">
+                    <option value="Worked on lab tasks and debugging">
+                    <option value="Prepared assignment draft and summary notes">
+                    <option value="Practiced formulas, definitions, and examples">
+                </datalist>
             </div>
             <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:10px;">
                 <button type="button" class="btn btn-outline" onclick="document.getElementById('logModal').classList.remove('active')">Cancel</button>

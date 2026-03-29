@@ -47,29 +47,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $deadline= clean($_POST['deadline'] ?? '');
         $link    = clean($_POST['apply_link'] ?? '');
         $email   = clean($_POST['apply_email'] ?? '');
-        if (!$company || !$title || !$desc) { $err = 'Fill in required fields.'; }
-        else {
-            $approved = $user['role']==='admin' ? 1 : 0;
+        if (!$company || !$title || !$desc) {
+            $err = 'Fill in required fields.';
+        } else {
+            $approved = $user['role'] === 'admin' ? 1 : 0;
             $db->prepare("INSERT INTO job_posts (user_id,company,title,type,location,description,requirements,salary,deadline,apply_link,apply_email,is_approved) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)")
-               ->execute([$user['id'],$company,$title,$type,$loc,$desc,$req,$salary,$deadline?:null,$link,$email,$approved]);
-            $msg = $user['role']==='admin' ? 'Job posted!' : 'Job submitted for review!';
+               ->execute([$user['id'], $company, $title, $type, $loc, $desc, $req, $salary, $deadline ?: null, $link, $email, $approved]);
+            $msg = $user['role'] === 'admin' ? 'Job posted!' : 'Job submitted for review!';
         }
     } elseif ($action === 'approve') {
-        $db->prepare("UPDATE job_posts SET is_approved=1,approved_by=? WHERE id=?")->execute([$user['id'],(int)$_POST['job_id']]);
+        $db->prepare("UPDATE job_posts SET is_approved=1,approved_by=? WHERE id=?")->execute([$user['id'], (int) $_POST['job_id']]);
         $msg = 'Job approved!';
     } elseif ($action === 'delete') {
-        $db->prepare("DELETE FROM job_posts WHERE id=?")->execute([(int)$_POST['job_id']]);
+        $db->prepare("DELETE FROM job_posts WHERE id=?")->execute([(int) $_POST['job_id']]);
         $msg = 'Deleted.';
     } elseif ($action === 'save') {
-        $jid = (int)$_POST['job_id'];
+        $jid = (int) $_POST['job_id'];
         $check = $db->prepare("SELECT id FROM job_saves WHERE user_id=? AND job_id=?");
-        $check->execute([$user['id'],$jid]);
+        $check->execute([$user['id'], $jid]);
         if ($check->fetch()) {
-            $db->prepare("DELETE FROM job_saves WHERE user_id=? AND job_id=?")->execute([$user['id'],$jid]);
+            $db->prepare("DELETE FROM job_saves WHERE user_id=? AND job_id=?")->execute([$user['id'], $jid]);
         } else {
-            $db->prepare("INSERT INTO job_saves (user_id,job_id) VALUES (?,?)")->execute([$user['id'],$jid]);
+            $db->prepare("INSERT INTO job_saves (user_id,job_id) VALUES (?,?)")->execute([$user['id'], $jid]);
         }
-        header('Content-Type: application/json'); echo json_encode(['ok'=>1]); exit();
+        header('Content-Type: application/json');
+        echo json_encode(['ok' => 1]);
+        exit();
     }
 }
 
@@ -77,28 +80,36 @@ $typeFilter = clean($_GET['type'] ?? '');
 $search     = clean($_GET['q'] ?? '');
 $where = ['j.is_approved=1'];
 $params = [];
-if ($typeFilter) { $where[] = 'j.type=?'; $params[] = $typeFilter; }
-if ($search) { $where[] = '(j.title LIKE ? OR j.company LIKE ? OR j.description LIKE ?)'; $params = array_merge($params,array_fill(0,3,"%$search%")); }
+if ($typeFilter) {
+    $where[] = 'j.type=?';
+    $params[] = $typeFilter;
+}
+if ($search) {
+    $where[] = '(j.title LIKE ? OR j.company LIKE ? OR j.description LIKE ?)';
+    $params = array_merge($params, array_fill(0, 3, "%$search%"));
+}
 
 $jobs = $db->prepare("SELECT j.*, u.name AS poster_name,
     (SELECT COUNT(*) FROM job_saves s WHERE s.job_id=j.id AND s.user_id=?) AS saved
     FROM job_posts j JOIN users u ON j.user_id=u.id
-    WHERE ".implode(' AND ',$where)." ORDER BY j.posted_at DESC");
-$jobs->execute(array_merge([$user['id']],$params));
+    WHERE " . implode(' AND ', $where) . " ORDER BY j.posted_at DESC");
+$jobs->execute(array_merge([$user['id']], $params));
 $jobList = $jobs->fetchAll();
 
-$typeColors=['internship'=>['var(--accent)','rgba(34,211,238,.1)','🎓'],
-    'full_time'=>['var(--accent3)','rgba(52,211,153,.1)','💼'],
-    'part_time'=>['var(--accent2)','rgba(129,140,248,.1)','⏰'],
-    'remote'=>['var(--warn)','rgba(251,191,36,.1)','🌐'],
-    'freelance'=>['#f97316','rgba(249,115,22,.1)','🔧']];
+$typeColors = [
+    'internship' => ['var(--accent)', 'rgba(34,211,238,.1)', '🎓'],
+    'full_time'  => ['var(--accent3)', 'rgba(52,211,153,.1)', '💼'],
+    'part_time'  => ['var(--accent2)', 'rgba(129,140,248,.1)', '⏰'],
+    'remote'     => ['var(--warn)', 'rgba(251,191,36,.1)', '🌐'],
+    'freelance'  => ['#f97316', 'rgba(249,115,22,.1)', '🔧'],
+];
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Internship & Jobs — EduSync MU</title>
+<title>Internship & Jobs - EduSync MU</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
 <style>
@@ -126,6 +137,7 @@ $typeColors=['internship'=>['var(--accent)','rgba(34,211,238,.1)','🎓'],
 .modal-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:20px;}
 .field{margin-bottom:14px;}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.hint-text{font-size:12px;color:var(--muted);margin-top:-6px;margin-bottom:12px;line-height:1.6;}
 </style>
 </head>
 <body>
@@ -134,7 +146,7 @@ $typeColors=['internship'=>['var(--accent)','rgba(34,211,238,.1)','🎓'],
     <div class="topbar">
         <div>
             <div class="page-title">💼 Internship & Job Board</div>
-            <div class="page-sub">Opportunities for MU Sylhet SE students — internships, jobs & freelance</div>
+            <div class="page-sub">Opportunities for MU Sylhet SE students - internships, jobs & freelance</div>
         </div>
         <button class="btn btn-primary" onclick="document.getElementById('postModal').classList.add('open')">+ Post Opportunity</button>
     </div>
@@ -142,20 +154,19 @@ $typeColors=['internship'=>['var(--accent)','rgba(34,211,238,.1)','🎓'],
     <?php if ($msg): ?><div class="alert-success">✅ <?= $msg ?></div><?php endif; ?>
     <?php if ($err): ?><div class="alert-error">⚠ <?= $err ?></div><?php endif; ?>
 
-    <!-- Search & Filter -->
     <form method="GET" style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
         <input type="text" name="q" placeholder="🔍 Search jobs, companies..." value="<?= htmlspecialchars($search) ?>" style="flex:1;min-width:220px;margin:0;">
         <button type="submit" class="btn btn-primary btn-sm">Search</button>
-        <?php if($search): ?><a href="jobs.php" class="btn btn-outline btn-sm">Clear</a><?php endif; ?>
+        <?php if ($search): ?><a href="jobs.php" class="btn btn-outline btn-sm">Clear</a><?php endif; ?>
     </form>
 
     <div class="filter-tabs">
-        <a href="jobs.php" class="tab <?= !$typeFilter?'active':'' ?>">All</a>
-        <a href="?type=internship" class="tab <?= $typeFilter==='internship'?'active':'' ?>">🎓 Internship</a>
-        <a href="?type=full_time" class="tab <?= $typeFilter==='full_time'?'active':'' ?>">💼 Full Time</a>
-        <a href="?type=part_time" class="tab <?= $typeFilter==='part_time'?'active':'' ?>">⏰ Part Time</a>
-        <a href="?type=remote" class="tab <?= $typeFilter==='remote'?'active':'' ?>">🌐 Remote</a>
-        <a href="?type=freelance" class="tab <?= $typeFilter==='freelance'?'active':'' ?>">🔧 Freelance</a>
+        <a href="jobs.php" class="tab <?= !$typeFilter ? 'active' : '' ?>">All</a>
+        <a href="?type=internship" class="tab <?= $typeFilter === 'internship' ? 'active' : '' ?>">🎓 Internship</a>
+        <a href="?type=full_time" class="tab <?= $typeFilter === 'full_time' ? 'active' : '' ?>">💼 Full Time</a>
+        <a href="?type=part_time" class="tab <?= $typeFilter === 'part_time' ? 'active' : '' ?>">⏰ Part Time</a>
+        <a href="?type=remote" class="tab <?= $typeFilter === 'remote' ? 'active' : '' ?>">🌐 Remote</a>
+        <a href="?type=freelance" class="tab <?= $typeFilter === 'freelance' ? 'active' : '' ?>">🔧 Freelance</a>
     </div>
 
     <?php if (empty($jobList)): ?>
@@ -168,28 +179,29 @@ $typeColors=['internship'=>['var(--accent)','rgba(34,211,238,.1)','🎓'],
     <?php else: ?>
     <div style="color:var(--muted);font-size:13px;margin-bottom:16px;"><?= count($jobList) ?> opportunities found</div>
     <?php foreach ($jobList as $job):
-        [$tc,$tbg,$ticon] = $typeColors[$job['type']] ?? [$typeColors['internship']];
+        [$tc, $tbg, $ticon] = $typeColors[$job['type']] ?? $typeColors['internship'];
     ?>
     <div class="job-card">
         <div class="job-header">
             <div style="display:flex;gap:14px;align-items:flex-start;">
-                <div class="company-logo"><?= strtoupper(substr($job['company'],0,2)) ?></div>
+                <div class="company-logo"><?= strtoupper(substr($job['company'], 0, 2)) ?></div>
                 <div>
                     <div class="job-title"><?= htmlspecialchars($job['title']) ?></div>
                     <div class="job-company">🏢 <?= htmlspecialchars($job['company']) ?></div>
                 </div>
             </div>
-            <button class="save-btn <?= $job['saved']?'saved':'' ?>" id="save-<?= $job['id'] ?>"
-                onclick="saveJob(<?= $job['id'] ?>)"><?= $job['saved']?'🔖 Saved':'🏷 Save' ?></button>
+            <button class="save-btn <?= $job['saved'] ? 'saved' : '' ?>" id="save-<?= $job['id'] ?>" onclick="saveJob(<?= $job['id'] ?>)">
+                <?= $job['saved'] ? '🔖 Saved' : '🏷 Save' ?>
+            </button>
         </div>
         <div class="job-badges">
-            <span class="job-badge" style="background:<?= $tbg ?>;color:<?= $tc ?>"><?= $ticon ?> <?= ucfirst(str_replace('_',' ',$job['type'])) ?></span>
+            <span class="job-badge" style="background:<?= $tbg ?>;color:<?= $tc ?>"><?= $ticon ?> <?= ucfirst(str_replace('_', ' ', $job['type'])) ?></span>
             <?php if ($job['location']): ?><span class="job-badge" style="background:rgba(100,116,139,.1);color:var(--muted)">📍 <?= htmlspecialchars($job['location']) ?></span><?php endif; ?>
             <?php if ($job['salary']): ?><span class="job-badge" style="background:rgba(52,211,153,.1);color:var(--accent3)">💰 <?= htmlspecialchars($job['salary']) ?></span><?php endif; ?>
             <?php if ($job['deadline']): ?>
-            <?php $daysLeft = (strtotime($job['deadline'])-time())/86400; ?>
-            <span class="job-badge" style="background:<?= $daysLeft<7?'rgba(248,113,113,.1)':'rgba(251,191,36,.1)' ?>;color:<?= $daysLeft<7?'var(--danger)':'var(--warn)' ?>">
-                ⏳ <?= $daysLeft < 0 ? 'Expired' : 'Deadline: '.date('M j',strtotime($job['deadline'])) ?>
+            <?php $daysLeft = (strtotime($job['deadline']) - time()) / 86400; ?>
+            <span class="job-badge" style="background:<?= $daysLeft < 7 ? 'rgba(248,113,113,.1)' : 'rgba(251,191,36,.1)' ?>;color:<?= $daysLeft < 7 ? 'var(--danger)' : 'var(--warn)' ?>">
+                ⏳ <?= $daysLeft < 0 ? 'Expired' : 'Deadline: ' . date('M j', strtotime($job['deadline'])) ?>
             </span>
             <?php endif; ?>
         </div>
@@ -205,7 +217,7 @@ $typeColors=['internship'=>['var(--accent)','rgba(34,211,238,.1)','🎓'],
                 <?php elseif ($job['apply_email']): ?>
                 <a href="mailto:<?= htmlspecialchars($job['apply_email']) ?>" class="btn btn-primary btn-sm">📧 Apply via Email</a>
                 <?php endif; ?>
-                <?php if ($user['role']==='admin' && !$job['is_approved']): ?>
+                <?php if ($user['role'] === 'admin' && !$job['is_approved']): ?>
                 <form method="POST" style="display:inline">
                     <input type="hidden" name="action" value="approve">
                     <input type="hidden" name="job_id" value="<?= $job['id'] ?>">
@@ -219,11 +231,10 @@ $typeColors=['internship'=>['var(--accent)','rgba(34,211,238,.1)','🎓'],
     <?php endif; ?>
 </main>
 
-<!-- Post Job Modal -->
 <div class="modal-overlay" id="postModal">
     <div class="modal">
         <div class="modal-title">💼 Post Job / Internship</div>
-        <?php if ($user['role']!=='admin'): ?>
+        <?php if ($user['role'] !== 'admin'): ?>
         <div style="background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.2);border-radius:8px;padding:10px;font-size:13px;color:var(--muted);margin-bottom:16px;">
             ℹ️ Your post will be reviewed by admin before appearing publicly.
         </div>
@@ -232,11 +243,24 @@ $typeColors=['internship'=>['var(--accent)','rgba(34,211,238,.1)','🎓'],
             <input type="hidden" name="action" value="post">
             <div class="form-row">
                 <div class="field"><label>Company Name *</label><input type="text" name="company" placeholder="e.g. Brain Station 23" required></div>
-                <div class="field"><label>Job Title *</label><input type="text" name="title" placeholder="e.g. Junior Software Engineer" required></div>
+                <div class="field"><label>Job Title *</label><input type="text" name="title" id="jobTitleInput" list="jobTitleSuggestions" placeholder="e.g. Junior Software Engineer" required></div>
             </div>
+            <datalist id="jobTitleSuggestions">
+                <option value="Junior Software Engineer"></option>
+                <option value="Software Engineer Intern"></option>
+                <option value="Frontend Developer"></option>
+                <option value="Backend Developer"></option>
+                <option value="Full Stack Developer"></option>
+                <option value="QA Engineer"></option>
+                <option value="UI/UX Designer"></option>
+                <option value="Data Analyst"></option>
+                <option value="Machine Learning Intern"></option>
+                <option value="Technical Support Engineer"></option>
+            </datalist>
             <div class="form-row">
-                <div class="field"><label>Type</label>
-                    <select name="type">
+                <div class="field">
+                    <label>Type</label>
+                    <select name="type" id="jobTypeSelect">
                         <option value="internship">🎓 Internship</option>
                         <option value="full_time">💼 Full Time</option>
                         <option value="part_time">⏰ Part Time</option>
@@ -244,12 +268,13 @@ $typeColors=['internship'=>['var(--accent)','rgba(34,211,238,.1)','🎓'],
                         <option value="freelance">🔧 Freelance</option>
                     </select>
                 </div>
-                <div class="field"><label>Location</label><input type="text" name="location" placeholder="e.g. Sylhet / Remote / Dhaka"></div>
+                <div class="field"><label>Location</label><input type="text" name="location" id="jobLocationInput" placeholder="e.g. Sylhet / Remote / Dhaka"></div>
             </div>
-            <div class="field"><label>Description *</label><textarea name="description" rows="4" placeholder="Describe the role, responsibilities..." required></textarea></div>
-            <div class="field"><label>Requirements</label><textarea name="requirements" rows="3" placeholder="Skills required: PHP, MySQL, JavaScript..."></textarea></div>
+            <div class="field"><label>Description *</label><textarea name="description" id="jobDescriptionInput" rows="4" placeholder="Describe the role, responsibilities..." required></textarea></div>
+            <div class="hint-text" id="jobDescriptionHint">Choose or type a job title to auto-fill a relevant description and requirements.</div>
+            <div class="field"><label>Requirements</label><textarea name="requirements" id="jobRequirementsInput" rows="3" placeholder="Skills required: PHP, MySQL, JavaScript..."></textarea></div>
             <div class="form-row">
-                <div class="field"><label>Salary / Stipend</label><input type="text" name="salary" placeholder="e.g. ৳15,000/month"></div>
+                <div class="field"><label>Salary / Stipend</label><input type="text" name="salary" id="jobSalaryInput" placeholder="e.g. 15,000/month"></div>
                 <div class="field"><label>Application Deadline</label><input type="date" name="deadline"></div>
             </div>
             <div class="form-row">
@@ -265,16 +290,138 @@ $typeColors=['internship'=>['var(--accent)','rgba(34,211,238,.1)','🎓'],
 </div>
 
 <script>
+const jobTitleInput = document.getElementById('jobTitleInput');
+const jobTypeSelect = document.getElementById('jobTypeSelect');
+const jobLocationInput = document.getElementById('jobLocationInput');
+const jobDescriptionInput = document.getElementById('jobDescriptionInput');
+const jobRequirementsInput = document.getElementById('jobRequirementsInput');
+const jobSalaryInput = document.getElementById('jobSalaryInput');
+const jobDescriptionHint = document.getElementById('jobDescriptionHint');
+
+const jobTemplates = [
+    {
+        keywords: ['intern', 'internship'],
+        type: 'internship',
+        location: 'Sylhet / Remote',
+        salary: 'Paid internship / Stipend based',
+        description: 'Support the engineering team with implementation, testing, debugging, documentation, and day-to-day product tasks. This role is ideal for students or fresh graduates who want hands-on industry experience.',
+        requirements: 'Basic programming knowledge, problem-solving ability, willingness to learn quickly, good communication, and familiarity with Git or collaborative coding tools.'
+    },
+    {
+        keywords: ['frontend', 'front-end', 'ui developer'],
+        type: 'full_time',
+        location: 'Remote / Dhaka / Sylhet',
+        salary: 'Negotiable',
+        description: 'Build responsive user interfaces, convert design ideas into production-ready screens, improve UX quality, and collaborate with backend and product teams to deliver polished web experiences.',
+        requirements: 'Strong HTML, CSS, JavaScript, responsive design skills, familiarity with modern frontend frameworks, API integration, and attention to UI detail.'
+    },
+    {
+        keywords: ['backend', 'back-end', 'api'],
+        type: 'full_time',
+        location: 'Remote / Dhaka / Sylhet',
+        salary: 'Negotiable',
+        description: 'Develop and maintain backend services, APIs, database logic, authentication flows, and core business functionality. Work closely with frontend developers and product stakeholders.',
+        requirements: 'Experience with server-side programming, databases, REST APIs, debugging, version control, and writing maintainable secure code.'
+    },
+    {
+        keywords: ['full stack', 'fullstack'],
+        type: 'full_time',
+        location: 'Remote / Dhaka',
+        salary: 'Negotiable',
+        description: 'Work across both frontend and backend layers to deliver complete product features. Responsibilities include UI development, API integration, database updates, testing, and deployment support.',
+        requirements: 'Good command of frontend and backend development, database handling, API design, debugging, Git workflow, and strong ownership of features end to end.'
+    },
+    {
+        keywords: ['qa', 'quality assurance', 'tester', 'test engineer'],
+        type: 'full_time',
+        location: 'Sylhet / Dhaka / Remote',
+        salary: 'Negotiable',
+        description: 'Ensure software quality through test planning, manual or automated testing, bug reporting, regression testing, and close coordination with developers before release.',
+        requirements: 'Understanding of software testing principles, test case writing, bug tracking, communication skills, and familiarity with web or app testing workflows.'
+    },
+    {
+        keywords: ['ui/ux', 'ux', 'designer', 'product designer'],
+        type: 'full_time',
+        location: 'Remote / Dhaka',
+        salary: 'Negotiable',
+        description: 'Design intuitive interfaces, improve usability, prepare wireframes and prototypes, and collaborate with developers to deliver user-centered digital products.',
+        requirements: 'Figma or design tool experience, wireframing, design systems, visual communication, usability thinking, and portfolio-ready project work.'
+    },
+    {
+        keywords: ['data analyst', 'analyst', 'business analyst'],
+        type: 'full_time',
+        location: 'Dhaka / Remote',
+        salary: 'Negotiable',
+        description: 'Analyze datasets, prepare dashboards and reports, identify trends, and support business or product decisions with clear insights and structured data work.',
+        requirements: 'Excel or spreadsheet skills, SQL basics, data visualization familiarity, analytical thinking, and ability to present findings clearly.'
+    },
+    {
+        keywords: ['machine learning', 'ml', 'ai engineer', 'data science'],
+        type: 'internship',
+        location: 'Remote / Dhaka',
+        salary: 'Paid internship / Negotiable',
+        description: 'Assist with data preprocessing, experimentation, model training, evaluation, and AI feature research while working with technical mentors on practical use cases.',
+        requirements: 'Python basics, machine learning fundamentals, data handling, notebooks or scripts, curiosity for experimentation, and strong mathematical thinking.'
+    },
+    {
+        keywords: ['support', 'technical support', 'it support'],
+        type: 'full_time',
+        location: 'On-site / Sylhet',
+        salary: 'Negotiable',
+        description: 'Provide technical assistance to users, troubleshoot software and hardware issues, document recurring problems, and help maintain stable day-to-day system operations.',
+        requirements: 'Strong communication, troubleshooting ability, basic networking or system knowledge, patience with users, and willingness to solve issues quickly.'
+    },
+    {
+        keywords: ['software engineer', 'developer', 'engineer'],
+        type: 'full_time',
+        location: 'Remote / Dhaka / Sylhet',
+        salary: 'Negotiable',
+        description: 'Design, develop, test, and maintain software features while collaborating with the product team to ship reliable, scalable, and user-focused solutions.',
+        requirements: 'Programming fundamentals, data structures, debugging skills, teamwork, Git workflow, and ability to learn and adapt across product needs.'
+    }
+];
+
+function getJobTemplate(title) {
+    const normalized = (title || '').trim().toLowerCase();
+    if (!normalized) return null;
+    return jobTemplates.find((template) => template.keywords.some((keyword) => normalized.includes(keyword))) || null;
+}
+
+function fillJobTemplate() {
+    const template = getJobTemplate(jobTitleInput.value);
+    if (!template) {
+        jobDescriptionHint.textContent = 'Choose or type a job title to auto-fill a relevant description and requirements.';
+        return;
+    }
+
+    if (!jobDescriptionInput.value.trim()) jobDescriptionInput.value = template.description;
+    if (!jobRequirementsInput.value.trim()) jobRequirementsInput.value = template.requirements;
+    if (!jobLocationInput.value.trim()) jobLocationInput.value = template.location;
+    if (!jobSalaryInput.value.trim()) jobSalaryInput.value = template.salary;
+    if (!jobTypeSelect.dataset.userChanged) jobTypeSelect.value = template.type;
+
+    jobDescriptionHint.textContent = `Auto-filled details for ${jobTitleInput.value.trim()}. You can still edit everything manually.`;
+}
+
+jobTitleInput.addEventListener('change', fillJobTemplate);
+jobTitleInput.addEventListener('blur', fillJobTemplate);
+jobTypeSelect.addEventListener('change', () => {
+    jobTypeSelect.dataset.userChanged = '1';
+});
+
 async function saveJob(id) {
-    const btn = document.getElementById('save-'+id);
+    const btn = document.getElementById('save-' + id);
     const form = new FormData();
-    form.append('action','save');
-    form.append('job_id',id);
-    await fetch('', {method:'POST', body:form});
+    form.append('action', 'save');
+    form.append('job_id', id);
+    await fetch('', { method: 'POST', body: form });
     const saved = btn.classList.toggle('saved');
     btn.textContent = saved ? '🔖 Saved' : '🏷 Save';
 }
-document.getElementById('postModal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open')});
+
+document.getElementById('postModal').addEventListener('click', function (e) {
+    if (e.target === this) this.classList.remove('open');
+});
 </script>
 </body>
 </html>

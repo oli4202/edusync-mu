@@ -65,7 +65,48 @@ $youtubeResources = [
         ['Trefor Bazett — Discrete Math','https://www.youtube.com/watch?v=rdXw7Ps9vxc','Full discrete math course','Trefor Bazett','Full'],
         ['TrevTutor — Discrete Math','https://www.youtube.com/watch?v=tyDKR4FG3Yw','Proofs, logic, sets and graphs','TrevTutor','Series'],
     ],
+    'Digital Logic Design' => [
+        ['Neso Academy - Digital Electronics','https://www.youtube.com/watch?v=M0mx8S05v60','Covers logic gates, combinational circuits, and exam topics','Neso Academy','Series'],
+        ['All About Electronics - Digital Electronics','https://www.youtube.com/watch?v=lKTsv6iVxV4','Great for flip flops, counters, and logic circuit ideas','All About Electronics','Series'],
+        ['Gate Smashers - Digital Logic','https://www.youtube.com/watch?v=VG3N3eA5l4w','Helpful for quick revision before exams','Gate Smashers','Series'],
+    ],
+    'Software UX and UI Design Practice Lab' => [
+        ['DesignCourse - UI UX Design Full Course','https://www.youtube.com/watch?v=c9Wg6Cb_YlU','Strong UI/UX foundation with practical design examples','DesignCourse','Full'],
+        ['Figma Tutorial for Beginners','https://www.youtube.com/watch?v=jwCmIBJ8Jtc','Useful for course projects, wireframes, and mockups','Figma','Tutorial'],
+        ['AJ&Smart - UX Fundamentals','https://www.youtube.com/watch?v=Ovj4hFxko7c','Good overview of UX process and product thinking','AJ&Smart','Series'],
+    ],
+    'Computer Architecture' => [
+        ['Neso Academy - Computer Organization and Architecture','https://www.youtube.com/watch?v=Ol8D69VKX2k','CPU, memory, instruction cycle, and architecture basics','Neso Academy','Series'],
+        ['Gate Smashers - Computer Organization','https://www.youtube.com/watch?v=6gX3cM4k3r0','Exam-oriented architecture explanations','Gate Smashers','Series'],
+    ],
 ];
+
+function findCourseVideos($courseName, $youtubeResources) {
+    if (isset($youtubeResources[$courseName])) return $youtubeResources[$courseName];
+
+    $rules = [
+        'Digital Logic' => 'Digital Logic Design',
+        'UX' => 'Software UX and UI Design Practice Lab',
+        'UI' => 'Software UX and UI Design Practice Lab',
+        'Object Oriented' => 'Object Oriented Programming (Java)',
+        'Database' => 'Database Management Systems',
+        'Operating System' => 'Operating Systems',
+        'Networking' => 'Computer Networks',
+        'Web Programming' => 'Web Technologies',
+        'Structured Programming' => 'Introduction to Programming (C)',
+        'Computer Architecture' => 'Computer Architecture',
+        'Discrete Mathematics' => 'Discrete Mathematics',
+        'Artificial Intelligence' => 'Artificial Intelligence',
+    ];
+
+    foreach ($rules as $needle => $resourceKey) {
+        if (stripos($courseName, $needle) !== false && isset($youtubeResources[$resourceKey])) {
+            return $youtubeResources[$resourceKey];
+        }
+    }
+
+    return null;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -144,7 +185,7 @@ $youtubeResources = [
     <!-- Videos for Selected Course -->
     <?php if ($courseData):
         $courseName = $courseData['name'];
-        $videos = $youtubeResources[$courseName] ?? null;
+        $videos = findCourseVideos($courseName, $youtubeResources);
     ?>
     <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;margin-bottom:6px;">
         ▶️ <?= htmlspecialchars($courseName) ?>

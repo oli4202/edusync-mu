@@ -141,19 +141,19 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px;}
             <input type="text" id="planSubjects" list="subjectList" placeholder="e.g. DSA, OOP, DBMS, OS">
             <datalist id="subjectList">
                 <!-- Year 1: Foundation & Programming -->
-                <!-- Semester 1.1 (11th Batch) -->
+                <!-- Semester 1.1 -->
                 <option value="GED 101: Communicative English Language I">
                 <option value="MAT 111: Differential & Integral Calculus">
                 <option value="SWE 111: Basic Electrical and Electronic Circuits">
                 <option value="SWE 131: Introduction to Software Engineering">
                 <option value="GED 105: Bangladesh Studies">
-                <!-- Semester 1.2 (10th Batch) -->
+                <!-- Semester 1.2 -->
                 <option value="MAT 112: Linear Algebra & Differential Equations">
                 <option value="MAT 113: Discrete Mathematics">
                 <option value="PHY 111: Basic Physics">
                 <option value="SWE 121: Structured Programming">
                 <option value="SWE 122: Structured Programming Lab">
-                <!-- Semester 1.3 (9th Batch) -->
+                <!-- Semester 1.3 -->
                 <option value="SWE 123: Data Structures">
                 <option value="SWE 124: Data Structure Lab">
                 <option value="SWE 133: Management Information Systems">
@@ -161,69 +161,87 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px;}
                 <option value="SWE 215: Digital Logic Design">
                 <option value="SWE 216: Digital Logic Design Lab">
                 <!-- Year 2: Core Engineering & Architecture -->
-                <!-- Semester 2.1 (8th Batch) -->
+                <!-- Semester 2.1 -->
                 <option value="SWE 221: Algorithm">
                 <option value="SWE 222: Algorithm Lab">
                 <option value="SWE 225: Database Management System">
                 <option value="SWE 226: Database Management System Lab">
                 <option value="SWE 311: Theory of Computation">
-                <!-- Semester 2.2 (7th Batch) -->
+                <option value="SWE 211: Computer Architecture">
+                <!-- Semester 2.2 -->
                 <option value="MAT 211: Numerical Analysis">
                 <option value="SWE 233: Software Architecture and Design Patterns">
                 <option value="SWE 234: Software Architecture and Design Patterns Lab">
+                <option value="SWE 223: Object Oriented Programming">
+                <option value="SWE 224: Object Oriented Programming Lab">
                 <option value="SWE 282: Project on Java GUI Development">
-                <option value="SWE 326: Problem Solving with Competitive Programming Lab-1">
-                <!-- Semester 2.3 (6th Batch) -->
+                <!-- Semester 2.3 -->
                 <option value="SWE 315: Artificial Intelligence">
                 <option value="SWE 316: Artificial Intelligence Lab">
                 <option value="SWE 322: Web Programming Practice Lab">
                 <option value="SWE 324: Software UX and UI Design Practice Lab">
+                <option value="SWE 213: Operating Systems">
+                <option value="SWE 214: Operating Systems Lab">
                 <!-- Year 3: Specialized Tracks & Management -->
-                <!-- Semester 3.1 (5th Batch) -->
+                <!-- Semester 3.1 -->
                 <option value="SWE 313: Computer Networking">
                 <option value="SWE 314: Computer Networking Lab">
                 <option value="SWE 317: Machine Learning">
                 <option value="SWE 318: Machine Learning Lab">
                 <option value="SWE 341: Basic Statistics and Probability">
                 <option value="SWE 449: Digital Marketing">
-                <!-- Semester 3.2 (4th Batch) -->
+                <!-- Semester 3.2 -->
                 <option value="SWE 422: Mobile App Development Practice Lab">
                 <option value="SWE 465: Embedded System & IoT">
                 <option value="SWE 466: Embedded System & IoT Lab">
                 <option value="SWE 431: Software Requirement Engineering">
-                <!-- Semester 3.3 (3rd Batch) -->
+                <option value="SWE 451: Data Science Fundamentals">
+                <option value="SWE 452: Data Science Lab">
+                <!-- Semester 3.3 -->
                 <option value="SWE 431: Software Project Management">
                 <option value="SWE 443: Entrepreneurship Development">
                 <option value="SWE 461: Introduction to Cryptography">
                 <option value="SWE 482: Final Year Project">
+                <option value="SWE 319: Cloud Computing">
+                <option value="SWE 462: Cybersecurity Fundamentals">
                 <!-- Year 4: Research & Professional Practice -->
-                <!-- Semesters 4.1 - 4.3 -->
+                <!-- Semester 4.1 -->
                 <option value="SWE 484: Internship">
+                <option value="SWE 457: Advanced Machine Learning">
+                <option value="SWE 458: Advanced Machine Learning Lab">
+                <option value="SWE 459: Natural Language Processing">
+                <option value="SWE 460: NLP Lab">
+                <option value="SWE 463: Blockchain Technology">
+                <!-- Semester 4.2 -->
+                <option value="SWE 482: Final Year Project Phase II">
+                <option value="SWE 457: Deep Learning">
+                <option value="SWE 453: Computer Graphics">
+                <option value="SWE 454: Computer Graphics Lab">
+                <option value="SWE 464: Distributed Systems">
+                <option value="SWE 447: Professional Ethics">
+                <!-- Semester 4.3 -->
                 <option value="SWE 485: Final Year Viva">
-                <!-- Reserved Subjects (Not in Spring 2026 Routine) -->
-                <!-- General Education -->
+                <option value="SWE 483: Research Methodology">
+                <option value="SWE 486: Advanced Topics in Software Engineering">
+                <option value="SWE 487: Career Development">
+                <option value="SWE 488: Industry Project">
+                <!-- Additional General Education & Math -->
                 <option value="GED 102: English II">
                 <option value="GED 103: Functional Bangla">
                 <option value="GED 104: History of Bangladesh">
                 <option value="MAT 212: Meteorology">
-                <!-- Core Computing -->
-                <option value="SWE 211: Computer Architecture">
-                <option value="SWE 213/214: Operating Systems & Lab">
-                <option value="SWE 223/224: OOP & Lab">
-                <!-- Specialized Electives -->
-                <option value="SWE 319: Cloud Computing">
-                <option value="SWE 328: Comp. Programming 2">
-                <option value="SWE 451/452: Data Science">
-                <option value="SWE 453/454: Graphics">
-                <option value="SWE 457/458: Deep Learning">
-                <option value="SWE 459/460: NLP">
-                <option value="SWE 463/464: Blockchain">
-                <!-- Professional/Management -->
-                <option value="SWE 331: Decision Support System">
-                <option value="SWE 333: Testing">
-                <option value="SWE 343: E-Commerce">
-                <option value="SWE 441: Accounting">
-                <option value="SWE 445: Economics">
+                <option value="MAT 213: Complex Analysis">
+                <option value="MAT 214: Linear Programming">
+                <option value="MAT 215: Graph Theory">
+                <!-- Additional Specialized Electives -->
+                <option value="SWE 321: Compiler Design">
+                <option value="SWE 322: Compiler Design Lab">
+                <option value="SWE 333: Software Testing">
+                <option value="SWE 334: Software Testing Lab">
+                <option value="SWE 343: E-Commerce Systems">
+                <option value="SWE 331: Decision Support Systems">
+                <option value="SWE 441: Accounting for Engineers">
+                <option value="SWE 445: Engineering Economics">
                 <option value="SWE 447: Ethics & Cyber Law">
             </datalist>
             <label>Days Until Exam</label>

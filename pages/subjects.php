@@ -6,11 +6,35 @@ $user = currentUser();
 $db   = getDB();
 $currentPage = 'subjects';
 
+$courseStmt = $db->query("SELECT name, code, year, semester FROM courses ORDER BY year ASC, semester ASC, name ASC");
+$courses = $courseStmt->fetchAll();
+$courseCatalog = [];
+foreach ($courses as $course) {
+    $displayName = trim($course['code'] . ': ' . $course['name']);
+    $courseCatalog[$displayName] = [
+        'code' => $course['code'],
+        'semester' => (int) $course['semester'],
+        'year' => (int) $course['year'],
+    ];
+}
+
 // Handle add/delete
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (($_POST['action'] ?? '') === 'add') {
-        $stmt = $db->prepare("INSERT INTO subjects (user_id, name, code, color, semester, target_hours_per_week) VALUES (?,?,?,?,?,?)");
-        $stmt->execute([$user['id'], clean($_POST['name']), clean($_POST['code'] ?? ''), $_POST['color'] ?? '#4f46e5', intval($_POST['semester'] ?? $user['semester']), floatval($_POST['target_hours'] ?? 5)]);
+        $subjectName = clean($_POST['name']);
+        $courseCode = clean($_POST['code'] ?? '');
+        $subjectSemester = intval($_POST['semester'] ?? $user['semester']);
+        $subjectYear = !empty($_POST['year']) ? intval($_POST['year']) : null;
+
+        $matchedCourse = $courseCatalog[$subjectName] ?? null;
+        if ($matchedCourse) {
+            $courseCode = $matchedCourse['code'];
+            $subjectSemester = $matchedCourse['semester'];
+            $subjectYear = $matchedCourse['year'];
+        }
+
+        $stmt = $db->prepare("INSERT INTO subjects (user_id, name, code, color, year, semester, target_hours_per_week) VALUES (?,?,?,?,?,?,?)");
+        $stmt->execute([$user['id'], $subjectName, $courseCode, $_POST['color'] ?? '#4f46e5', $subjectYear, $subjectSemester, floatval($_POST['target_hours'] ?? 5)]);
         header('Location: subjects.php'); exit;
     }
     if (($_POST['action'] ?? '') === 'delete') {
@@ -131,109 +155,9 @@ $subjects = $stmt->fetchAll();
             
                 <input type="text" name="name" list="subjectList" required placeholder="e.g. Data Structures & Algorithms">
                 <datalist id="subjectList">
-                    <!-- Year 1: Foundation & Programming -->
-                    <!-- Semester 1.1 -->
-                    <option value="GED 101: Communicative English Language I">
-                    <option value="MAT 111: Differential & Integral Calculus">
-                    <option value="SWE 111: Basic Electrical and Electronic Circuits">
-                    <option value="SWE 131: Introduction to Software Engineering">
-                    <option value="GED 105: Bangladesh Studies">
-                    <!-- Semester 1.2 -->
-                    <option value="MAT 112: Linear Algebra & Differential Equations">
-                    <option value="MAT 113: Discrete Mathematics">
-                    <option value="PHY 111: Basic Physics">
-                    <option value="SWE 121: Structured Programming">
-                    <option value="SWE 122: Structured Programming Lab">
-                    <!-- Semester 1.3 -->
-                    <option value="SWE 123: Data Structures">
-                    <option value="SWE 124: Data Structure Lab">
-                    <option value="SWE 133: Management Information Systems">
-                    <option value="SWE 182: Project on Python Development">
-                    <option value="SWE 215: Digital Logic Design">
-                    <option value="SWE 216: Digital Logic Design Lab">
-                    <!-- Year 2: Core Engineering & Architecture -->
-                    <!-- Semester 2.1 -->
-                    <option value="SWE 221: Algorithm">
-                    <option value="SWE 222: Algorithm Lab">
-                    <option value="SWE 225: Database Management System">
-                    <option value="SWE 226: Database Management System Lab">
-                    <option value="SWE 311: Theory of Computation">
-                    <option value="SWE 211: Computer Architecture">
-                    <!-- Semester 2.2 -->
-                    <option value="MAT 211: Numerical Analysis">
-                    <option value="SWE 233: Software Architecture and Design Patterns">
-                    <option value="SWE 234: Software Architecture and Design Patterns Lab">
-                    <option value="SWE 223: Object Oriented Programming">
-                    <option value="SWE 224: Object Oriented Programming Lab">
-                    <option value="SWE 282: Project on Java GUI Development">
-                    <!-- Semester 2.3 -->
-                    <option value="SWE 315: Artificial Intelligence">
-                    <option value="SWE 316: Artificial Intelligence Lab">
-                    <option value="SWE 322: Web Programming Practice Lab">
-                    <option value="SWE 324: Software UX and UI Design Practice Lab">
-                    <option value="SWE 213: Operating Systems">
-                    <option value="SWE 214: Operating Systems Lab">
-                    <!-- Year 3: Specialized Tracks & Management -->
-                    <!-- Semester 3.1 -->
-                    <option value="SWE 313: Computer Networking">
-                    <option value="SWE 314: Computer Networking Lab">
-                    <option value="SWE 317: Machine Learning">
-                    <option value="SWE 318: Machine Learning Lab">
-                    <option value="SWE 341: Basic Statistics and Probability">
-                    <option value="SWE 449: Digital Marketing">
-                    <!-- Semester 3.2 -->
-                    <option value="SWE 422: Mobile App Development Practice Lab">
-                    <option value="SWE 465: Embedded System & IoT">
-                    <option value="SWE 466: Embedded System & IoT Lab">
-                    <option value="SWE 431: Software Requirement Engineering">
-                    <option value="SWE 451: Data Science Fundamentals">
-                    <option value="SWE 452: Data Science Lab">
-                    <!-- Semester 3.3 -->
-                    <option value="SWE 431: Software Project Management">
-                    <option value="SWE 443: Entrepreneurship Development">
-                    <option value="SWE 461: Introduction to Cryptography">
-                    <option value="SWE 482: Final Year Project">
-                    <option value="SWE 319: Cloud Computing">
-                    <option value="SWE 462: Cybersecurity Fundamentals">
-                    <!-- Year 4: Research & Professional Practice -->
-                    <!-- Semester 4.1 -->
-                    <option value="SWE 484: Internship">
-                    <option value="SWE 457: Advanced Machine Learning">
-                    <option value="SWE 458: Advanced Machine Learning Lab">
-                    <option value="SWE 459: Natural Language Processing">
-                    <option value="SWE 460: NLP Lab">
-                    <option value="SWE 463: Blockchain Technology">
-                    <!-- Semester 4.2 -->
-                    <option value="SWE 482: Final Year Project Phase II">
-                    <option value="SWE 457: Deep Learning">
-                    <option value="SWE 453: Computer Graphics">
-                    <option value="SWE 454: Computer Graphics Lab">
-                    <option value="SWE 464: Distributed Systems">
-                    <option value="SWE 447: Professional Ethics">
-                    <!-- Semester 4.3 -->
-                    <option value="SWE 485: Final Year Viva">
-                    <option value="SWE 483: Research Methodology">
-                    <option value="SWE 486: Advanced Topics in Software Engineering">
-                    <option value="SWE 487: Career Development">
-                    <option value="SWE 488: Industry Project">
-                    <!-- Additional General Education & Math -->
-                    <option value="GED 102: English II">
-                    <option value="GED 103: Functional Bangla">
-                    <option value="GED 104: History of Bangladesh">
-                    <option value="MAT 212: Meteorology">
-                    <option value="MAT 213: Complex Analysis">
-                    <option value="MAT 214: Linear Programming">
-                    <option value="MAT 215: Graph Theory">
-                    <!-- Additional Specialized Electives -->
-                    <option value="SWE 321: Compiler Design">
-                    <option value="SWE 322: Compiler Design Lab">
-                    <option value="SWE 333: Software Testing">
-                    <option value="SWE 334: Software Testing Lab">
-                    <option value="SWE 343: E-Commerce Systems">
-                    <option value="SWE 331: Decision Support Systems">
-                    <option value="SWE 441: Accounting for Engineers">
-                    <option value="SWE 445: Engineering Economics">
-                    <option value="SWE 447: Ethics & Cyber Law">
+                    <?php foreach ($courses as $course): ?>
+                    <option value="<?= htmlspecialchars($course['code'] . ': ' . $course['name']) ?>">
+                    <?php endforeach; ?>
                 </datalist>
             </div>
 
@@ -247,6 +171,7 @@ $subjects = $stmt->fetchAll();
                     <input type="number" name="semester" min="1" max="8" value="<?= $user['semester'] ?>">
                 </div>
             </div>
+            <input type="hidden" name="year" value="">
             <div class="form-group">
                 <label>Target Hours/Week</label>
                 <input type="number" name="target_hours" step="0.5" min="0" max="40" value="5">
@@ -271,13 +196,30 @@ $subjects = $stmt->fetchAll();
 document.getElementById('addModal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('active');});
 document.querySelector('.color-opt').classList.add('selected');
 
-// Auto-fill course code when subject is selected
-document.querySelector('input[name="name"]').addEventListener('input', function() {
-    const selectedValue = this.value;
-    const codeMatch = selectedValue.match(/^([A-Z]{3}\s+\d{3}(?:\/\d{3})?):/);
-    if (codeMatch) {
-        document.querySelector('input[name="code"]').value = codeMatch[1].trim();
+const courseCatalog = <?= json_encode($courseCatalog, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+const subjectInput = document.querySelector('input[name="name"]');
+const codeInput = document.querySelector('input[name="code"]');
+const semesterInput = document.querySelector('input[name="semester"]');
+const yearInput = document.querySelector('input[name="year"]');
+const defaultSemester = <?= (int) $user['semester'] ?>;
+
+function syncSubjectMeta(selectedValue) {
+    const selectedCourse = courseCatalog[selectedValue];
+    if (selectedCourse) {
+        codeInput.value = selectedCourse.code;
+        semesterInput.value = selectedCourse.semester;
+        yearInput.value = selectedCourse.year;
+        return;
     }
+
+    const codeMatch = selectedValue.match(/^([A-Z]{3}\s+\d{3}(?:\/\d{3})?):/);
+    codeInput.value = codeMatch ? codeMatch[1].trim() : '';
+    semesterInput.value = defaultSemester;
+    yearInput.value = '';
+}
+
+subjectInput.addEventListener('input', function() {
+    syncSubjectMeta(this.value.trim());
 });
 </script>
 </body>

@@ -12,7 +12,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     if ($action === 'add') {
         $subjectId = (int)$_POST['subject_id'];
-        $title     = clean($_POST['title']);
+        $assessmentType = clean($_POST['assessment_type'] ?? 'Final');
+        $titleBase  = clean($_POST['title']);
+        $title      = $assessmentType . ($titleBase ? ' - ' . $titleBase : '');
         $score     = (float)$_POST['score'];
         $maxScore  = (float)($_POST['max_score'] ?? 100);
         $examDate  = clean($_POST['exam_date'] ?? date('Y-m-d'));
@@ -83,6 +85,16 @@ $best = count($grades) ? max(array_map(fn($g)=>$g['score']/$g['max_score']*100, 
 $subjects = $db->prepare("SELECT * FROM subjects WHERE user_id=? ORDER BY year ASC, semester ASC, name ASC");
 $subjects->execute([$user['id']]);
 $mySubjects = $subjects->fetchAll();
+$subjectMeta = [];
+foreach ($mySubjects as $subject) {
+    $subjectMeta[] = [
+        'id' => (int) $subject['id'],
+        'name' => $subject['name'],
+        'code' => $subject['code'] ?? '',
+        'year' => isset($subject['year']) ? (int) $subject['year'] : 0,
+        'semester' => isset($subject['semester']) ? (int) $subject['semester'] : 0,
+    ];
+}
 
 // Chart data — last 10 grades timeline
 $chartGrades = array_slice(array_reverse($grades), 0, 10);
@@ -110,6 +122,7 @@ $chartData   = array_map(fn($g) => round($g['score']/$g['max_score']*100,1), $ch
 .form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
 .mu-scale { font-size:12px; }
 .mu-scale td { padding:4px 10px; border-bottom:1px solid var(--border); }
+.hint-text { color:var(--muted); font-size:11px; margin-top:8px; }
 </style>
 </head>
 <body>
@@ -268,33 +281,36 @@ $chartData   = array_map(fn($g) => round($g['score']/$g['max_score']*100,1), $ch
         <div class="modal-title">🎓 Add Grade / Result</div>
         <form method="POST">
             <input type="hidden" name="action" value="add">
-            <div class="field">
-                <label>Exam / Assessment Title *</label>
-                <input type="text" name="title" placeholder="e.g. Mid-term Exam, Assignment 1..." required>
+            <div class="form-row">
+                <div class="field">
+                    <label>Assessment Type *</label>
+                    <select name="assessment_type" id="gradeAssessmentType">
+                        <option value="Final">Final</option>
+                        <option value="CT">CT</option>
+                        <option value="Assignment">Assignment</option>
+                        <option value="Project">Project</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Year</label>
+                    <select id="gradeYear"></select>
+                </div>
             </div>
             <div class="field">
-                <label>Subject (optional)</label>
-                <select name="subject_id">
-                    <option value="">No subject</option>
-                    <?php
-                    $currentYear = null;
-                    $currentSemester = null;
-                    foreach ($mySubjects as $s):
-                        if ($s['year'] != $currentYear || $s['semester'] != $currentSemester):
-                            if ($currentYear !== null) echo '</optgroup>';
-                            $yearLabel = $s['year'] . 'st Year';
-                            if ($s['year'] == 2) $yearLabel = '2nd Year';
-                            if ($s['year'] == 3) $yearLabel = '3rd Year';
-                            if ($s['year'] >= 4) $yearLabel = $s['year'] . 'th Year';
-                            echo '<optgroup label="' . $yearLabel . ' - Semester ' . $s['semester'] . '">';
-                            $currentYear = $s['year'];
-                            $currentSemester = $s['semester'];
-                        endif;
-                    ?>
-                    <option value="<?= $s['id'] ?>"><?= htmlspecialchars($s['code'] ? $s['code'] . ': ' . $s['name'] : $s['name']) ?></option>
-                    <?php endforeach; ?>
-                    <?php if (!empty($mySubjects)) echo '</optgroup>'; ?>
-                </select>
+                <label>Exam / Assessment Title *</label>
+                <input type="text" name="title" id="gradeTitle" list="gradeTitleSuggestions" placeholder="e.g. Theory, Viva, Lab Performance..." required>
+                <datalist id="gradeTitleSuggestions"></datalist>
+                <div class="hint-text">The saved title will combine the selected type and your title.</div>
+            </div>
+            <div class="form-row">
+                <div class="field">
+                    <label>Semester</label>
+                    <select id="gradeSemester"></select>
+                </div>
+                <div class="field">
+                    <label>Subject (optional)</label>
+                    <select name="subject_id" id="gradeSubject"></select>
+                </div>
             </div>
             <div class="form-row">
                 <div class="field">
@@ -328,6 +344,122 @@ $chartData   = array_map(fn($g) => round($g['score']/$g['max_score']*100,1), $ch
 const scoreInput = document.querySelector('[name=score]');
 const maxInput   = document.querySelector('[name=max_score]');
 const preview    = document.getElementById('gradePreview');
+const gradeSubjectMeta = <?= json_encode($subjectMeta, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+const gradeYear = document.getElementById('gradeYear');
+const gradeSemester = document.getElementById('gradeSemester');
+const gradeSubject = document.getElementById('gradeSubject');
+const gradeAssessmentType = document.getElementById('gradeAssessmentType');
+const gradeTitleSuggestions = document.getElementById('gradeTitleSuggestions');
+
+function formatYearLabel(year) {
+    if (year === 1) return '1st Year';
+    if (year === 2) return '2nd Year';
+    if (year === 3) return '3rd Year';
+    return `${year}th Year`;
+}
+
+function getGradeYears() {
+    return [...new Set(gradeSubjectMeta.map((item) => item.year).filter(Boolean))];
+}
+
+function getGradeSemesters(year) {
+    return [...new Set(gradeSubjectMeta.filter((item) => item.year === year).map((item) => item.semester).filter(Boolean))];
+}
+
+function getGradeSubjects(year, semester) {
+    return gradeSubjectMeta.filter((item) => item.year === year && item.semester === semester);
+}
+
+function populateGradeYears() {
+    gradeYear.innerHTML = '';
+    const years = getGradeYears();
+    if (!years.length) {
+        gradeYear.innerHTML = '<option value="">No years</option>';
+        return;
+    }
+    years.forEach((year) => {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = formatYearLabel(year);
+        gradeYear.appendChild(option);
+    });
+}
+
+function populateGradeSemesters(year) {
+    gradeSemester.innerHTML = '';
+    const semesters = getGradeSemesters(year);
+    if (!semesters.length) {
+        gradeSemester.innerHTML = '<option value="">No semester</option>';
+        return;
+    }
+    semesters.forEach((semester) => {
+        const option = document.createElement('option');
+        option.value = semester;
+        option.textContent = `Semester ${semester}`;
+        gradeSemester.appendChild(option);
+    });
+}
+
+function populateGradeSubjects(year, semester) {
+    gradeSubject.innerHTML = '<option value="">No subject</option>';
+    getGradeSubjects(year, semester).forEach((subject) => {
+        const option = document.createElement('option');
+        option.value = subject.id;
+        option.textContent = subject.code ? `${subject.code}: ${subject.name}` : subject.name;
+        gradeSubject.appendChild(option);
+    });
+}
+
+function refreshGradeTitleSuggestions() {
+    const type = gradeAssessmentType.value;
+    const selectedSubject = gradeSubjectMeta.find((item) => item.id === Number(gradeSubject.value || 0)) || null;
+    const subjectLabel = selectedSubject ? (selectedSubject.code || selectedSubject.name) : 'Course';
+    const suggestions = [
+        `${subjectLabel} Theory`,
+        `${subjectLabel} Lab`,
+        `${type} Performance`,
+        `${type} Viva`,
+        `${type} Written`
+    ];
+    gradeTitleSuggestions.innerHTML = '';
+    suggestions.forEach((title) => {
+        const option = document.createElement('option');
+        option.value = title;
+        gradeTitleSuggestions.appendChild(option);
+    });
+}
+
+function initializeGradeSelectors() {
+    populateGradeYears();
+    const firstSubject = gradeSubjectMeta[0] || null;
+    if (!firstSubject) {
+        gradeSemester.innerHTML = '<option value="">No semester</option>';
+        gradeSubject.innerHTML = '<option value="">No subject</option>';
+        refreshGradeTitleSuggestions();
+        return;
+    }
+    gradeYear.value = String(firstSubject.year);
+    populateGradeSemesters(firstSubject.year);
+    gradeSemester.value = String(firstSubject.semester);
+    populateGradeSubjects(firstSubject.year, firstSubject.semester);
+    refreshGradeTitleSuggestions();
+}
+
+gradeYear.addEventListener('change', () => {
+    populateGradeSemesters(Number(gradeYear.value || 0));
+    const semesters = getGradeSemesters(Number(gradeYear.value || 0));
+    if (semesters.length) gradeSemester.value = String(semesters[0]);
+    populateGradeSubjects(Number(gradeYear.value || 0), Number(gradeSemester.value || 0));
+    refreshGradeTitleSuggestions();
+});
+gradeSemester.addEventListener('change', () => {
+    populateGradeSubjects(Number(gradeYear.value || 0), Number(gradeSemester.value || 0));
+    refreshGradeTitleSuggestions();
+});
+gradeSubject.addEventListener('change', refreshGradeTitleSuggestions);
+gradeAssessmentType.addEventListener('change', refreshGradeTitleSuggestions);
+initializeGradeSelectors();
+
 function updatePreview() {
     const s = parseFloat(scoreInput.value), m = parseFloat(maxInput.value)||100;
     if (!isNaN(s) && s>0) {

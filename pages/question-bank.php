@@ -94,6 +94,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 .empty-state .icon{font-size:40px;margin-bottom:12px;}
 
 @media(max-width:900px){.layout{grid-template-columns:1fr;}.sidebar{display:none;}.main{margin-left:0;}}
+optgroup {
+    background: rgba(34, 211, 238, 0.1) !important;
+    color: #102c31 !important;
+    font-weight: 600;
+}
 </style>
 </head>
 <body>

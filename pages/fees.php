@@ -22,20 +22,31 @@ $db->exec("CREATE TABLE IF NOT EXISTS fee_payments (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 )");
 
+$feeTypes = ['Monthly Tuition'];
+$allowedStatuses = ['paid', 'pending', 'waived'];
 $msg = $err = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     if ($action === 'add') {
-        $feeType   = clean($_POST['fee_type']);
+        $feeType   = clean($_POST['fee_type'] ?? 'Monthly Tuition');
         $amount    = (float)$_POST['amount'];
         $semester  = (int)($_POST['semester'] ?? $user['semester']);
-        $method    = clean($_POST['payment_method']);
+        $method    = 'bkash';
         $txnId     = clean($_POST['transaction_id'] ?? '');
         $date      = clean($_POST['payment_date']);
         $status    = clean($_POST['status'] ?? 'paid');
         $notes     = clean($_POST['notes'] ?? '');
-        if (!$feeType || !$amount || !$date) { $err = 'Fill in required fields.'; }
-        else {
+        if (!in_array($feeType, $feeTypes, true)) {
+            $feeType = 'Monthly Tuition';
+        }
+        if (!in_array($status, $allowedStatuses, true)) {
+            $status = 'paid';
+        }
+        if (!$feeType || !$amount || !$date) {
+            $err = 'Fill in required fields.';
+        } elseif ($amount <= 0) {
+            $err = 'Amount must be greater than 0.';
+        } else {
             $db->prepare("INSERT INTO fee_payments (user_id,fee_type,amount,semester,payment_method,transaction_id,payment_date,status,notes) VALUES (?,?,?,?,?,?,?,?,?)")
                ->execute([$user['id'],$feeType,$amount,$semester,$method,$txnId,$date,$status,$notes]);
             $msg = 'Payment record added!';
@@ -46,7 +57,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Fetch records
 $fees = $db->prepare("SELECT * FROM fee_payments WHERE user_id=? ORDER BY payment_date DESC");
 $fees->execute([$user['id']]);
 $payments = $fees->fetchAll();
@@ -58,16 +68,15 @@ foreach ($payments as $p) {
     $byCat[$p['fee_type']] = ($byCat[$p['fee_type']] ?? 0) + $p['amount'];
 }
 
-$feeTypes = ['Tuition Fee','Admission Fee','Exam Fee','Lab Fee','Library Fee','Development Fee','Transport Fee','Other'];
 $statusColors = ['paid'=>'var(--accent3)','pending'=>'var(--warn)','waived'=>'var(--accent2)'];
-$methodIcons  = ['bkash'=>'📱','nrb_bank'=>'🏦','cash'=>'💵','other'=>'💳'];
+$methodIcons  = ['bkash'=>'bKash'];
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fee Payment Tracker — EduSync MU</title>
+<title>Fee Payment Tracker - EduSync MU</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
 <style>
@@ -90,7 +99,7 @@ $methodIcons  = ['bkash'=>'📱','nrb_bank'=>'🏦','cash'=>'💵','other'=>'�
 .modal-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:20px;}
 .field{margin-bottom:14px;}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-.copy-btn{background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.2);color:var(--accent);font-size:11px;padding:3px 10px;border-radius:6px;cursor:pointer;border-style:solid;}
+.copy-btn{background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.2);color:var(--accent);font-size:11px;padding:6px 10px;border-radius:6px;cursor:pointer;border-style:solid;}
 </style>
 </head>
 <body>
@@ -98,61 +107,47 @@ $methodIcons  = ['bkash'=>'📱','nrb_bank'=>'🏦','cash'=>'💵','other'=>'�
 <main class="main">
     <div class="topbar">
         <div>
-            <div class="page-title">💳 Fee Payment Tracker</div>
-            <div class="page-sub">Track university fee payments — bKash, NRB Bank & more</div>
+            <div class="page-title">Fee Payment Tracker</div>
+            <div class="page-sub">Track monthly tuition payments with bKash only</div>
         </div>
         <button class="btn btn-primary" onclick="document.getElementById('addModal').classList.add('open')">+ Add Payment</button>
     </div>
 
-    <?php if ($msg): ?><div class="alert-success">✅ <?= $msg ?></div><?php endif; ?>
-    <?php if ($err): ?><div class="alert-error">⚠ <?= $err ?></div><?php endif; ?>
+    <?php if ($msg): ?><div class="alert-success"><?= $msg ?></div><?php endif; ?>
+    <?php if ($err): ?><div class="alert-error"><?= $err ?></div><?php endif; ?>
 
-    <!-- Stats -->
     <div class="grid-4" style="margin-bottom:24px;">
-        <div class="stat-card green"><div class="stat-icon">✅</div><div class="stat-value">৳<?= number_format($totalPaid,0) ?></div><div class="stat-label">Total Paid</div></div>
-        <div class="stat-card yellow"><div class="stat-icon">⏳</div><div class="stat-value">৳<?= number_format($totalPending,0) ?></div><div class="stat-label">Pending</div></div>
-        <div class="stat-card cyan"><div class="stat-icon">📋</div><div class="stat-value"><?= count($payments) ?></div><div class="stat-label">Payment Records</div></div>
-        <div class="stat-card purple"><div class="stat-icon">🎓</div><div class="stat-value">Sem <?= $user['semester'] ?></div><div class="stat-label">Current Semester</div></div>
+        <div class="stat-card green"><div class="stat-value"><?= number_format($totalPaid,0) ?></div><div class="stat-label">Total Paid</div></div>
+        <div class="stat-card yellow"><div class="stat-value"><?= number_format($totalPending,0) ?></div><div class="stat-label">Pending</div></div>
+        <div class="stat-card cyan"><div class="stat-value"><?= count($payments) ?></div><div class="stat-label">Payment Records</div></div>
+        <div class="stat-card purple"><div class="stat-value">Sem <?= $user['semester'] ?></div><div class="stat-label">Current Semester</div></div>
     </div>
 
     <div class="grid-2" style="margin-bottom:24px;">
-        <!-- bKash Payment Guide -->
         <div>
             <div class="bkash-card">
                 <div class="bkash-logo">bKash</div>
-                <div style="font-size:13px;opacity:.85;margin-bottom:4px;">Metropolitan University Sylhet — Fee Payment</div>
-                <div style="font-size:11px;opacity:.7;">Send Money → University bKash Merchant Number</div>
+                <div style="font-size:13px;opacity:.85;margin-bottom:4px;">Metropolitan University Sylhet - Fee Payment</div>
+                <div style="font-size:11px;opacity:.8;">Use bKash Education Bill for Metropolitan University or open the official biller page directly.</div>
                 <div class="bkash-steps">
                     <div class="bkash-step"><div class="num">1</div>Open bKash App</div>
-                    <div class="bkash-step"><div class="num">2</div>Tap "Send Money"</div>
-                    <div class="bkash-step"><div class="num">3</div>Enter amount & Student ID</div>
-                    <div class="bkash-step"><div class="num">4</div>Save TxnID for records</div>
+                    <div class="bkash-step"><div class="num">2</div>Choose Education Bill</div>
+                    <div class="bkash-step"><div class="num">3</div>Find Metropolitan University</div>
+                    <div class="bkash-step"><div class="num">4</div>Save TxnID</div>
+                </div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;">
+                    <a href="https://www.bkash.com/en" target="_blank" class="btn btn-outline btn-sm" style="background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2);color:#fff;">Visit bKash Website</a>
+                    <a href="https://www.bkash.com/en/products-services/education/billers/01757535844" target="_blank" class="btn btn-outline btn-sm" style="background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2);color:#fff;">Open bKash App Link</a>
+                </div>
+                <div style="margin-top:12px;font-size:12px;line-height:1.6;word-break:break-all;">
+                    Website: <a href="https://www.bkash.com/en" target="_blank" style="color:#fff;text-decoration:underline;">https://www.bkash.com/en</a>
                 </div>
             </div>
 
-            <!-- NRB Bank Details -->
-            <div class="bank-card">
-                <div class="card-title" style="margin-bottom:14px;">🏦 NRB Commercial Bank — Direct Deposit</div>
-                <div class="bank-detail"><span class="bank-label">Bank Name</span><span class="bank-value">NRB Commercial Bank</span></div>
-                <div class="bank-detail">
-                    <span class="bank-label">Account Number</span>
-                    <span class="bank-value" style="display:flex;align-items:center;gap:8px;">
-                        015954000000001
-                        <button class="copy-btn" onclick="navigator.clipboard.writeText('015954000000001');this.textContent='Copied!'">Copy</button>
-                    </span>
-                </div>
-                <div class="bank-detail"><span class="bank-label">Branch</span><span class="bank-value">Metropolitan University Campus, Bateshwar, Sylhet</span></div>
-                <div class="bank-detail"><span class="bank-label">Required Info</span><span class="bank-value" style="font-size:12px;color:var(--muted)">Write full name, mobile no. & Student ID on deposit slip</span></div>
-                <div style="background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.2);border-radius:8px;padding:10px;margin-top:12px;font-size:12px;color:var(--muted);">
-                    📌 Keep the deposit slip carefully for future reference.<br>
-                    📞 Fee queries: <strong style="color:var(--text)">01757535844</strong> &nbsp;|&nbsp; 📧 <strong style="color:var(--text)">accounts@metrouni.edu.bd</strong>
-                </div>
-            </div>
         </div>
 
-        <!-- Payment Summary by Category -->
         <div class="card">
-            <div class="card-title">📊 Payment Summary by Type</div>
+            <div class="card-title">Monthly Tuition Summary</div>
             <?php if (empty($byCat)): ?>
             <div style="text-align:center;padding:24px;color:var(--muted);">No payments logged yet.</div>
             <?php else: ?>
@@ -161,7 +156,7 @@ $methodIcons  = ['bkash'=>'📱','nrb_bank'=>'🏦','cash'=>'💵','other'=>'�
             <div style="margin-bottom:14px;">
                 <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:5px;">
                     <span><?= htmlspecialchars($type) ?></span>
-                    <strong>৳<?= number_format($amt,0) ?></strong>
+                    <strong><?= number_format($amt,0) ?></strong>
                 </div>
                 <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
                     <div style="height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));width:<?= round($amt/$maxAmt*100) ?>%;transition:width .5s;"></div>
@@ -172,12 +167,10 @@ $methodIcons  = ['bkash'=>'📱','nrb_bank'=>'🏦','cash'=>'💵','other'=>'�
         </div>
     </div>
 
-    <!-- Payment Records Table -->
     <div class="card">
-        <div class="card-title">📋 All Payment Records</div>
+        <div class="card-title">All Payment Records</div>
         <?php if (empty($payments)): ?>
         <div style="text-align:center;padding:32px;color:var(--muted);">
-            <div style="font-size:36px;margin-bottom:10px;">💳</div>
             No payments logged yet.
             <div style="margin-top:10px;"><button onclick="document.getElementById('addModal').classList.add('open')" class="btn btn-primary btn-sm">+ Add First Payment</button></div>
         </div>
@@ -189,16 +182,16 @@ $methodIcons  = ['bkash'=>'📱','nrb_bank'=>'🏦','cash'=>'💵','other'=>'�
             <tr>
                 <td style="color:var(--muted);font-size:13px;"><?= date('M j, Y',strtotime($p['payment_date'])) ?></td>
                 <td><strong><?= htmlspecialchars($p['fee_type']) ?></strong><?php if($p['notes']): ?><div style="font-size:11px;color:var(--muted)"><?= htmlspecialchars($p['notes']) ?></div><?php endif; ?></td>
-                <td><strong style="color:var(--accent3)">৳<?= number_format($p['amount'],2) ?></strong></td>
-                <td style="text-align:center;"><?= $p['semester'] ?: '—' ?></td>
-                <td><?= $methodIcons[$p['payment_method']] ?? '💳' ?> <?= ucfirst(str_replace('_',' ',$p['payment_method'])) ?></td>
-                <td style="font-family:monospace;font-size:12px;color:var(--muted)"><?= htmlspecialchars($p['transaction_id'] ?: '—') ?></td>
+                <td><strong style="color:var(--accent3)"><?= number_format($p['amount'],2) ?></strong></td>
+                <td style="text-align:center;"><?= $p['semester'] ?: '-' ?></td>
+                <td><?= $methodIcons[$p['payment_method']] ?? 'bKash' ?></td>
+                <td style="font-family:monospace;font-size:12px;color:var(--muted)"><?= htmlspecialchars($p['transaction_id'] ?: '-') ?></td>
                 <td><span style="color:<?= $statusColors[$p['status']] ?? 'var(--muted)' ?>;font-weight:600;font-size:13px;">● <?= ucfirst($p['status']) ?></span></td>
                 <td>
                     <form method="POST" style="display:inline" onsubmit="return confirm('Delete?')">
                         <input type="hidden" name="action" value="delete">
                         <input type="hidden" name="fee_id" value="<?= $p['id'] ?>">
-                        <button type="submit" class="btn btn-danger btn-sm">🗑</button>
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                     </form>
                 </td>
             </tr>
@@ -209,10 +202,9 @@ $methodIcons  = ['bkash'=>'📱','nrb_bank'=>'🏦','cash'=>'💵','other'=>'�
     </div>
 </main>
 
-<!-- Add Payment Modal -->
 <div class="modal-overlay" id="addModal">
     <div class="modal">
-        <div class="modal-title">💳 Log Fee Payment</div>
+        <div class="modal-title">Log Fee Payment</div>
         <form method="POST">
             <input type="hidden" name="action" value="add">
             <div class="form-row">
@@ -225,19 +217,15 @@ $methodIcons  = ['bkash'=>'📱','nrb_bank'=>'🏦','cash'=>'💵','other'=>'�
                     </select>
                 </div>
                 <div class="field">
-                    <label>Amount (৳) *</label>
+                    <label>Amount *</label>
                     <input type="number" name="amount" step="0.01" placeholder="e.g. 15000" required>
                 </div>
             </div>
             <div class="form-row">
                 <div class="field">
                     <label>Payment Method</label>
-                    <select name="payment_method" id="methodSel" onchange="toggleTxn(this.value)">
-                        <option value="bkash">📱 bKash</option>
-                        <option value="nrb_bank">🏦 NRB Bank</option>
-                        <option value="cash">💵 Cash</option>
-                        <option value="other">💳 Other</option>
-                    </select>
+                    <input type="text" value="bKash" readonly>
+                    <input type="hidden" name="payment_method" value="bkash">
                 </div>
                 <div class="field">
                     <label>Payment Date *</label>
@@ -260,15 +248,15 @@ $methodIcons  = ['bkash'=>'📱','nrb_bank'=>'🏦','cash'=>'💵','other'=>'�
                 <div class="field">
                     <label>Status</label>
                     <select name="status">
-                        <option value="paid">✅ Paid</option>
-                        <option value="pending">⏳ Pending</option>
-                        <option value="waived">🎓 Waived</option>
+                        <option value="paid">Paid</option>
+                        <option value="pending">Pending</option>
+                        <option value="waived">Waived</option>
                     </select>
                 </div>
             </div>
             <div class="field">
                 <label>Notes (optional)</label>
-                <input type="text" name="notes" placeholder="e.g. Spring 2026 semester tuition...">
+                <input type="text" name="notes" placeholder="e.g. March 2026 monthly tuition payment">
             </div>
             <div style="display:flex;gap:10px;margin-top:8px;">
                 <button type="submit" class="btn btn-primary">Save Payment</button>
@@ -278,11 +266,6 @@ $methodIcons  = ['bkash'=>'📱','nrb_bank'=>'🏦','cash'=>'💵','other'=>'�
     </div>
 </div>
 <script>
-function toggleTxn(method) {
-    const txnLabel = document.querySelector('#txnField label');
-    const labels = {bkash:'bKash Transaction ID',nrb_bank:'Deposit Slip Reference',cash:'Receipt Number',other:'Reference Number'};
-    txnLabel.textContent = labels[method] || 'Transaction ID';
-}
 document.getElementById('addModal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open')});
 </script>
 </body>

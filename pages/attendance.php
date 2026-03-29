@@ -109,13 +109,29 @@ $lowAttCourses = array_filter($courseStats, fn($s) => $s['pct'] < 75);
 .status-dot { width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:6px; }
 .warn-box { background:rgba(248,113,113,.08); border:1px solid rgba(248,113,113,.2); border-radius:12px; padding:14px 18px; margin-bottom:20px; }
 .warn-box-title { color:var(--danger); font-weight:600; font-size:13px; margin-bottom:8px; }
-.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:999; align-items:center; justify-content:center; }
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(156, 60, 60, 0.7); z-index:999; align-items:center; justify-content:center; }
 .modal-overlay.open { display:flex; }
 .modal { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:28px; width:100%; max-width:460px; animation:fadeUp .3s ease; }
 @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
 .modal-title { font-family:'Syne',sans-serif; font-size:16px; font-weight:700; margin-bottom:20px; }
 .form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-.field { margin-bottom:14px; }
+.modal select {
+    background: rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: 8px;
+    width: 100%;
+}
+.modal select option {
+    background: var(--card);
+    color: var(--text);
+}
+optgroup {
+    background: rgba(34, 211, 238, 0.1) !important;
+    color:#102c40 !important;
+}
+
 </style>
 </head>
 <body>
@@ -313,7 +329,14 @@ $lowAttCourses = array_filter($courseStats, fn($s) => $s['pct'] < 75);
             </div>
             <div class="field">
                 <label>Notes (optional)</label>
-                <input type="text" name="notes" placeholder="e.g. Sick, transport issue...">
+                <input type="text" name="notes" list="attendanceNoteList" placeholder="e.g. Sick, transport issue...">
+                <datalist id="attendanceNoteList">
+                    <option value="Present for full class">
+                    <option value="Late due to traffic">
+                    <option value="Lab class attended">
+                    <option value="Missed class due to illness">
+                    <option value="Excused for university work">
+                </datalist>
             </div>
             <div style="display:flex;gap:10px;margin-top:8px;">
                 <button type="submit" class="btn btn-primary">Save Record</button>

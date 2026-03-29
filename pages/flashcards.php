@@ -62,6 +62,17 @@ $cardList = $cards->fetchAll();
 
 $subjectList = $db->prepare("SELECT id, name, code, year, semester FROM subjects WHERE user_id=? ORDER BY year ASC, semester ASC, name ASC");
 $subjectList->execute([$user['id']]); $subs = $subjectList->fetchAll();
+$subjectMeta = [];
+foreach ($subs as $subject) {
+    $subjectMeta[] = [
+        'id' => (int) $subject['id'],
+        'name' => $subject['name'],
+        'code' => $subject['code'] ?? '',
+        'year' => isset($subject['year']) ? (int) $subject['year'] : 0,
+        'semester' => isset($subject['semester']) ? (int) $subject['semester'] : 0,
+    ];
+}
+$deckNames = array_map(fn($deck) => $deck['deck_name'], $deckList);
 
 $totalCards = $db->prepare("SELECT COUNT(*) FROM flashcards WHERE user_id=?");
 $totalCards->execute([$user['id']]); $totalCount = $totalCards->fetchColumn();
@@ -105,6 +116,15 @@ $totalCards->execute([$user['id']]); $totalCount = $totalCards->fetchColumn();
 .modal { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:28px; width:100%; max-width:480px; }
 .modal h3 { font-family:'Syne',sans-serif; font-size:18px; font-weight:700; margin-bottom:20px; }
 .form-group { margin-bottom:16px; }
+.suggestion-row { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+.suggestion-chip { border:1px solid var(--border); background:rgba(255,255,255,.03); color:var(--text); border-radius:999px; padding:6px 10px; font-size:11px; cursor:pointer; transition:all .2s; }
+.suggestion-chip:hover { border-color:var(--accent); color:var(--accent); }
+.hint-text { color:var(--muted); font-size:11px; margin-top:8px; }
+optgroup {
+    background: rgba(34, 211, 238, 0.1) !important;
+    color: #00d9ff !important;
+    font-weight: 600;
+}
 @media(max-width:900px) { .fc-layout { grid-template-columns:1fr; } }
 </style>
 </head>
@@ -210,7 +230,12 @@ $totalCards->execute([$user['id']]); $totalCount = $totalCards->fetchColumn();
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
                 <div class="form-group">
                     <label>Deck Name</label>
-                    <input type="text" name="deck_name" value="<?= htmlspecialchars($currentDeck ?? 'General') ?>" placeholder="e.g. DSA">
+                    <input type="text" name="deck_name" id="flashcardDeck" list="deckNameList" value="<?= htmlspecialchars($currentDeck ?? 'General') ?>" placeholder="e.g. DSA">
+                    <datalist id="deckNameList">
+                        <?php foreach ($deckNames as $deckName): ?>
+                        <option value="<?= htmlspecialchars($deckName) ?>">
+                        <?php endforeach; ?>
+                    </datalist>
                 </div>
                 <div class="form-group">
                     <label>Subject</label>
@@ -239,11 +264,13 @@ $totalCards->execute([$user['id']]); $totalCount = $totalCards->fetchColumn();
             </div>
             <div class="form-group">
                 <label>Question *</label>
-                <textarea name="question" rows="3" required placeholder="What is the time complexity of binary search?"></textarea>
+                <textarea name="question" id="flashcardQuestion" rows="3" required placeholder="What is the time complexity of binary search?"></textarea>
+                <div class="suggestion-row" id="flashcardQuestionSuggestions"></div>
             </div>
             <div class="form-group">
                 <label>Answer *</label>
-                <textarea name="answer" rows="3" required placeholder="O(log n)"></textarea>
+                <textarea name="answer" id="flashcardAnswer" rows="3" required placeholder="O(log n)"></textarea>
+                <div class="suggestion-row" id="flashcardAnswerSuggestions"></div>
             </div>
             <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:10px;">
                 <button type="button" class="btn btn-outline" onclick="document.getElementById('addModal').classList.remove('active')">Cancel</button>
@@ -261,7 +288,9 @@ $totalCards->execute([$user['id']]); $totalCount = $totalCards->fetchColumn();
             <input type="hidden" name="action" value="ai_generate">
             <div class="form-group">
                 <label>Topic *</label>
-                <input type="text" name="topic" required placeholder="e.g. Binary Trees, OOP concepts, SQL joins">
+                <input type="text" name="topic" id="aiTopic" list="aiTopicList" required placeholder="e.g. Binary Trees, OOP concepts, SQL joins">
+                <datalist id="aiTopicList"></datalist>
+                <div class="hint-text">Relevant topic ideas update when you choose a subject.</div>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
                 <div class="form-group">
@@ -312,7 +341,81 @@ $totalCards->execute([$user['id']]); $totalCount = $totalCards->fetchColumn();
 document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',function(e){if(e.target===this)this.classList.remove('active');}));
 
 const studyCards = <?= json_encode($cardList) ?>;
+const flashcardSubjects = <?= json_encode($subjectMeta, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+const manualSubjectSelect = document.querySelector('#addModal select[name="subject_id"]');
+const aiSubjectSelect = document.querySelector('#aiModal select[name="subject_id"]');
+const flashcardDeck = document.getElementById('flashcardDeck');
+const flashcardQuestion = document.getElementById('flashcardQuestion');
+const flashcardAnswer = document.getElementById('flashcardAnswer');
+const questionSuggestions = document.getElementById('flashcardQuestionSuggestions');
+const answerSuggestions = document.getElementById('flashcardAnswerSuggestions');
+const aiTopicList = document.getElementById('aiTopicList');
 let studyIdx = 0;
+
+function buildFlashcardPrompts(subject) {
+    const label = subject ? (subject.code || subject.name) : 'General Study';
+    return {
+        deck: subject ? `${label} Quick Review` : 'General',
+        questions: [
+            `What are the key concepts of ${label}?`,
+            `What is the most important formula or rule in ${label}?`,
+            `What are common exam questions from ${label}?`
+        ],
+        answers: [
+            `A short summary of the core ideas, definitions, and examples from ${label}.`,
+            `List the main formula, explain when to use it, and give one quick example.`,
+            `Mention the usual question patterns, key steps, and common mistakes to avoid.`
+        ],
+        topics: [
+            `${label} definitions`,
+            `${label} important formulas`,
+            `${label} short questions`,
+            `${label} viva topics`,
+            `${label} exam revision`
+        ]
+    };
+}
+
+function renderSuggestionButtons(container, values, target) {
+    container.innerHTML = '';
+    values.forEach((value) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'suggestion-chip';
+        button.textContent = value;
+        button.addEventListener('click', () => {
+            target.value = value;
+            target.focus();
+        });
+        container.appendChild(button);
+    });
+}
+
+function syncFlashcardSuggestions() {
+    const selectedSubject = flashcardSubjects.find((item) => item.id === Number(manualSubjectSelect.value || 0)) || null;
+    const prompts = buildFlashcardPrompts(selectedSubject);
+    if (!flashcardDeck.value.trim() || flashcardDeck.value === 'General') {
+        flashcardDeck.value = prompts.deck;
+    }
+    renderSuggestionButtons(questionSuggestions, prompts.questions, flashcardQuestion);
+    renderSuggestionButtons(answerSuggestions, prompts.answers, flashcardAnswer);
+}
+
+function syncAITopicSuggestions() {
+    const selectedSubject = flashcardSubjects.find((item) => item.id === Number(aiSubjectSelect.value || 0)) || null;
+    const prompts = buildFlashcardPrompts(selectedSubject);
+    aiTopicList.innerHTML = '';
+    prompts.topics.forEach((topic) => {
+        const option = document.createElement('option');
+        option.value = topic;
+        aiTopicList.appendChild(option);
+    });
+}
+
+manualSubjectSelect.addEventListener('change', syncFlashcardSuggestions);
+aiSubjectSelect.addEventListener('change', syncAITopicSuggestions);
+syncFlashcardSuggestions();
+syncAITopicSuggestions();
 
 function startStudy() {
     if (!studyCards.length) return;

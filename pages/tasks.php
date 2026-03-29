@@ -46,13 +46,23 @@ $done = array_filter($allTasks, fn($t) => $t['status'] === 'done');
 $subjects = $db->prepare("SELECT id, name, code, year, semester FROM subjects WHERE user_id=? ORDER BY year ASC, semester ASC, name ASC");
 $subjects->execute([$user['id']]);
 $subjectList = $subjects->fetchAll();
+$subjectMeta = [];
+foreach ($subjectList as $subject) {
+    $subjectMeta[] = [
+        'id' => (int) $subject['id'],
+        'name' => $subject['name'],
+        'code' => $subject['code'] ?? '',
+        'year' => isset($subject['year']) ? (int) $subject['year'] : 0,
+        'semester' => isset($subject['semester']) ? (int) $subject['semester'] : 0,
+    ];
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tasks & Kanban — EduSync MU</title>
+<title>Tasks & Kanban - EduSync MU</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
 <style>
@@ -75,9 +85,13 @@ $subjectList = $subjects->fetchAll();
 .priority-low { background:#34d399; }
 .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:200; align-items:center; justify-content:center; }
 .modal-overlay.active { display:flex; }
-.modal { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:28px; width:100%; max-width:480px; }
+.modal { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:28px; width:100%; max-width:520px; }
 .modal h3 { font-family:'Syne',sans-serif; font-size:18px; font-weight:700; margin-bottom:20px; }
 .form-group { margin-bottom:16px; }
+.suggestion-row { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+.suggestion-chip { border:1px solid var(--border); background:rgba(255,255,255,.03); color:var(--text); border-radius:999px; padding:6px 10px; font-size:11px; cursor:pointer; transition:all .2s; }
+.suggestion-chip:hover { border-color:var(--accent); color:var(--accent); }
+.suggestion-note { color:var(--muted); font-size:11px; margin-top:8px; }
 @media(max-width:900px) { .kanban { grid-template-columns:1fr; } }
 </style>
 </head>
@@ -86,7 +100,7 @@ $subjectList = $subjects->fetchAll();
 <main class="main">
     <div class="topbar">
         <div>
-            <div class="page-title">✅ Tasks & Kanban</div>
+            <div class="page-title">Tasks & Kanban</div>
             <div class="page-sub">Organize your assignments, projects, and study tasks</div>
         </div>
         <button class="btn btn-primary" onclick="document.getElementById('addModal').classList.add('active')">+ New Task</button>
@@ -94,23 +108,23 @@ $subjectList = $subjects->fetchAll();
 
     <div class="kanban">
         <div class="kanban-col">
-            <div class="kanban-header">📋 To Do <span class="kanban-count"><?= count($todo) ?></span></div>
+            <div class="kanban-header">To Do <span class="kanban-count"><?= count($todo) ?></span></div>
             <?php foreach ($todo as $t): ?>
             <div class="task-card">
                 <div class="task-card-title"><?= htmlspecialchars($t['title']) ?></div>
                 <div class="task-card-meta">
                     <span class="priority-dot priority-<?= $t['priority'] ?>"></span> <?= ucfirst($t['priority']) ?>
                     <?php if ($t['subject_name']): ?>
-                        <span style="color:<?= htmlspecialchars($t['color'] ?? 'var(--accent)') ?>">● <?= htmlspecialchars($t['subject_name']) ?></span>
+                        <span style="color:<?= htmlspecialchars($t['color'] ?? 'var(--accent)') ?>">&#9679; <?= htmlspecialchars($t['subject_name']) ?></span>
                     <?php endif; ?>
                     <?php if ($t['due_date']): ?>
-                        <span>📅 <?= date('M j', strtotime($t['due_date'])) ?></span>
+                        <span><?= date('M j', strtotime($t['due_date'])) ?></span>
                     <?php endif; ?>
                 </div>
                 <div class="task-card-actions">
-                    <form method="POST"><input type="hidden" name="action" value="status"><input type="hidden" name="task_id" value="<?= $t['id'] ?>"><input type="hidden" name="status" value="in_progress"><button type="submit">▶ Start</button></form>
-                    <form method="POST"><input type="hidden" name="action" value="status"><input type="hidden" name="task_id" value="<?= $t['id'] ?>"><input type="hidden" name="status" value="done"><button type="submit">✓ Done</button></form>
-                    <form method="POST" onsubmit="return confirm('Delete?')"><input type="hidden" name="action" value="delete"><input type="hidden" name="task_id" value="<?= $t['id'] ?>"><button type="submit" class="del-btn">🗑</button></form>
+                    <form method="POST"><input type="hidden" name="action" value="status"><input type="hidden" name="task_id" value="<?= $t['id'] ?>"><input type="hidden" name="status" value="in_progress"><button type="submit">Start</button></form>
+                    <form method="POST"><input type="hidden" name="action" value="status"><input type="hidden" name="task_id" value="<?= $t['id'] ?>"><input type="hidden" name="status" value="done"><button type="submit">Done</button></form>
+                    <form method="POST" onsubmit="return confirm('Delete?')"><input type="hidden" name="action" value="delete"><input type="hidden" name="task_id" value="<?= $t['id'] ?>"><button type="submit" class="del-btn">Delete</button></form>
                 </div>
             </div>
             <?php endforeach; ?>
@@ -118,23 +132,23 @@ $subjectList = $subjects->fetchAll();
         </div>
 
         <div class="kanban-col">
-            <div class="kanban-header">🔄 In Progress <span class="kanban-count"><?= count($inProgress) ?></span></div>
+            <div class="kanban-header">In Progress <span class="kanban-count"><?= count($inProgress) ?></span></div>
             <?php foreach ($inProgress as $t): ?>
             <div class="task-card">
                 <div class="task-card-title"><?= htmlspecialchars($t['title']) ?></div>
                 <div class="task-card-meta">
                     <span class="priority-dot priority-<?= $t['priority'] ?>"></span> <?= ucfirst($t['priority']) ?>
                     <?php if ($t['subject_name']): ?>
-                        <span style="color:<?= htmlspecialchars($t['color'] ?? 'var(--accent)') ?>">● <?= htmlspecialchars($t['subject_name']) ?></span>
+                        <span style="color:<?= htmlspecialchars($t['color'] ?? 'var(--accent)') ?>">&#9679; <?= htmlspecialchars($t['subject_name']) ?></span>
                     <?php endif; ?>
                     <?php if ($t['due_date']): ?>
-                        <span>📅 <?= date('M j', strtotime($t['due_date'])) ?></span>
+                        <span><?= date('M j', strtotime($t['due_date'])) ?></span>
                     <?php endif; ?>
                 </div>
                 <div class="task-card-actions">
-                    <form method="POST"><input type="hidden" name="action" value="status"><input type="hidden" name="task_id" value="<?= $t['id'] ?>"><input type="hidden" name="status" value="todo"><button type="submit">⏪ Back</button></form>
-                    <form method="POST"><input type="hidden" name="action" value="status"><input type="hidden" name="task_id" value="<?= $t['id'] ?>"><input type="hidden" name="status" value="done"><button type="submit">✓ Done</button></form>
-                    <form method="POST" onsubmit="return confirm('Delete?')"><input type="hidden" name="action" value="delete"><input type="hidden" name="task_id" value="<?= $t['id'] ?>"><button type="submit" class="del-btn">🗑</button></form>
+                    <form method="POST"><input type="hidden" name="action" value="status"><input type="hidden" name="task_id" value="<?= $t['id'] ?>"><input type="hidden" name="status" value="todo"><button type="submit">Back</button></form>
+                    <form method="POST"><input type="hidden" name="action" value="status"><input type="hidden" name="task_id" value="<?= $t['id'] ?>"><input type="hidden" name="status" value="done"><button type="submit">Done</button></form>
+                    <form method="POST" onsubmit="return confirm('Delete?')"><input type="hidden" name="action" value="delete"><input type="hidden" name="task_id" value="<?= $t['id'] ?>"><button type="submit" class="del-btn">Delete</button></form>
                 </div>
             </div>
             <?php endforeach; ?>
@@ -142,18 +156,18 @@ $subjectList = $subjects->fetchAll();
         </div>
 
         <div class="kanban-col">
-            <div class="kanban-header">✅ Done <span class="kanban-count"><?= count($done) ?></span></div>
+            <div class="kanban-header">Done <span class="kanban-count"><?= count($done) ?></span></div>
             <?php foreach ($done as $t): ?>
             <div class="task-card" style="opacity:.7;">
                 <div class="task-card-title" style="text-decoration:line-through;"><?= htmlspecialchars($t['title']) ?></div>
                 <div class="task-card-meta">
                     <?php if ($t['subject_name']): ?>
-                        <span style="color:<?= htmlspecialchars($t['color'] ?? 'var(--accent)') ?>">● <?= htmlspecialchars($t['subject_name']) ?></span>
+                        <span style="color:<?= htmlspecialchars($t['color'] ?? 'var(--accent)') ?>">&#9679; <?= htmlspecialchars($t['subject_name']) ?></span>
                     <?php endif; ?>
                 </div>
                 <div class="task-card-actions">
-                    <form method="POST"><input type="hidden" name="action" value="status"><input type="hidden" name="task_id" value="<?= $t['id'] ?>"><input type="hidden" name="status" value="todo"><button type="submit">↩ Reopen</button></form>
-                    <form method="POST" onsubmit="return confirm('Delete?')"><input type="hidden" name="action" value="delete"><input type="hidden" name="task_id" value="<?= $t['id'] ?>"><button type="submit" class="del-btn">🗑</button></form>
+                    <form method="POST"><input type="hidden" name="action" value="status"><input type="hidden" name="task_id" value="<?= $t['id'] ?>"><input type="hidden" name="status" value="todo"><button type="submit">Reopen</button></form>
+                    <form method="POST" onsubmit="return confirm('Delete?')"><input type="hidden" name="action" value="delete"><input type="hidden" name="task_id" value="<?= $t['id'] ?>"><button type="submit" class="del-btn">Delete</button></form>
                 </div>
             </div>
             <?php endforeach; ?>
@@ -162,52 +176,45 @@ $subjectList = $subjects->fetchAll();
     </div>
 </main>
 
-<!-- Add Task Modal -->
 <div class="modal-overlay" id="addModal">
     <div class="modal">
-        <h3>➕ New Task</h3>
+        <h3>New Task</h3>
         <form method="POST">
             <input type="hidden" name="action" value="add">
             <div class="form-group">
                 <label>Task Title *</label>
-                <input type="text" name="title" required placeholder="e.g. Complete DSA assignment">
+                <input type="text" name="title" list="taskTitleSuggestions" required placeholder="e.g. Complete DSA assignment">
+                <datalist id="taskTitleSuggestions"></datalist>
+                <div class="suggestion-note">Choose a subject to see different work ideas for this task.</div>
             </div>
             <div class="form-group">
                 <label>Description</label>
                 <textarea name="description" rows="3" placeholder="Optional details..."></textarea>
+                <div class="suggestion-row" id="descriptionSuggestions"></div>
+                <div class="suggestion-note">Type your own description or tap a random suggestion.</div>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
                 <div class="form-group">
-                    <label>Subject</label>
-                    <select name="subject_id">
-                        <option value="">— None —</option>
-                        <?php
-                        $currentYear = null;
-                        $currentSemester = null;
-                        foreach ($subjectList as $s):
-                            if ($s['year'] != $currentYear || $s['semester'] != $currentSemester):
-                                if ($currentYear !== null) echo '</optgroup>';
-                                $yearLabel = $s['year'] . 'st Year';
-                                if ($s['year'] == 2) $yearLabel = '2nd Year';
-                                if ($s['year'] == 3) $yearLabel = '3rd Year';
-                                if ($s['year'] >= 4) $yearLabel = $s['year'] . 'th Year';
-                                echo '<optgroup label="' . $yearLabel . ' - Semester ' . $s['semester'] . '">';
-                                $currentYear = $s['year'];
-                                $currentSemester = $s['semester'];
-                            endif;
-                        ?>
-                        <option value="<?= $s['id'] ?>"><?= htmlspecialchars($s['code'] ? $s['code'] . ': ' . $s['name'] : $s['name']) ?></option>
-                        <?php endforeach; ?>
-                        <?php if (!empty($subjectList)) echo '</optgroup>'; ?>
-                    </select>
+                    <label>Year</label>
+                    <select id="taskYear"></select>
                 </div>
                 <div class="form-group">
                     <label>Priority</label>
                     <select name="priority">
-                        <option value="low">🟢 Low</option>
-                        <option value="medium" selected>🟡 Medium</option>
-                        <option value="high">🔴 High</option>
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
                     </select>
+                </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div class="form-group">
+                    <label>Semester</label>
+                    <select id="taskSemester"></select>
+                </div>
+                <div class="form-group">
+                    <label>Subject</label>
+                    <select name="subject_id" id="taskSubject"></select>
                 </div>
             </div>
             <div class="form-group">
@@ -221,9 +228,187 @@ $subjectList = $subjects->fetchAll();
         </form>
     </div>
 </div>
+
 <script>
 document.getElementById('addModal').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('active'); });
 <?php if (isset($_GET['new'])): ?>document.getElementById('addModal').classList.add('active');<?php endif; ?>
+
+const subjectMeta = <?= json_encode($subjectMeta, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+const yearSelect = document.getElementById('taskYear');
+const semesterSelect = document.getElementById('taskSemester');
+const subjectSelect = document.getElementById('taskSubject');
+const titleSuggestions = document.getElementById('taskTitleSuggestions');
+const descriptionSuggestions = document.getElementById('descriptionSuggestions');
+const descriptionInput = document.querySelector('textarea[name="description"]');
+
+const genericTaskTitles = [
+    'Review lecture notes',
+    'Prepare quiz questions',
+    'Make a short revision sheet',
+    'Practice previous questions',
+    'Organize study materials'
+];
+
+const genericDescriptions = [
+    'Break the work into small steps and finish the most important part first.',
+    'Collect notes, key formulas, and examples before starting the task.',
+    'Spend one focused study session on this and review the final result.',
+    'Check class slides and complete the work with proper formatting.',
+    'Finish a draft today and leave time for revision at the end.'
+];
+
+function formatYearLabel(year) {
+    if (year === 1) return '1st Year';
+    if (year === 2) return '2nd Year';
+    if (year === 3) return '3rd Year';
+    return `${year}th Year`;
+}
+
+function getSubjectLabel(subject) {
+    return subject.code ? `${subject.code} ${subject.name}` : subject.name;
+}
+
+function buildTaskTitles(subject) {
+    if (!subject) return genericTaskTitles;
+    const shortLabel = subject.code || subject.name;
+    return [
+        `Complete ${shortLabel} assignment`,
+        `Revise ${shortLabel} class notes`,
+        `Solve ${shortLabel} practice problems`,
+        `Prepare ${shortLabel} presentation`,
+        `Finish ${shortLabel} lab work`
+    ];
+}
+
+function buildDescriptions(subject) {
+    if (!subject) return genericDescriptions;
+    const label = getSubjectLabel(subject);
+    return [
+        `Read the latest ${label} lecture materials and list the key topics to finish today.`,
+        `Complete the pending ${label} work and double-check everything before submission.`,
+        `Practice ${label} questions in one focused session and note down weak areas.`,
+        `Prepare a clean summary for ${label} with formulas, definitions, and examples.`,
+        `Finish the current ${label} task, then review the result and fix any missing parts.`
+    ];
+}
+
+function fillTitleSuggestions(subject) {
+    titleSuggestions.innerHTML = '';
+    buildTaskTitles(subject).forEach((title) => {
+        const option = document.createElement('option');
+        option.value = title;
+        titleSuggestions.appendChild(option);
+    });
+}
+
+function fillDescriptionSuggestions(subject) {
+    descriptionSuggestions.innerHTML = '';
+    buildDescriptions(subject).forEach((description) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'suggestion-chip';
+        button.textContent = description;
+        button.addEventListener('click', () => {
+            descriptionInput.value = description;
+            descriptionInput.focus();
+        });
+        descriptionSuggestions.appendChild(button);
+    });
+}
+
+function getYears() {
+    return [...new Set(subjectMeta.map((item) => item.year).filter(Boolean))];
+}
+
+function getSemesters(year) {
+    return [...new Set(subjectMeta.filter((item) => item.year === year).map((item) => item.semester).filter(Boolean))];
+}
+
+function getSubjects(year, semester) {
+    return subjectMeta.filter((item) => item.year === year && item.semester === semester);
+}
+
+function populateYearOptions() {
+    yearSelect.innerHTML = '';
+    const years = getYears();
+    if (!years.length) {
+        yearSelect.innerHTML = '<option value="">No years</option>';
+        return;
+    }
+    years.forEach((year) => {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = formatYearLabel(year);
+        yearSelect.appendChild(option);
+    });
+}
+
+function populateSemesterOptions(year) {
+    semesterSelect.innerHTML = '';
+    const semesters = getSemesters(year);
+    if (!semesters.length) {
+        semesterSelect.innerHTML = '<option value="">No semester</option>';
+        return;
+    }
+    semesters.forEach((semester) => {
+        const option = document.createElement('option');
+        option.value = semester;
+        option.textContent = `Semester ${semester}`;
+        semesterSelect.appendChild(option);
+    });
+}
+
+function populateSubjectOptions(year, semester) {
+    subjectSelect.innerHTML = '<option value="">-- None --</option>';
+    getSubjects(year, semester).forEach((subject) => {
+        const option = document.createElement('option');
+        option.value = subject.id;
+        option.textContent = subject.code ? `${subject.code}: ${subject.name}` : subject.name;
+        subjectSelect.appendChild(option);
+    });
+}
+
+function syncTaskSuggestions() {
+    const selectedId = Number(subjectSelect.value || 0);
+    const subject = subjectMeta.find((item) => item.id === selectedId) || null;
+    fillTitleSuggestions(subject);
+    fillDescriptionSuggestions(subject);
+}
+
+function syncTaskSelectors() {
+    const year = Number(yearSelect.value || 0);
+    populateSemesterOptions(year);
+    const semesters = getSemesters(year);
+    if (semesters.length) {
+        semesterSelect.value = String(semesters[0]);
+    }
+    populateSubjectOptions(year, Number(semesterSelect.value || 0));
+    syncTaskSuggestions();
+}
+
+function initializeTaskSelectors() {
+    populateYearOptions();
+    const firstSubject = subjectMeta[0] || null;
+    if (!firstSubject) {
+        semesterSelect.innerHTML = '<option value="">No semester</option>';
+        subjectSelect.innerHTML = '<option value="">-- None --</option>';
+        syncTaskSuggestions();
+        return;
+    }
+    yearSelect.value = String(firstSubject.year);
+    populateSemesterOptions(firstSubject.year);
+    semesterSelect.value = String(firstSubject.semester);
+    populateSubjectOptions(firstSubject.year, firstSubject.semester);
+    syncTaskSuggestions();
+}
+
+yearSelect.addEventListener('change', syncTaskSelectors);
+semesterSelect.addEventListener('change', () => {
+    populateSubjectOptions(Number(yearSelect.value || 0), Number(semesterSelect.value || 0));
+    syncTaskSuggestions();
+});
+subjectSelect.addEventListener('change', syncTaskSuggestions);
+initializeTaskSelectors();
 </script>
 </body>
 </html>
