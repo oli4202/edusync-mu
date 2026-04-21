@@ -202,7 +202,7 @@ document.getElementById('toolInput')?.addEventListener('input', function() {
 });
 
 async function callAI(prompt) {
-    const resp = await fetch('../admin/ajax/ai-suggest.php', {
+    const resp = await fetch('../ajax/ai-suggest.php', {
         method:'POST', headers:{'Content-Type':'application/json'},
         body:JSON.stringify({prompt})
     });
@@ -293,7 +293,9 @@ function copyResult() {
 }
 
 function escHtml(t) {
-    return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+    const div = document.createElement('div');
+    div.textContent = t;
+    return div.innerHTML;
 }
 </script>
 </body>

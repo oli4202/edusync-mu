@@ -242,7 +242,7 @@ $typeColors = [
         <form method="POST">
             <input type="hidden" name="action" value="post">
             <div class="form-row">
-                <div class="field"><label>Company Name *</label><input type="text" name="company" placeholder="e.g. Brain Station 23" required></div>
+                <div class="field"><label>Company Name *</label><input type="text" name="company" id="jobCompanyInput" list="companySuggestions" placeholder="e.g. Brain Station 23" required></div>
                 <div class="field"><label>Job Title *</label><input type="text" name="title" id="jobTitleInput" list="jobTitleSuggestions" placeholder="e.g. Junior Software Engineer" required></div>
             </div>
             <datalist id="jobTitleSuggestions">
@@ -251,11 +251,67 @@ $typeColors = [
                 <option value="Frontend Developer"></option>
                 <option value="Backend Developer"></option>
                 <option value="Full Stack Developer"></option>
+                <option value="React.js Developer"></option>
+                <option value="Laravel Developer"></option>
+                <option value="Python Developer"></option>
+                <option value="Node.js Developer"></option>
+                <option value="Mobile App Developer"></option>
+                <option value="Flutter Developer"></option>
+                <option value="Android Developer"></option>
+                <option value="iOS Developer"></option>
+                <option value="DevOps Engineer"></option>
+                <option value="Cloud Engineer"></option>
                 <option value="QA Engineer"></option>
+                <option value="Manual Tester"></option>
+                <option value="Automation Tester"></option>
                 <option value="UI/UX Designer"></option>
+                <option value="Graphic Designer"></option>
                 <option value="Data Analyst"></option>
+                <option value="Data Scientist"></option>
                 <option value="Machine Learning Intern"></option>
+                <option value="AI Research Assistant"></option>
+                <option value="Database Administrator"></option>
+                <option value="Network Engineer"></option>
+                <option value="Cybersecurity Analyst"></option>
                 <option value="Technical Support Engineer"></option>
+                <option value="IT Support Specialist"></option>
+                <option value="Project Manager"></option>
+                <option value="Scrum Master"></option>
+                <option value="WordPress Developer"></option>
+                <option value="SEO Specialist"></option>
+                <option value="Digital Marketing Executive"></option>
+                <option value="Content Writer (Tech)"></option>
+                <option value="Technical Writer"></option>
+                <option value="Blockchain Developer"></option>
+                <option value="Game Developer"></option>
+                <option value="Embedded Systems Engineer"></option>
+            </datalist>
+            <datalist id="companySuggestions">
+                <option value="Brain Station 23">
+                <option value="Kaz Software">
+                <option value="Nascenia">
+                <option value="Samsung R&D Bangladesh">
+                <option value="Synesis IT">
+                <option value="TigerIT Bangladesh">
+                <option value="Therap (BD) Ltd">
+                <option value="BJIT Group">
+                <option value="Selise Digital Platforms">
+                <option value="bKash Limited">
+                <option value="Pathao">
+                <option value="Chaldal">
+                <option value="10 Minute School">
+                <option value="Robi Axiata">
+                <option value="Grameenphone">
+                <option value="DataSoft Systems">
+                <option value="Cefalo Bangladesh">
+                <option value="Leads Corporation">
+                <option value="SSL Wireless">
+                <option value="Enosis Solutions">
+                <option value="Optimizely Bangladesh">
+                <option value="Shohoz">
+                <option value="Field Nation Bangladesh">
+                <option value="Vivasoft Limited">
+                <option value="WellDev">
             </datalist>
             <div class="form-row">
                 <div class="field">
@@ -268,19 +324,49 @@ $typeColors = [
                         <option value="freelance">🔧 Freelance</option>
                     </select>
                 </div>
-                <div class="field"><label>Location</label><input type="text" name="location" id="jobLocationInput" placeholder="e.g. Sylhet / Remote / Dhaka"></div>
+                <div class="field"><label>Location</label><input type="text" name="location" id="jobLocationInput" list="locationSuggestions" placeholder="e.g. Sylhet / Remote / Dhaka"></div>
             </div>
+            <datalist id="locationSuggestions">
+                <option value="Sylhet">
+                <option value="Dhaka">
+                <option value="Remote">
+                <option value="Sylhet / Remote">
+                <option value="Dhaka / Remote">
+                <option value="Chittagong">
+                <option value="Rajshahi">
+                <option value="On-site — Sylhet">
+                <option value="On-site — Dhaka">
+                <option value="Hybrid — Dhaka">
+                <option value="Remote (Bangladesh)">
+                <option value="Remote (Worldwide)">
+            </datalist>
             <div class="field"><label>Description *</label><textarea name="description" id="jobDescriptionInput" rows="4" placeholder="Describe the role, responsibilities..." required></textarea></div>
             <div class="hint-text" id="jobDescriptionHint">Choose or type a job title to auto-fill a relevant description and requirements.</div>
             <div class="field"><label>Requirements</label><textarea name="requirements" id="jobRequirementsInput" rows="3" placeholder="Skills required: PHP, MySQL, JavaScript..."></textarea></div>
             <div class="form-row">
-                <div class="field"><label>Salary / Stipend</label><input type="text" name="salary" id="jobSalaryInput" placeholder="e.g. 15,000/month"></div>
+                <div class="field"><label>Salary / Stipend</label><input type="text" name="salary" id="jobSalaryInput" list="salarySuggestions" placeholder="e.g. 15,000/month"></div>
                 <div class="field"><label>Application Deadline</label><input type="date" name="deadline"></div>
             </div>
             <div class="form-row">
                 <div class="field"><label>Apply Link (URL)</label><input type="url" name="apply_link" placeholder="https://..."></div>
                 <div class="field"><label>Apply via Email</label><input type="email" name="apply_email" placeholder="hr@company.com"></div>
             </div>
+            <datalist id="salarySuggestions">
+                <option value="5,000/month (Intern)">
+                <option value="8,000/month (Intern)">
+                <option value="10,000/month (Intern)">
+                <option value="12,000 - 15,000/month">
+                <option value="15,000 - 20,000/month">
+                <option value="20,000 - 30,000/month">
+                <option value="25,000 - 35,000/month">
+                <option value="30,000 - 40,000/month">
+                <option value="40,000 - 60,000/month">
+                <option value="Negotiable">
+                <option value="Unpaid Internship">
+                <option value="Paid Internship">
+                <option value="Performance Based">
+                <option value="Project Based">
+            </datalist>
             <div style="display:flex;gap:10px;margin-top:8px;">
                 <button type="submit" class="btn btn-primary">Post Job</button>
                 <button type="button" class="btn btn-outline" onclick="document.getElementById('postModal').classList.remove('open')">Cancel</button>

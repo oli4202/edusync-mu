@@ -51,9 +51,6 @@ $user = $user ?? currentUser();
             <a href="fees.php" class="nav-item <?= $currentPage === 'fees' ? 'active' : '' ?>">
                 <span class="icon">💳</span><span class="nav-copy">Fee Payments</span>
             </a>
-            <a href="https://www.bkash.com/en" target="_blank" class="nav-item">
-                <span class="icon">🌐</span><span class="nav-copy">bKash Website</span>
-            </a>
         </div>
 
         <div class="nav-group">
@@ -100,6 +97,9 @@ $user = $user ?? currentUser();
             <div class="nav-section">Admin</div>
             <a href="../admin/index.php" class="nav-item">
                 <span class="icon">🛡</span><span class="nav-copy">Admin Panel</span>
+            </a>
+            <a href="../admin/manage-attendance.php" class="nav-item">
+                <span class="icon">📋</span><span class="nav-copy">Manage Attendance</span>
             </a>
         </div>
         <?php endif; ?>

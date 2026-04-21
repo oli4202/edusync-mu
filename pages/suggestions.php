@@ -103,9 +103,32 @@ label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px;}
             </select>
             <label>Current Semester</label>
             <select id="predSem">
-                <?php for ($i=1;$i<=8;$i++): ?>
-                <option value="<?= $i ?>" <?= $user['semester'] == $i ? 'selected' : '' ?>>Semester <?= $i ?></option>
-                <?php endfor; ?>
+                <?php 
+                $semLabels = [
+                    '1.1' => '1st Year — Semester 1.1',
+                    '1.2' => '1st Year — Semester 1.2',
+                    '1.3' => '1st Year — Semester 1.3',
+                    '2.1' => '2nd Year — Semester 2.1',
+                    '2.2' => '2nd Year — Semester 2.2',
+                    '2.3' => '2nd Year — Semester 2.3',
+                    '3.1' => '3rd Year — Semester 3.1',
+                    '3.2' => '3rd Year — Semester 3.2',
+                    '3.3' => '3rd Year — Semester 3.3',
+                    '4.1' => '4th Year — Semester 4.1',
+                    '4.2' => '4th Year — Semester 4.2',
+                    '4.3' => '4th Year — Semester 4.3',
+                ];
+                foreach ($semLabels as $val => $lbl): ?>
+                <option value="<?= $val ?>" <?= $user['semester'] == explode('.', $val)[0] ? 'selected' : '' ?>><?= $lbl ?></option>
+                <?php endforeach; ?>
+            </select>
+            <label>Exam Type</label>
+            <select id="predExamType">
+                <option value="Final">📝 Final Exam</option>
+                <option value="Class Test">📋 Class Test (CT)</option>
+                <option value="Assignment">📑 Assignment / Quiz</option>
+                <option value="Lab Exam">🔬 Lab Exam</option>
+                <option value="Viva">🗣 Viva</option>
             </select>
             <button class="btn btn-primary" id="predBtn" onclick="runPrediction()">🎯 Predict Exam Topics</button>
             <div class="loading" id="predLoading"><div class="spinner"></div> Analyzing past questions...</div>
@@ -315,6 +338,7 @@ async function callAI(prompt, loadingId, btnId, resultId, contentId) {
 function runPrediction() {
     const sel = document.getElementById('predCourse');
     const sem = document.getElementById('predSem').value;
+    const examType = document.getElementById('predExamType').value;
     if (!sel.value) { alert('Please select a course.'); return; }
     const name = sel.options[sel.selectedIndex].dataset.name;
     const code = sel.options[sel.selectedIndex].dataset.code;
@@ -322,13 +346,14 @@ function runPrediction() {
 
 Course: ${code} — ${name}
 Student's current semester: ${sem}
+Exam type: ${examType}
 University: Metropolitan University Sylhet
 
 Based on typical university exam patterns for this course in a software engineering program:
-1. List the TOP 8 most likely exam topics (with brief explanation of why each is important)
-2. Suggest 5 probable exam questions with suggested compact answer outlines
+1. List the TOP 8 most likely ${examType} topics (with brief explanation of why each is important)
+2. Suggest 5 probable ${examType} questions with suggested compact answer outlines
 3. List 3 topics to prioritize for last-minute revision
-4. Give one study tip specific to this course.
+4. Give one study tip specific to this course and ${examType} format.
 
 Format clearly with numbered sections and bullet points.`;
     callAI(prompt, 'predLoading', 'predBtn', 'predResult', 'predContent');

@@ -1,0 +1,13 @@
+RewriteEngine On
+
+# If you placed the project in a subdirectory like htdocs/edusync/,
+# set the RewriteBase to match. Otherwise leave it as /.
+# RewriteBase /edusync
+
+# If the requested file or directory exists on disk, serve it directly.
+# This lets CSS, JS, and image files load normally.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Everything else goes through index.php (the front controller).
+RewriteRule ^ index.php [QSA,L]

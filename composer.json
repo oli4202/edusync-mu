@@ -1,0 +1,12 @@
+{
+  "name": "edusync/project",
+  "description": "EduSync MU - Student Portal for Metropolitan University Sylhet",
+  "require": {
+    "php": ">=7.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "app/"
+    }
+  }
+}

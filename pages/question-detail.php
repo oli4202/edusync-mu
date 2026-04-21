@@ -306,7 +306,7 @@ function generateCompact() {
     document.getElementById('aiResult').style.display = 'none';
     document.querySelector('.ai-panel .btn-primary').disabled = true;
 
-    fetch('ajax/ai-compact.php', {
+    fetch('../ajax/ai-compact.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -314,7 +314,12 @@ function generateCompact() {
             answers: existingAnswers
         })
     })
-    .then(r => r.json())
+    .then(async r => {
+        if (!r.ok) {
+            throw new Error('Request failed with status ' + r.status);
+        }
+        return r.json();
+    })
     .then(data => {
         document.getElementById('aiLoading').style.display = 'none';
         document.querySelector('.ai-panel .btn-primary').disabled = false;
@@ -325,7 +330,7 @@ function generateCompact() {
     .catch(() => {
         document.getElementById('aiLoading').style.display = 'none';
         document.querySelector('.ai-panel .btn-primary').disabled = false;
-        alert('AI request failed. Please check your API key.');
+        alert('Compact answer request failed. Please try again.');
     });
 }
 

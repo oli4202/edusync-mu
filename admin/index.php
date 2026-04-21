@@ -81,6 +81,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     </div>
     <div style="display:flex;align-items:center;gap:14px;">
         <span class="badge-admin">🛡️ Admin</span>
+        <a href="manage-attendance.php" class="nav-link">📋 Attendance</a>
         <a href="api-settings.php" class="nav-link">API Settings</a>
         <a href="../pages/dashboard.php" class="nav-link">← Back to Dashboard</a>
     </div>

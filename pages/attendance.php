@@ -4,6 +4,7 @@ require_once __DIR__ . '/../includes/auth.php';
 requireLogin();
 $user = currentUser();
 $db   = getDB();
+$isAdmin = ($user['role'] ?? '') === 'admin';
 $currentPage = 'attendance';
 
 // Ensure attendance tables exist
@@ -20,9 +21,9 @@ $db->exec("CREATE TABLE IF NOT EXISTS attendance (
     UNIQUE KEY unique_att (user_id, course_id, class_date)
 )");
 
-// Handle form actions
+// Handle form actions (admin only)
 $msg = $err = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAdmin) {
     $action = $_POST['action'] ?? '';
 
     if ($action === 'add') {
@@ -41,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     } elseif ($action === 'delete') {
         $id = (int)$_POST['att_id'];
-        $db->prepare("DELETE FROM attendance WHERE id=? AND user_id=?")->execute([$id, $user['id']]);
+        $db->prepare("DELETE FROM attendance WHERE id=?")->execute([$id]);
         $msg = 'Record deleted.';
     }
 }
@@ -140,9 +141,15 @@ optgroup {
     <div class="topbar">
         <div>
             <div class="page-title">🗓 Attendance Tracker</div>
-            <div class="page-sub">Track your class attendance across all subjects</div>
+            <div class="page-sub"><?= $isAdmin ? 'Manage attendance records' : 'View your class attendance across all subjects' ?></div>
         </div>
-        <button class="btn btn-primary" onclick="document.getElementById('addModal').classList.add('open')">+ Log Attendance</button>
+        <div style="display:flex;gap:10px;align-items:center;">
+            <?php if ($isAdmin): ?>
+                <a href="../admin/manage-attendance.php" class="btn btn-primary">📋 Manage Attendance</a>
+            <?php else: ?>
+                <span style="font-size:13px;color:var(--muted);background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.15);border-radius:10px;padding:8px 14px;">📌 Attendance is managed by your teacher</span>
+            <?php endif; ?>
+        </div>
     </div>
 
     <?php if ($msg): ?><div class="alert-success">✅ <?= $msg ?></div><?php endif; ?>
@@ -255,7 +262,7 @@ optgroup {
         <?php else: ?>
         <table class="data-table">
             <thead>
-                <tr><th>Date</th><th>Course</th><th>Status</th><th>Notes</th><th>Action</th></tr>
+                <tr><th>Date</th><th>Course</th><th>Status</th><th>Notes</th><?php if ($isAdmin): ?><th>Action</th><?php endif; ?></tr>
             </thead>
             <tbody>
                 <?php foreach ($attendance as $a): ?>
@@ -267,6 +274,7 @@ optgroup {
                         <span class="status-<?= $a['status'] ?>" style="font-weight:600;font-size:13px;"><?= ucfirst($a['status']) ?></span>
                     </td>
                     <td style="color:var(--muted);font-size:13px;"><?= htmlspecialchars($a['notes'] ?: '—') ?></td>
+                    <?php if ($isAdmin): ?>
                     <td>
                         <form method="POST" style="display:inline" onsubmit="return confirm('Delete this record?')">
                             <input type="hidden" name="action" value="delete">
@@ -274,6 +282,7 @@ optgroup {
                             <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                         </form>
                     </td>
+                    <?php endif; ?>
                 </tr>
                 <?php endforeach; ?>
             </tbody>
@@ -282,7 +291,8 @@ optgroup {
     </div>
 </main>
 
-<!-- Add Attendance Modal -->
+<?php if ($isAdmin): ?>
+<!-- Add Attendance Modal (Admin Only) -->
 <div class="modal-overlay" id="addModal">
     <div class="modal">
         <div class="modal-title">🗓 Log Attendance</div>
@@ -350,5 +360,6 @@ document.getElementById('addModal').addEventListener('click', function(e) {
     if (e.target === this) this.classList.remove('open');
 });
 </script>
+<?php endif; ?>
 </body>
 </html>
