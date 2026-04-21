@@ -1,0 +1,7 @@
+<?php
+
+$api_keys = [
+    'CLAUDE_API_KEY' => 'YOUR_CLAUDE_API_KEY_HERE',
+    'GEMINI_API_KEY' => 'AIzaSyD6JsiCJO3x15E9RAWLNk0N9p_dK2AYyFM',
+    'HF_API_KEY' => 'YOUR_HF_API_KEY_HERE',
+];
