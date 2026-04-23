@@ -1,5 +1,8 @@
 <?php
-// pages/flashcards.php
+// LEGACY FILE - REDIRECT TO MVC
+header('Location: /flashcards');
+exit;
+
 require_once __DIR__ . '/../includes/auth.php';
 requireLogin();
 $user = currentUser();

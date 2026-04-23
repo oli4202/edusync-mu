@@ -1,8 +1,8 @@
 <?php
-require_once __DIR__ . '/../includes/auth.php';
-requireLogin();
-$user = currentUser();
-$currentPage = 'prospectus';
+// LEGACY FILE - REDIRECT TO MVC
+header('Location: /prospectus');
+exit;
+
 ?>
 <!DOCTYPE html>
 <html lang="en">

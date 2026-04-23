@@ -1,5 +1,8 @@
 <?php
-// admin/api-settings.php
+// LEGACY FILE - REDIRECT TO MVC
+header('Location: /admin/api-settings');
+exit;
+
 require_once __DIR__ . '/../includes/auth.php';
 requireAdmin();
 $user = currentUser();

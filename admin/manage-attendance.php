@@ -1,5 +1,8 @@
 <?php
-// admin/manage-attendance.php — Admin-only bulk attendance management
+// LEGACY FILE - REDIRECT TO MVC
+header('Location: /admin/attendance');
+exit;
+
 require_once __DIR__ . '/../includes/auth.php';
 requireAdmin();
 $user = currentUser();

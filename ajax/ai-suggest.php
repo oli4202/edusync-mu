@@ -1,5 +1,8 @@
 <?php
-// ajax/ai-suggest.php — General AI prompt handler
+// LEGACY FILE - REDIRECT TO MVC API
+header('Location: /api/ai/suggest');
+exit;
+
 require_once __DIR__ . '/../includes/auth.php';
 requireLogin();
 header('Content-Type: application/json');

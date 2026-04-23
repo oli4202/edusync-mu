@@ -1,5 +1,8 @@
 <?php
-// pages/calendar.php — PDF-style MU Academic Calendar
+// LEGACY FILE - REDIRECT TO MVC
+header('Location: /calendar');
+exit;
+
 require_once __DIR__ . '/../includes/auth.php';
 requireLogin();
 $user = currentUser();

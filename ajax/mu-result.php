@@ -1,5 +1,8 @@
 <?php
-// ajax/mu-result.php — Proxy to fetch MU official result
+// LEGACY FILE - REDIRECT TO MVC API
+header('Location: /api/result-lookup');
+exit;
+
 require_once __DIR__ . '/../includes/auth.php';
 requireLogin();
 header('Content-Type: application/json');

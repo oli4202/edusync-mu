@@ -1,5 +1,8 @@
 <?php
-// pages/grades.php
+// LEGACY FILE - REDIRECT TO MVC
+header('Location: /grades');
+exit;
+
 require_once __DIR__ . '/../includes/auth.php';
 requireLogin();
 $user = currentUser();

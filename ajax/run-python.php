@@ -1,5 +1,8 @@
 <?php
-// ajax/run-python.php — Local Python execution for Code Playground
+// LEGACY FILE - REDIRECT TO MVC API
+header('Location: /api/playground/run-python');
+exit;
+
 require_once __DIR__ . '/../includes/auth.php';
 requireLogin();
 

@@ -1,5 +1,8 @@
 <?php
-// ajax/upvote.php
+// LEGACY FILE - REDIRECT TO MVC API
+header('Location: /api/question-bank/upvote');
+exit;
+
 require_once __DIR__ . '/../includes/auth.php';
 requireLogin();
 header('Content-Type: application/json');

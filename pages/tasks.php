@@ -1,5 +1,8 @@
 <?php
-// pages/tasks.php
+// LEGACY FILE - REDIRECT TO MVC
+header('Location: /tasks');
+exit;
+
 require_once __DIR__ . '/../includes/auth.php';
 requireLogin();
 $user = currentUser();

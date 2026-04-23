@@ -1,5 +1,8 @@
 <?php
-// pages/attendance.php
+// LEGACY FILE - REDIRECT TO MVC
+header('Location: /attendance');
+exit;
+
 require_once __DIR__ . '/../includes/auth.php';
 requireLogin();
 $user = currentUser();

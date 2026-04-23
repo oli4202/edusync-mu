@@ -1,5 +1,8 @@
 <?php
-// pages/jobs.php
+// LEGACY FILE - REDIRECT TO MVC
+header('Location: /jobs');
+exit;
+
 require_once __DIR__ . '/../includes/auth.php';
 requireLogin();
 $user = currentUser();

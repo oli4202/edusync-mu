@@ -1,159 +1,87 @@
 <?php
 /**
  * Login page - auth/login.php
- * $error - error message if login failed
- * $flash - flash message from session
  */
 ?>
-<div class="auth-container">
-    <div class="auth-card">
-        <h1>EduSync</h1>
-        <p class="auth-subtitle">Student Portal — Metropolitan University Sylhet</p>
+<div class="min-h-screen flex items-center justify-center relative p-6 overflow-hidden">
+    <!-- Background Decorations -->
+    <div class="absolute top-0 right-0 -z-10 w-[500px] h-[500px] bg-accent-cyan/5 blur-[120px] rounded-full translate-x-1/4 -translate-y-1/4"></div>
+    <div class="absolute bottom-0 left-0 -z-10 w-[500px] h-[500px] bg-accent-purple/5 blur-[120px] rounded-full -translate-x-1/4 translate-y-1/4"></div>
 
-        <?php if (isset($error) && $error): ?>
-            <div class="alert alert-error">
-                <?php echo htmlspecialchars($error); ?>
+    <div class="w-full max-w-md space-y-8">
+        <div class="text-center">
+            <h1 class="font-syne text-5xl font-extrabold bg-gradient-to-r from-accent-cyan to-accent-purple bg-clip-text text-transparent italic tracking-tight">
+                EduSync
+            </h1>
+            <p class="mt-3 text-slate-500 font-medium text-sm uppercase tracking-widest">Student Portal — MU Sylhet</p>
+        </div>
+
+        <div class="glass-card p-8 shadow-2xl relative overflow-hidden group">
+            <div class="absolute inset-0 bg-gradient-to-br from-accent-cyan/5 to-accent-purple/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
+            
+            <h2 class="text-xl font-bold text-white mb-8 text-center font-syne uppercase tracking-tighter">Sign in to your account</h2>
+
+            <?php if (isset($error) && $error): ?>
+                <div class="mb-6 p-4 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
+                    <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                    <span class="text-xs font-bold"><?php echo htmlspecialchars($error); ?></span>
+                </div>
+            <?php endif; ?>
+
+            <?php if (isset($flash) && $flash): ?>
+                <div class="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
+                    <i data-lucide="check-circle" class="w-5 h-5"></i>
+                    <span class="text-xs font-bold"><?php echo htmlspecialchars($flash['message']); ?></span>
+                </div>
+            <?php endif; ?>
+
+            <form method="POST" action="/auth/login" class="space-y-6">
+                <div class="space-y-2">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">Email Address</label>
+                    <div class="relative group">
+                        <i data-lucide="mail" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-accent-cyan transition-colors"></i>
+                        <input 
+                            type="email" 
+                            name="email" 
+                            required 
+                            class="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3.5 text-sm text-white focus:outline-none focus:border-accent-cyan transition-all"
+                            placeholder="your@email.com"
+                        >
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between px-1">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Password</label>
+                        <a href="#" class="text-[10px] font-bold text-accent-cyan hover:text-white transition-colors uppercase tracking-widest">Forgot?</a>
+                    </div>
+                    <div class="relative group">
+                        <i data-lucide="lock" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-accent-cyan transition-colors"></i>
+                        <input 
+                            type="password" 
+                            name="password" 
+                            required 
+                            class="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3.5 text-sm text-white focus:outline-none focus:border-accent-cyan transition-all"
+                            placeholder="••••••••"
+                        >
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full py-4 bg-gradient-to-r from-accent-cyan to-accent-purple text-dark-bg font-bold rounded-xl shadow-lg shadow-accent-cyan/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-xs">
+                    Sign In →
+                </button>
+            </form>
+
+            <div class="mt-8 text-center pt-8 border-t border-white/5">
+                <p class="text-xs text-slate-500 font-medium tracking-tight">
+                    New to EduSync? 
+                    <a href="/signup" class="text-accent-cyan font-bold hover:text-white transition-colors ml-1 uppercase tracking-widest">Create an account</a>
+                </p>
             </div>
-        <?php endif; ?>
-
-        <?php if (isset($flash) && $flash): ?>
-            <div class="alert alert-<?php echo htmlspecialchars($flash['type']); ?>">
-                <?php echo htmlspecialchars($flash['message']); ?>
-            </div>
-        <?php endif; ?>
-
-        <form method="POST" action="/auth/login" class="auth-form">
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" required placeholder="your@email.com">
-            </div>
-
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required placeholder="••••••••">
-            </div>
-
-            <button type="submit" class="btn btn-primary">Sign In</button>
-        </form>
-
-        <p class="auth-link">
-            Don't have an account? <a href="/signup">Create one</a>
-        </p>
+        </div>
     </div>
 </div>
 
-<style>
-.auth-container {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #0a0e1a 0%, #111827 100%);
-}
-
-.auth-card {
-    background: #111827;
-    border: 1px solid #1e2d45;
-    border-radius: 12px;
-    padding: 40px;
-    width: 100%;
-    max-width: 400px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-}
-
-.auth-card h1 {
-    font-size: 32px;
-    margin-bottom: 8px;
-    color: #22d3ee;
-}
-
-.auth-subtitle {
-    color: #64748b;
-    margin-bottom: 30px;
-    font-size: 14px;
-}
-
-.auth-form {
-    margin: 30px 0;
-}
-
-.form-group {
-    margin-bottom: 20px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 8px;
-    color: #e2e8f0;
-    font-weight: 500;
-}
-
-.form-group input {
-    width: 100%;
-    padding: 10px 12px;
-    background: #0f172a;
-    border: 1px solid #1e2d45;
-    border-radius: 6px;
-    color: #e2e8f0;
-    font-size: 14px;
-}
-
-.form-group input:focus {
-    outline: none;
-    border-color: #22d3ee;
-    background: #0a0e1a;
-}
-
-.btn {
-    width: 100%;
-    padding: 12px;
-    border: none;
-    border-radius: 6px;
-    font-weight: 600;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-.btn-primary {
-    background: #22d3ee;
-    color: #0a0e1a;
-}
-
-.btn-primary:hover {
-    background: #06b6d4;
-}
-
-.auth-link {
-    text-align: center;
-    color: #64748b;
-    font-size: 14px;
-}
-
-.auth-link a {
-    color: #22d3ee;
-    text-decoration: none;
-}
-
-.auth-link a:hover {
-    text-decoration: underline;
-}
-
-.alert {
-    padding: 12px 16px;
-    border-radius: 6px;
-    margin-bottom: 20px;
-    font-size: 14px;
-}
-
-.alert-error {
-    background: rgba(244, 63, 94, 0.1);
-    color: #f87171;
-    border: 1px solid #f87171;
-}
-
-.alert-success {
-    background: rgba(52, 211, 153, 0.1);
-    color: #34d399;
-    border: 1px solid #34d399;
-}
-</style>
+<script>
+    lucide.createIcons();
+</script>

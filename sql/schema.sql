@@ -280,7 +280,7 @@ CREATE TABLE question_topics (
 -- ============================================================
 -- SEED DATA — MU Sylhet SE Courses (Complete 4-Year Curriculum)
 -- ============================================================
-INSERT INTO courses (name, code, year, semester) VALUES
+INSERT IGNORE INTO courses (name, code, year, semester) VALUES
 -- Year 1: Foundation & Programming
 -- Semester 1.1
 ('Communicative English Language I', 'GED 101', 1, 1),

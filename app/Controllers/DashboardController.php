@@ -3,7 +3,7 @@
 namespace App\Controllers;
 
 use App\Core\Controller;
-use App\Models\Subject, Task, Grade, Attendance, User;
+use App\Models\{Subject, Task, Grade, Attendance, User, StudyLog, Question};
 use function App\getDB;
 
 /**
@@ -17,29 +17,16 @@ class DashboardController extends Controller
         $userId = $this->session->userId();
         $user = User::findById($userId);
 
-        $db = getDB();
-
         // Get stats
-        $tasksDueStmt = $db->prepare("SELECT COUNT(*) FROM tasks WHERE user_id=? AND status!='done' AND due_date <= DATE_ADD(NOW(), INTERVAL 3 DAY)");
-        $tasksDueStmt->execute([$userId]);
-        $tasksDueCount = $tasksDueStmt->fetchColumn();
-
-        $doneStmt = $db->prepare("SELECT COUNT(*) FROM tasks WHERE user_id=? AND status='done'");
-        $doneStmt->execute([$userId]);
-        $doneCount = $doneStmt->fetchColumn();
-
-        $weekStmt = $db->prepare("SELECT COALESCE(SUM(hours),0) FROM study_logs WHERE user_id=? AND WEEK(logged_date)=WEEK(NOW())");
-        $weekStmt->execute([$userId]);
-        $weekHours = $weekStmt->fetchColumn();
+        $tasksDueCount = Task::getTasksDueSoon($userId);
+        $doneCount = Task::getDoneCount($userId);
+        $weekHours = StudyLog::getWeeklyHours($userId);
 
         // Upcoming tasks
-        $upcomingStmt = $db->prepare("SELECT t.*, s.name AS subject_name, s.color FROM tasks t LEFT JOIN subjects s ON t.subject_id=s.id WHERE t.user_id=? AND t.status!='done' ORDER BY t.due_date ASC LIMIT 5");
-        $upcomingStmt->execute([$userId]);
-        $upcomingTasks = $upcomingStmt->fetchAll();
+        $upcomingTasks = Task::getUpcomingTasks($userId);
 
         // Recent questions
-        $questionsStmt = $db->query("SELECT * FROM questions WHERE is_approved=1 ORDER BY created_at DESC LIMIT 4");
-        $recentQuestions = $questionsStmt->fetchAll();
+        $recentQuestions = Question::getRecentApproved();
 
         $this->render('dashboard/index', compact('user', 'tasksDueCount', 'doneCount', 'weekHours', 'upcomingTasks', 'recentQuestions'));
     }
@@ -50,75 +37,110 @@ class DashboardController extends Controller
         $userId = $this->session->userId();
         $user = User::findById($userId);
 
-        $db = getDB();
-
         // Study logs - weekly breakdown
-        $logsStmt = $db->prepare(
-            "SELECT DATE(logged_date) as date, SUM(hours) as total 
-             FROM study_logs 
-             WHERE user_id=? AND logged_date >= DATE_SUB(NOW(), INTERVAL 30 DAY) 
-             GROUP BY DATE(logged_date) 
-             ORDER BY date DESC"
-        );
-        $logsStmt->execute([$userId]);
-        $studyLogs = $logsStmt->fetchAll();
+        $studyLogs = StudyLog::getRecentLogs($userId);
 
         // Grade trends
-        $gradesStmt = $db->prepare(
-            "SELECT subject_id, AVG(marks_obtained / total_marks * 100) as avg_score 
-             FROM grades 
-             WHERE user_id=? 
-             GROUP BY subject_id"
-        );
-        $gradesStmt->execute([$userId]);
-        $grades = $gradesStmt->fetchAll();
+        $grades = Grade::getAverageScoresBySubject($userId);
 
         $this->render('dashboard/analytics', compact('user', 'studyLogs', 'grades'));
     }
-}
 
-/**
- * PageController — Renders static and dynamic pages
- */
-class PageController extends Controller
-{
-    public function page(string $name): void
+    public function subjects(): void
     {
-        $allowedPages = [
-            'subjects', 'tasks', 'grades', 'attendance',
-            'flashcards', 'groups', 'announcements', 'calendar',
-            'fees', 'question-bank', 'learn', 'jobs', 'partners'
-        ];
+        $this->requireLogin();
+        $userId = $this->session->userId();
+        $user = User::findById($userId);
+        $subjects = Subject::findByUser($userId);
+        $this->render('pages/subjects', compact('user', 'subjects'));
+    }
 
-        if (!in_array($name, $allowedPages)) {
-            http_response_code(404);
-            die('Page not found');
-        }
+    public function tasks(): void
+    {
+        $this->requireLogin();
+        $userId = $this->session->userId();
+        $user = User::findById($userId);
+        $tasks = Task::findByUser($userId);
+        $this->render('pages/tasks', compact('user', 'tasks'));
+    }
 
+    public function grades(): void
+    {
+        $this->requireLogin();
+        $userId = $this->session->userId();
+        $user = User::findById($userId);
+        $grades = Grade::findByUser($userId);
+        $this->render('pages/grades', compact('user', 'grades'));
+    }
+
+    public function attendance(): void
+    {
+        $this->requireLogin();
+        $userId = $this->session->userId();
+        $user = User::findById($userId);
+        $attendance = Attendance::findByUser($userId);
+        $this->render('pages/attendance', compact('user', 'attendance'));
+    }
+
+    public function calendar(): void
+    {
         $this->requireLogin();
         $userId = $this->session->userId();
         $user = User::findById($userId);
 
-        // Pass data based on page
-        $data = compact('user', 'userId');
+        $viewYear = 2026;
+        $viewMonth = (int)($_GET['month'] ?? date('n'));
+        $viewMonth = max(1, min(12, $viewMonth));
+        $monthNames = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $viewMonth, $viewYear);
+        $firstDayOfWeek = (int)date('w', mktime(0, 0, 0, $viewMonth, 1, $viewYear));
+        $prevMonth = $viewMonth - 1 < 1 ? 12 : $viewMonth - 1;
+        $nextMonth = $viewMonth + 1 > 12 ? 1 : $viewMonth + 1;
+        $today = date('Y-m-d');
 
-        // Load specific data for page
-        if ($name === 'subjects') {
-            $data['subjects'] = Subject::findByUser($userId);
-        } elseif ($name === 'tasks') {
-            $data['tasks'] = Task::findByUser($userId);
-        } elseif ($name === 'grades') {
-            $db = getDB();
-            $stmt = $db->prepare("SELECT * FROM grades WHERE user_id=? ORDER BY exam_date DESC");
-            $stmt->execute([$userId]);
-            $data['grades'] = $stmt->fetchAll();
-        } elseif ($name === 'attendance') {
-            $db = getDB();
-            $stmt = $db->prepare("SELECT * FROM attendance WHERE user_id=? ORDER BY class_date DESC");
-            $stmt->execute([$userId]);
-            $data['attendance'] = $stmt->fetchAll();
-        }
+        $holidays = [
+            '2026-02-04' => ['Shab-e-Barat (Based on the moon sighting)', 'islamic'],
+            '2026-02-21' => ['International Mother Language Day', 'national'],
+            '2026-03-17' => ['Shab-e-Qadr (Based on the moon sighting)', 'islamic'],
+            '2026-03-19' => ['Eid-ul-Fitr (Based on the moon sighting)', 'islamic'],
+            '2026-03-20' => ['Eid-ul-Fitr', 'islamic'],
+            '2026-03-21' => ['Eid-ul-Fitr', 'islamic'],
+            '2026-03-22' => ['Eid-ul-Fitr', 'islamic'],
+            '2026-03-23' => ['Eid-ul-Fitr', 'islamic'],
+            '2026-03-26' => ['Independence & National Day', 'national'],
+            '2024-04-14' => ["Bengali New Year's Day", 'national'],
+            '2026-05-01' => ['May Day & Buddha Purnima (Based on the moon sighting)', 'national'],
+            '2026-05-26' => ['Eid-ul-Adha (Based on the moon sighting)', 'islamic'],
+            '2026-05-27' => ['Eid-ul-Adha', 'islamic'],
+            '2026-05-28' => ['Eid-ul-Adha', 'islamic'],
+            '2026-05-29' => ['Eid-ul-Adha', 'islamic'],
+            '2026-05-30' => ['Eid-ul-Adha', 'islamic'],
+            '2026-05-31' => ['Eid-ul-Adha (End)', 'islamic'],
+            '2026-06-26' => ['Ashura (Based on the moon sighting)', 'islamic'],
+            '2026-08-05' => ['July Mass Uprising Day', 'national'],
+            '2026-08-26' => ['Eid-e-Milad-Un-Nabi (Based on the moon sighting)', 'islamic'],
+            '2026-09-04' => ['Janmashtami', 'religious'],
+            '2026-10-20' => ['Durga Puja (Nabami)', 'religious'],
+            '2026-10-21' => ['Durga Puja (Vijaya Dashami)', 'religious'],
+            '2026-12-16' => ['Victory Day', 'national'],
+            '2026-12-25' => ['Christmas Day', 'religious'],
+        ];
 
-        $this->render('pages/' . $name, $data);
+        $monthNotes = [
+            2 => ['04 February : Shab-e-Barat (Based on the moon sighting)', '21 February : International Mother Language Day'],
+            3 => ['17 March : Shab-e-Qadr (Based on the moon sighting)  20 March : Jumatul Bidah', '19 March - 23 March : Eid-ul-Fitr (Based on the moon sighting)', '26 March : Independence and National Day'],
+            4 => ["14 April : Bengali New Year's Day"],
+            5 => ['01 May : May Day & Buddha Purnima (Based on the moon sighting)', '26-31 May : Eid-ul-Adha (Based on the moon sighting)'],
+            6 => ['26 June : Ashura (Based on the moon sighting)'],
+            8 => ['05 August : July Mass Uprising Day', '26 August : Eid-e-Milad-Un-Nabi (Based on the moon sighting)'],
+            9 => ['04 September : Janmashtami'],
+            10 => ['20-21 October : Durga Puja (Nabami, Vijaya Dashami)'],
+            12 => ['16 December : Victory Day', '25 December : Christmas Day'],
+        ];
+
+        $this->render('pages/calendar', compact(
+            'user', 'viewYear', 'viewMonth', 'monthNames', 'daysInMonth', 'firstDayOfWeek', 
+            'prevMonth', 'nextMonth', 'today', 'holidays', 'monthNotes'
+        ));
     }
 }

@@ -4,6 +4,7 @@ $currentPage = 'grades';
 
 <div class="page-header">
     <h2>My Grades</h2>
+    <a href="/result-lookup" class="result-link">MU Official Result</a>
 </div>
 
 <div class="grades-table">
@@ -49,6 +50,30 @@ $currentPage = 'grades';
 table {
     width: 100%;
     border-collapse: collapse;
+}
+
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.result-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 14px;
+    border: 1px solid #1e2d45;
+    border-radius: 8px;
+    color: #22d3ee;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.result-link:hover {
+    border-color: #22d3ee;
 }
 
 thead {

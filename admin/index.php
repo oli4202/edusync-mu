@@ -1,9 +1,8 @@
 <?php
-// admin/index.php
-require_once __DIR__ . '/../includes/auth.php';
-requireAdmin();
-$user = currentUser();
-$db   = getDB();
+// LEGACY FILE - REDIRECT TO MVC
+header('Location: /admin');
+exit;
+
 
 // Handle approval/rejection
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

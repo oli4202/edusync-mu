@@ -12,13 +12,17 @@ class Subject
     public static function findById(int $id): ?array
     {
         $db = getDB();
-        return $db->prepare("SELECT * FROM subjects WHERE id = ?")->execute([$id])->fetch() ?: null;
+        $stmt = $db->prepare("SELECT * FROM subjects WHERE id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetch() ?: null;
     }
 
     public static function findByUser(int $userId): array
     {
         $db = getDB();
-        return $db->prepare("SELECT * FROM subjects WHERE user_id = ? ORDER BY name")->execute([$userId])->fetchAll();
+        $stmt = $db->prepare("SELECT * FROM subjects WHERE user_id = ? ORDER BY name");
+        $stmt->execute([$userId]);
+        return $stmt->fetchAll();
     }
 
     public static function create(int $userId, array $data): array
@@ -69,132 +73,5 @@ class Subject
     {
         $db = getDB();
         $db->prepare("DELETE FROM subjects WHERE id = ?")->execute([$id]);
-    }
-}
-
-/**
- * Task Model
- */
-class Task
-{
-    public static function findById(int $id): ?array
-    {
-        $db = getDB();
-        return $db->prepare("SELECT * FROM tasks WHERE id = ?")->execute([$id])->fetch() ?: null;
-    }
-
-    public static function findByUser(int $userId): array
-    {
-        $db = getDB();
-        return $db->prepare("SELECT * FROM tasks WHERE user_id = ? ORDER BY due_date")->execute([$userId])->fetchAll();
-    }
-
-    public static function create(int $userId, array $data): array
-    {
-        try {
-            $db = getDB();
-            $stmt = $db->prepare(
-                "INSERT INTO tasks (user_id, subject_id, title, description, due_date, priority, status) 
-                 VALUES (?, ?, ?, ?, ?, ?, ?)"
-            );
-            $stmt->execute([
-                $userId,
-                $data['subject_id'] ?? null,
-                $data['title'],
-                $data['description'] ?? '',
-                $data['due_date'] ?? null,
-                $data['priority'] ?? 'normal',
-                'pending'
-            ]);
-            return ['success' => true, 'id' => $db->lastInsertId()];
-        } catch (\Exception $e) {
-            return ['success' => false, 'message' => $e->getMessage()];
-        }
-    }
-
-    public static function updateStatus(int $id, string $status): void
-    {
-        $db = getDB();
-        $db->prepare("UPDATE tasks SET status = ? WHERE id = ?")->execute([$status, $id]);
-    }
-
-    public static function delete(int $id): void
-    {
-        $db = getDB();
-        $db->prepare("DELETE FROM tasks WHERE id = ?")->execute([$id]);
-    }
-}
-
-/**
- * Grade Model
- */
-class Grade
-{
-    public static function findById(int $id): ?array
-    {
-        $db = getDB();
-        return $db->prepare("SELECT * FROM grades WHERE id = ?")->execute([$id])->fetch() ?: null;
-    }
-
-    public static function findByUser(int $userId): array
-    {
-        $db = getDB();
-        return $db->prepare("SELECT * FROM grades WHERE user_id = ? ORDER BY exam_date DESC")->execute([$userId])->fetchAll();
-    }
-
-    public static function create(int $userId, array $data): array
-    {
-        try {
-            $db = getDB();
-            $stmt = $db->prepare(
-                "INSERT INTO grades (user_id, subject_id, exam_name, marks_obtained, total_marks, exam_date) 
-                 VALUES (?, ?, ?, ?, ?, ?)"
-            );
-            $stmt->execute([
-                $userId,
-                $data['subject_id'],
-                $data['exam_name'],
-                $data['marks_obtained'],
-                $data['total_marks'],
-                $data['exam_date'] ?? date('Y-m-d')
-            ]);
-            return ['success' => true, 'id' => $db->lastInsertId()];
-        } catch (\Exception $e) {
-            return ['success' => false, 'message' => $e->getMessage()];
-        }
-    }
-}
-
-/**
- * Attendance Model
- */
-class Attendance
-{
-    public static function findById(int $id): ?array
-    {
-        $db = getDB();
-        return $db->prepare("SELECT * FROM attendance WHERE id = ?")->execute([$id])->fetch() ?: null;
-    }
-
-    public static function findByUser(int $userId): array
-    {
-        $db = getDB();
-        return $db->prepare("SELECT * FROM attendance WHERE user_id = ? ORDER BY class_date DESC")->execute([$userId])->fetchAll();
-    }
-
-    public static function record(int $userId, int $courseId, string $date, string $status, string $notes = ''): array
-    {
-        try {
-            $db = getDB();
-            $stmt = $db->prepare(
-                "INSERT INTO attendance (user_id, course_id, class_date, status, notes) 
-                 VALUES (?, ?, ?, ?, ?) 
-                 ON DUPLICATE KEY UPDATE status = VALUES(status), notes = VALUES(notes)"
-            );
-            $stmt->execute([$userId, $courseId, $date, $status, $notes]);
-            return ['success' => true];
-        } catch (\Exception $e) {
-            return ['success' => false, 'message' => $e->getMessage()];
-        }
     }
 }

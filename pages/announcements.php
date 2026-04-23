@@ -1,5 +1,8 @@
 <?php
-// pages/announcements.php
+// LEGACY FILE - REDIRECT TO MVC
+header('Location: /announcements');
+exit;
+
 require_once __DIR__ . '/../includes/auth.php';
 requireLogin();
 $user = currentUser();

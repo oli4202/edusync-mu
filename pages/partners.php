@@ -1,5 +1,8 @@
 <?php
-// pages/partners.php
+// LEGACY FILE - REDIRECT TO MVC
+header('Location: /partners');
+exit;
+
 require_once __DIR__ . '/../includes/auth.php';
 requireLogin();
 $user = currentUser();

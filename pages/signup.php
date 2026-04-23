@@ -1,7 +1,8 @@
 <?php
-// pages/signup.php
-require_once __DIR__ . '/../includes/auth.php';
-if (isLoggedIn()) { header('Location: dashboard.php'); exit(); }
+// LEGACY FILE - REDIRECT TO MVC
+header('Location: /signup');
+exit;
+
 
 $error = $success = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

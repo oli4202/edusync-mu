@@ -60,7 +60,7 @@ abstract class Controller
     protected function requireLogin(): void
     {
         if (!$this->session->isLoggedIn()) {
-            redirect('/login');
+            $this->redirect('/login');
         }
     }
 

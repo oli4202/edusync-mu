@@ -1,58 +1,199 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $pageTitle ?? 'EduSync MU'; ?></title>
+    
+    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    
+    <!-- Frameworks -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Custom Styles -->
     <link rel="stylesheet" href="/assets/css/style.css">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            bg: '#0a0e1a',
+                            card: '#111827',
+                            border: '#1e2d45',
+                        },
+                        accent: {
+                            cyan: '#22d3ee',
+                            purple: '#818cf8',
+                            emerald: '#34d399',
+                        }
+                    },
+                    fontFamily: {
+                        syne: ['Syne', 'sans-serif'],
+                        sans: ['DM Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style type="text/tailwindcss">
+        @layer components {
+            .glass-card {
+                @apply bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl;
+            }
+            .nav-link-active {
+                @apply bg-gradient-to-r from-accent-cyan/10 to-accent-purple/10 border-accent-purple/20 text-white;
+            }
+        }
+    </style>
+    
     <?php if (isset($extraStyles)) echo $extraStyles; ?>
 </head>
-<body>
-    <div class="layout">
+<body class="bg-[#0a0e1a] text-slate-200 font-sans antialiased min-h-screen" x-data="{ sidebarOpen: true }">
+    <div class="flex">
         <?php if (isset($user) && $user): ?>
             <!-- Sidebar -->
-            <aside class="sidebar">
-                <div class="sidebar-header">
-                    <h1>EduSync</h1>
+            <aside 
+                class="fixed inset-y-0 left-0 z-50 w-72 bg-[#0f172a]/95 backdrop-blur-xl border-r border-slate-800 transition-transform duration-300 transform lg:translate-x-0 lg:static lg:inset-0"
+                :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+            >
+                <div class="flex flex-col h-full p-6">
+                    <div class="mb-10">
+                        <h1 class="font-syne text-2xl font-extrabold bg-gradient-to-r from-accent-cyan to-accent-purple bg-clip-text text-transparent italic">
+                            EduSync
+                        </h1>
+                        <p class="text-[10px] text-slate-500 uppercase tracking-[0.2em] mt-1">METROPOLITAN UNIVERSITY</p>
+                    </div>
+
+                    <nav class="flex-1 space-y-2 overflow-y-auto pr-2 custom-scrollbar">
+                        <div class="text-[10px] font-bold text-accent-cyan uppercase tracking-widest px-4 mb-2 opacity-60">General</div>
+                        
+                        <a href="/dashboard" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'dashboard' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
+                            <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                            <span class="text-sm font-medium">Dashboard</span>
+                        </a>
+
+                        <a href="/subjects" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'subjects' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
+                            <i data-lucide="book-open" class="w-5 h-5"></i>
+                            <span class="text-sm font-medium">Subjects</span>
+                        </a>
+
+                        <a href="/tasks" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'tasks' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
+                            <i data-lucide="check-square" class="w-5 h-5"></i>
+                            <span class="text-sm font-medium">Tasks</span>
+                        </a>
+
+                        <div class="pt-4 pb-2">
+                            <div class="text-[10px] font-bold text-accent-cyan uppercase tracking-widest px-4 mb-2 opacity-60">Academic</div>
+                        </div>
+
+                        <a href="/grades" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'grades' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
+                            <i data-lucide="graduation-cap" class="w-5 h-5"></i>
+                            <span class="text-sm font-medium">Grades</span>
+                        </a>
+
+                        <a href="/attendance" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'attendance' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
+                            <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                            <span class="text-sm font-medium">Attendance</span>
+                        </a>
+
+                        <a href="/flashcards" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'flashcards' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
+                            <i data-lucide="layers" class="w-5 h-5"></i>
+                            <span class="text-sm font-medium">Flashcards</span>
+                        </a>
+
+                        <a href="/groups" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'groups' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
+                            <i data-lucide="users" class="w-5 h-5"></i>
+                            <span class="text-sm font-medium">Study Groups</span>
+                        </a>
+
+                        <?php if ($this->session->userRole() === 'admin'): ?>
+                            <div class="pt-4 pb-2">
+                                <div class="text-[10px] font-bold text-red-400 uppercase tracking-widest px-4 mb-2 opacity-60">Administration</div>
+                            </div>
+                            <a href="/admin" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'admin' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
+                                <i data-lucide="shield-check" class="w-5 h-5"></i>
+                                <span class="text-sm font-medium">Admin Panel</span>
+                            </a>
+                        <?php endif; ?>
+                    </nav>
+
+                    <div class="mt-auto pt-6 border-t border-slate-800">
+                        <div class="flex items-center gap-3 px-2 mb-4">
+                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-cyan to-accent-purple flex items-center justify-center font-bold text-dark-bg shadow-lg shadow-accent-cyan/20">
+                                <?php echo strtoupper(substr($user['name'] ?? 'U', 0, 1)); ?>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-bold truncate"><?php echo htmlspecialchars($user['name'] ?? ''); ?></p>
+                                <p class="text-[10px] text-slate-500 truncate uppercase tracking-tighter"><?php echo htmlspecialchars($user['role'] ?? 'Student'); ?></p>
+                            </div>
+                        </div>
+                        <a href="/logout" class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-800 bg-white/5 hover:bg-red-500/10 hover:border-red-500/20 hover:text-red-400 transition-all duration-200 text-xs font-semibold">
+                            <i data-lucide="log-out" class="w-4 h-4"></i>
+                            Logout
+                        </a>
+                    </div>
                 </div>
-                <nav class="sidebar-nav">
-                    <a href="/dashboard" class="nav-link <?php echo ($currentPage ?? '') === 'dashboard' ? 'active' : ''; ?>">Dashboard</a>
-                    <a href="/subjects" class="nav-link <?php echo ($currentPage ?? '') === 'subjects' ? 'active' : ''; ?>">Subjects</a>
-                    <a href="/tasks" class="nav-link <?php echo ($currentPage ?? '') === 'tasks' ? 'active' : ''; ?>">Tasks</a>
-                    <a href="/grades" class="nav-link <?php echo ($currentPage ?? '') === 'grades' ? 'active' : ''; ?>">Grades</a>
-                    <a href="/attendance" class="nav-link <?php echo ($currentPage ?? '') === 'attendance' ? 'active' : ''; ?>">Attendance</a>
-                    <a href="/flashcards" class="nav-link <?php echo ($currentPage ?? '') === 'flashcards' ? 'active' : ''; ?>">Flashcards</a>
-                    <a href="/groups" class="nav-link <?php echo ($currentPage ?? '') === 'groups' ? 'active' : ''; ?>">Groups</a>
-                    <a href="/logout" class="nav-link">Logout</a>
-                </nav>
             </aside>
 
             <!-- Main Content -->
-            <main class="main-content">
-                <header class="top-bar">
-                    <div class="user-info">
-                        <span><?php echo htmlspecialchars($user['name'] ?? ''); ?></span>
+            <div class="flex-1 flex flex-col min-h-screen relative overflow-hidden">
+                <!-- Background Decorations -->
+                <div class="absolute top-0 right-0 -z-10 w-96 h-96 bg-accent-cyan/10 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2"></div>
+                <div class="absolute bottom-0 left-0 -z-10 w-96 h-96 bg-accent-purple/10 blur-[120px] rounded-full -translate-x-1/2 translate-y-1/2"></div>
+
+                <!-- Top Header -->
+                <header class="h-20 flex items-center justify-between px-8 bg-[#0a0e1a]/50 backdrop-blur-md sticky top-0 z-40 border-b border-white/5">
+                    <button @click="sidebarOpen = !sidebarOpen" class="lg:hidden text-slate-400 hover:text-white">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+
+                    <div class="flex-1 flex items-center justify-end gap-6">
+                        <div class="hidden md:flex items-center gap-4 text-xs font-medium text-slate-400">
+                            <span class="flex items-center gap-1.5"><i data-lucide="flame" class="w-4 h-4 text-orange-500"></i> <?php echo $user['streak'] ?? 0; ?> Day Streak</span>
+                        </div>
                     </div>
                 </header>
 
-                <div class="content">
+                <!-- Page Content -->
+                <main class="flex-1 p-8">
                     <?php if (isset($flash) && $flash): ?>
-                        <div class="alert alert-<?php echo htmlspecialchars($flash['type']); ?>">
-                            <?php echo htmlspecialchars($flash['message']); ?>
+                        <div 
+                            x-data="{ show: true }" 
+                            x-show="show" 
+                            x-init="setTimeout(() => show = false, 5000)"
+                            class="mb-8 p-4 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300 <?php echo $flash['type'] === 'success' ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' : 'bg-red-500/10 border border-red-500/20 text-red-400'; ?>"
+                        >
+                            <i data-lucide="<?php echo $flash['type'] === 'success' ? 'check-circle' : 'alert-circle'; ?>" class="w-5 h-5"></i>
+                            <span class="text-sm font-medium"><?php echo htmlspecialchars($flash['message']); ?></span>
                         </div>
                     <?php endif; ?>
                     
-                    <?php echo $content; ?>
-                </div>
-            </main>
+                    <div class="animate-in fade-in duration-700">
+                        <?php echo $content; ?>
+                    </div>
+                </main>
+            </div>
         <?php else: ?>
-            <!-- Full width for auth pages -->
-            <?php echo $content; ?>
+            <!-- Auth Pages -->
+            <main class="flex-1">
+                <?php echo $content; ?>
+            </main>
         <?php endif; ?>
     </div>
 
+    <!-- Scripts -->
+    <script>
+        lucide.createIcons();
+    </script>
     <script src="/assets/js/main.js"></script>
     <?php if (isset($extraScripts)) echo $extraScripts; ?>
 </body>
 </html>
+

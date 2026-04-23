@@ -1,5 +1,8 @@
 <?php
-// pages/ai.php
+// LEGACY FILE - REDIRECT TO MVC
+header('Location: /ai');
+exit;
+
 require_once __DIR__ . '/../includes/auth.php';
 requireLogin();
 $user = currentUser();

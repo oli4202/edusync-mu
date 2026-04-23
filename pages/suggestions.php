@@ -1,5 +1,8 @@
 <?php
-// pages/suggestions.php
+// LEGACY FILE - REDIRECT TO MVC
+header('Location: /suggestions');
+exit;
+
 require_once __DIR__ . '/../includes/auth.php';
 requireLogin();
 $user = currentUser();

@@ -1,5 +1,8 @@
 <?php
-// pages/fees.php
+// LEGACY FILE - REDIRECT TO MVC
+header('Location: /fees');
+exit;
+
 require_once __DIR__ . '/../includes/auth.php';
 requireLogin();
 $user = currentUser();

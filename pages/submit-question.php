@@ -1,5 +1,8 @@
 <?php
-// pages/submit-question.php
+// LEGACY FILE - REDIRECT TO MVC
+header('Location: /question-bank/submit');
+exit;
+
 require_once __DIR__ . '/../includes/auth.php';
 requireLogin();
 $user = currentUser();

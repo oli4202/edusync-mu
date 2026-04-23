@@ -1,9 +1,8 @@
 <?php
-// pages/dashboard.php
-require_once __DIR__ . '/../includes/auth.php';
-requireLogin();
-$user = currentUser();
-$db   = getDB();
+// LEGACY FILE - REDIRECT TO MVC
+header('Location: /dashboard');
+exit;
+
 
 // Stats
 $tasksDue = $db->prepare("SELECT COUNT(*) FROM tasks WHERE user_id=? AND status!='done' AND due_date <= DATE_ADD(NOW(), INTERVAL 3 DAY)");

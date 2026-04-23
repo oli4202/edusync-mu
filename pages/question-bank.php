@@ -1,5 +1,8 @@
 <?php
-// pages/question-bank.php — MU SWE Question Bank with Analysis
+// LEGACY FILE - REDIRECT TO MVC
+header('Location: /question-bank');
+exit;
+
 require_once __DIR__ . '/../includes/auth.php';
 requireLogin();
 $user = currentUser();
