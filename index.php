@@ -25,103 +25,126 @@ $router = new Router();
 // ============================================================
 
 // Authentication routes
-$router->get('/login', 'AuthController@login');
-$router->post('/auth/login', 'AuthController@doLogin');
-$router->get('/signup', 'AuthController@signup');
-$router->post('/auth/signup', 'AuthController@doSignup');
-$router->get('/logout', 'AuthController@logout');
+$router->get('/login', 'App\Controllers\AuthController@login');
+$router->post('/auth/login', 'App\Controllers\AuthController@doLogin');
+$router->get('/signup', 'App\Controllers\AuthController@signup');
+$router->post('/auth/signup', 'App\Controllers\AuthController@doSignup');
+$router->get('/logout', 'App\Controllers\AuthController@logout');
 
 // Dashboard routes
-$router->get('/dashboard', 'DashboardController@index');
-$router->get('/analytics', 'DashboardController@analytics');
-$router->get('/subjects', 'DashboardController@subjects');
-$router->get('/tasks', 'DashboardController@tasks');
-$router->get('/grades', 'DashboardController@grades');
-$router->get('/attendance', 'DashboardController@attendance');
-$router->get('/calendar', 'DashboardController@calendar');
+$router->get('/dashboard', 'App\Controllers\DashboardController@index');
+$router->get('/analytics', 'App\Controllers\DashboardController@analytics');
+$router->get('/subjects', 'App\Controllers\DashboardController@subjects');
+$router->post('/subjects', 'App\Controllers\DashboardController@subjects');
+$router->get('/tasks', 'App\Controllers\DashboardController@tasks');
+$router->post('/tasks', 'App\Controllers\DashboardController@tasks');
+$router->get('/grades', 'App\Controllers\DashboardController@grades');
+$router->post('/grades', 'App\Controllers\DashboardController@grades');
+$router->get('/attendance', 'App\Controllers\DashboardController@attendance');
+$router->post('/attendance', 'App\Controllers\DashboardController@attendance');
+$router->get('/calendar', 'App\Controllers\DashboardController@calendar');
 
 // Flashcard routes
-$router->get('/flashcards', 'FlashcardController@index');
-$router->post('/flashcards/add', 'FlashcardController@add');
-$router->post('/flashcards/delete', 'FlashcardController@delete');
-$router->post('/flashcards/generate', 'FlashcardController@generate');
+$router->get('/flashcards', 'App\Controllers\FlashcardController@index');
+$router->post('/flashcards/add', 'App\Controllers\FlashcardController@add');
+$router->post('/flashcards/delete', 'App\Controllers\FlashcardController@delete');
+$router->post('/flashcards/generate', 'App\Controllers\FlashcardController@generate');
 
 // Group routes
-$router->get('/groups', 'GroupController@index');
-$router->post('/groups/create', 'GroupController@create');
-$router->post('/groups/join', 'GroupController@join');
-$router->post('/groups/leave', 'GroupController@leave');
+$router->get('/groups', 'App\Controllers\GroupController@index');
+$router->post('/groups/create', 'App\Controllers\GroupController@create');
+$router->post('/groups/join', 'App\Controllers\GroupController@join');
+$router->post('/groups/leave', 'App\Controllers\GroupController@leave');
 
 // Announcement routes
-$router->get('/announcements', 'AnnouncementController@index');
-$router->post('/announcements/post', 'AnnouncementController@post');
-$router->post('/announcements/delete', 'AnnouncementController@delete');
-$router->post('/announcements/pin', 'AnnouncementController@pin');
+$router->get('/announcements', 'App\Controllers\AnnouncementController@index');
+$router->post('/announcements/post', 'App\Controllers\AnnouncementController@post');
+$router->post('/announcements/delete', 'App\Controllers\AnnouncementController@delete');
+$router->post('/announcements/pin', 'App\Controllers\AnnouncementController@pin');
 
 // Fee routes
-$router->get('/fees', 'FeeController@index');
-$router->post('/fees/add', 'FeeController@add');
-$router->post('/fees/delete', 'FeeController@delete');
+$router->get('/fees', 'App\Controllers\FeeController@index');
+$router->post('/fees/add', 'App\Controllers\FeeController@add');
+$router->post('/fees/delete', 'App\Controllers\FeeController@delete');
 
 // Question Bank routes
-$router->get('/question-bank', 'QuestionBankController@index');
-$router->get('/question-bank/:id', 'QuestionBankController@detail');
-$router->post('/question-bank/:id', 'QuestionBankController@detail');
-$router->get('/question-bank/submit', 'QuestionBankController@submit');
-$router->post('/question-bank/submit', 'QuestionBankController@submit');
-$router->post('/api/question-bank/bookmark', 'QuestionBankController@bookmark');
-$router->post('/api/question-bank/upvote', 'QuestionBankController@upvote');
-$router->post('/api/question-bank/compact-answer', 'QuestionBankController@compactAnswer');
+$router->get('/question-bank', 'App\Controllers\QuestionBankController@index');
+$router->get('/question-bank/:id', 'App\Controllers\QuestionBankController@detail');
+$router->post('/question-bank/:id', 'App\Controllers\QuestionBankController@detail');
+$router->get('/question-bank/submit', 'App\Controllers\QuestionBankController@submit');
+$router->post('/question-bank/submit', 'App\Controllers\QuestionBankController@submit');
+$router->post('/api/question-bank/bookmark', 'App\Controllers\QuestionBankController@bookmark');
+$router->post('/api/question-bank/upvote', 'App\Controllers\QuestionBankController@upvote');
+$router->post('/api/question-bank/compact-answer', 'App\Controllers\QuestionBankController@compactAnswer');
 
 // Learn routes
-$router->get('/learn', 'LearnController@index');
+$router->get('/learn', 'App\Controllers\LearnController@index');
 
 // Job & Partner routes
-$router->get('/jobs', 'JobController@index');
-$router->post('/jobs/post', 'JobController@post');
-$router->post('/jobs/save', 'JobController@save');
-$router->get('/partners', 'JobController@partners');
-$router->post('/partners/follow', 'JobController@follow');
-$router->post('/partners/unfollow', 'JobController@unfollow');
+$router->get('/jobs', 'App\Controllers\JobController@index');
+$router->post('/jobs/post', 'App\Controllers\JobController@post');
+$router->post('/jobs/save', 'App\Controllers\JobController@save');
+$router->get('/partners', 'App\Controllers\JobController@partners');
+$router->post('/partners/follow', 'App\Controllers\JobController@follow');
+$router->post('/partners/unfollow', 'App\Controllers\JobController@unfollow');
 
 // AI routes
-$router->get('/ai', 'AiController@index');
-$router->get('/playground', 'AiController@playground');
-$router->get('/suggestions', 'AiController@suggestions');
-$router->post('/api/ai/chat', 'AiController@chat');
-$router->post('/api/ai/suggest', 'AiController@suggest');
-$router->post('/api/playground/run-python', 'AiController@runPython');
-$router->post('/api/playground/run-sql', 'AiController@runSql');
+$router->get('/ai', 'App\Controllers\AiController@index');
+$router->get('/playground', 'App\Controllers\AiController@playground');
+$router->get('/suggestions', 'App\Controllers\AiController@suggestions');
+$router->post('/api/ai/chat', 'App\Controllers\AiController@chat');
+$router->post('/api/ai/suggest', 'App\Controllers\AiController@suggest');
+$router->post('/api/ai/summarize', 'App\Controllers\AiController@summarize');
+$router->post('/api/ai/quiz', 'App\Controllers\AiController@generateQuiz');
+$router->post('/api/ai/ocr', 'App\Controllers\AiController@ocr');
+$router->post('/api/playground/run-python', 'App\Controllers\AiController@runPython');
+$router->post('/api/playground/run-sql', 'App\Controllers\AiController@runSql');
 
 // Miscellaneous routes
-$router->get('/prospectus', 'MiscController@prospectus');
-$router->get('/result-lookup', 'MiscController@resultLookup');
-$router->post('/api/result-lookup', 'MiscController@lookupOfficialResult');
+$router->get('/prospectus', 'App\Controllers\MiscController@prospectus');
+$router->get('/result-lookup', 'App\Controllers\MiscController@resultLookup');
+$router->post('/api/result-lookup', 'App\Controllers\MiscController@lookupOfficialResult');
 
 // Admin routes
-$router->get('/admin', 'AdminController@index');
-$router->get('/admin/attendance', 'AdminController@manageAttendance');
-$router->post('/admin/attendance', 'AdminController@manageAttendance');
-$router->get('/admin/api-settings', 'AdminController@apiSettings');
-$router->post('/admin/api-settings', 'AdminController@apiSettings');
-$router->post('/admin/questions/approve', 'AdminController@approveQuestion');
-$router->post('/admin/questions/reject', 'AdminController@rejectQuestion');
-$router->post('/admin/answers/approve', 'AdminController@approveAnswer');
-$router->post('/admin/answers/reject', 'AdminController@rejectAnswer');
+$router->get('/admin', 'App\Controllers\AdminController@index');
+$router->get('/admin/attendance', 'App\Controllers\AdminController@manageAttendance');
+$router->post('/admin/attendance', 'App\Controllers\AdminController@manageAttendance');
+$router->get('/admin/attendance/sheet', 'App\Controllers\AdminController@attendanceSheet');
+$router->get('/admin/students', 'App\Controllers\AdminController@studentDirectory');
+$router->get('/admin/api-settings', 'App\Controllers\AdminController@apiSettings');
+$router->post('/admin/api-settings', 'App\Controllers\AdminController@apiSettings');
+$router->post('/admin/questions/approve', 'App\Controllers\AdminController@approveQuestion');
+$router->post('/admin/questions/reject', 'App\Controllers\AdminController@rejectQuestion');
+$router->post('/admin/answers/approve', 'App\Controllers\AdminController@approveAnswer');
+$router->post('/admin/answers/reject', 'App\Controllers\AdminController@rejectAnswer');
+
+// Course API routes
+$router->get('/api/courses/semesters', 'App\Controllers\CourseController@semesters');
+$router->get('/api/courses/filter', 'App\Controllers\CourseController@filter');
+$router->get('/api/students/lookup', 'App\Controllers\AuthController@lookupStudent');
 
 // Page routes (dynamic)
+$router->get('/:page', 'App\Controllers\PageController@page');
+$router->get('/pages/:page', 'App\Controllers\PageController@page');
+$router->get('/admin/:page', 'App\Controllers\PageController@page');
 
-$router->get('/:page', 'PageController@page');
+// Legacy AJAX redirects (for compatibility with old JS)
+$router->get('/ajax/:page', 'App\Controllers\PageController@page');
+$router->post('/ajax/:page', 'App\Controllers\PageController@page');
 
-// API/AJAX routes (if needed)
-// $router->post('/api/task/create', 'AjaxController@createTask');
-// $router->post('/api/task/update/:id', 'AjaxController@updateTask');
+// Explicit legacy mappings for POST AJAX calls
+$router->post('/ajax/ai-suggest.php', 'App\Controllers\AiController@suggest');
+$router->post('/ajax/ai-compact.php', 'App\Controllers\QuestionBankController@compactAnswer');
+$router->post('/ajax/bookmark.php', 'App\Controllers\QuestionBankController@bookmark');
+$router->post('/ajax/upvote.php', 'App\Controllers\QuestionBankController@upvote');
+$router->post('/ajax/mu-result.php', 'App\Controllers\MiscController@lookupOfficialResult');
+$router->post('/ajax/run-python.php', 'App\Controllers\AiController@runPython');
+$router->post('/ajax/run-sql.php', 'App\Controllers\AiController@runSql');
 
 // Dispatch request
 $method = $_SERVER['REQUEST_METHOD'];
 
 // Get the request URI, prioritizing the 'url' parameter from .htaccess
-// This helps when the app is installed in a subdirectory
 $uri = $_GET['url'] ?? $_SERVER['REQUEST_URI'] ?? '/';
 
 // If we got it from REQUEST_URI, we might need to remove the query string
@@ -136,10 +159,11 @@ if (empty($uri) || $uri[0] !== '/') {
 
 // Handle root redirect
 if ($uri === '/' || $uri === '/index.php') {
-    if ((new \App\Core\Session())->isLoggedIn()) {
-        header('Location: /dashboard');
+    $session = new \App\Core\Session();
+    if ($session->isLoggedIn()) {
+        redirect('/dashboard');
     } else {
-        header('Location: /login');
+        redirect('/login');
     }
     exit;
 }

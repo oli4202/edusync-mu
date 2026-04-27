@@ -13,23 +13,34 @@
 </div>
 
 <div class="form-card-admin">
+    <div style="margin-bottom: 24px; text-align: center;">
+        <h2 class="font-syne text-xl font-bold text-white">AI Configuration</h2>
+        <p class="text-xs text-slate-500 mt-1">Configure your API keys to power all AI features</p>
+    </div>
+
     <?php if (isset($message) && $message): ?>
-    <div class="alert alert-success">✅ <?= htmlspecialchars($message) ?></div>
+    <div class="alert alert-success" style="margin-bottom: 20px;">✅ <?= htmlspecialchars($message) ?></div>
     <?php endif; ?>
 
     <form method="POST">
         <div class="form-group-admin">
-            <label class="label-admin" for="claude">Claude API Key</label>
-            <input type="text" id="claude" name="claude" class="input-admin" value="<?= htmlspecialchars($api_keys['CLAUDE_API_KEY'] ?? '') ?>" placeholder="Enter Claude API Key">
+            <label class="label-admin" for="groq">Groq API Key (Main Text Engine)</label>
+            <input type="text" id="groq" name="groq" class="input-admin" value="<?= htmlspecialchars($api_keys['GROQ_API_KEY'] ?? '') ?>" placeholder="gsk_...">
+            <small style="color: var(--muted); font-size: 11px; margin-top: 8px; display: block; line-height: 1.4;">
+                Get your free API key from the <a href="https://console.groq.com/keys" target="_blank" style="color: var(--accent);">Groq Console</a>. 
+            </small>
         </div>
+
         <div class="form-group-admin">
-            <label class="label-admin" for="gemini">Gemini API Key</label>
-            <input type="text" id="gemini" name="gemini" class="input-admin" value="<?= htmlspecialchars($api_keys['GEMINI_API_KEY'] ?? '') ?>" placeholder="Enter Gemini API Key">
+            <label class="label-admin" for="gemini">Gemini API Key (Image Analysis)</label>
+            <input type="text" id="gemini" name="gemini" class="input-admin" value="<?= htmlspecialchars($api_keys['GEMINI_API_KEY'] ?? '') ?>" placeholder="AIzaSy...">
+            <small style="color: var(--muted); font-size: 11px; margin-top: 8px; display: block; line-height: 1.4;">
+                Get your free Gemini API key from <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: var(--accent);">Google AI Studio</a>.
+            </small>
         </div>
-        <div class="form-group-admin">
-            <label class="label-admin" for="hf">Hugging Face API Key</label>
-            <input type="text" id="hf" name="hf" class="input-admin" value="<?= htmlspecialchars($api_keys['HF_API_KEY'] ?? '') ?>" placeholder="Enter Hugging Face API Key">
-        </div>
-        <button type="submit" class="btn btn-primary">Save API Keys</button>
+        
+        <button type="submit" class="btn btn-primary w-full" style="margin-top: 10px;">
+            Save & Activate AI
+        </button>
     </form>
 </div>

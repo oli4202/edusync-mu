@@ -36,6 +36,11 @@ class Router
      */
     public function dispatch(string $method, string $uri): bool
     {
+        // Treat HEAD as GET
+        if ($method === 'HEAD') {
+            $method = 'GET';
+        }
+
         // Normalize URI (remove trailing slashes and query strings)
         $uri = parse_url($uri, PHP_URL_PATH);
         $uri = rtrim($uri, '/') ?: '/';

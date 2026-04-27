@@ -60,6 +60,16 @@
 <div class="qb-layout">
     <div class="qb-sidebar">
         <div class="filter-panel">
+            <div class="fp-title">Batches</div>
+            <a href="/question-bank" class="course-btn <?= !$filters['batch'] ? 'on' : '' ?>">All Batches</a>
+            <?php foreach ($availableBatches as $batch): ?>
+                <a href="/question-bank?batch=<?= urlencode($batch) ?>" class="course-btn <?= $filters['batch'] == $batch ? 'on' : '' ?>">
+                    Batch <?= htmlspecialchars($batch) ?>
+                </a>
+            <?php endforeach; ?>
+        </div>
+
+        <div class="filter-panel">
             <div class="fp-title">Courses</div>
             <a href="/question-bank" class="course-btn <?= !$filters['course'] ? 'on' : '' ?>">
                 All Courses <span class="cnt"><?= $totalQuestionCount ?></span>

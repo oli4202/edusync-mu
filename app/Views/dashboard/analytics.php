@@ -2,7 +2,7 @@
 $currentPage = 'analytics';
 $dailyLabels = array_map(static fn ($row) => date('M j', strtotime($row['date'])), $studyLogs ?? []);
 $dailyValues = array_map(static fn ($row) => (float) ($row['total'] ?? 0), $studyLogs ?? []);
-$gradeLabels = array_map(static fn ($row) => 'Subject #' . ($row['subject_id'] ?? '?'), $grades ?? []);
+$gradeLabels = array_map(static fn ($row) => $row['subject_name'] ?? ('Subject #' . ($row['subject_id'] ?? '?')), $grades ?? []);
 $gradeValues = array_map(static fn ($row) => round((float) ($row['avg_score'] ?? 0), 1), $grades ?? []);
 $totalStudyHours = array_sum($dailyValues);
 $activeStudyDays = count(array_filter($dailyValues, static fn ($hours) => $hours > 0));

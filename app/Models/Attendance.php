@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use function App\getDB;
+use function getDB;
 
 /**
  * Attendance Model
@@ -20,9 +20,50 @@ class Attendance
     public static function findByUser(int $userId): array
     {
         $db = getDB();
-        $stmt = $db->prepare("SELECT * FROM attendance WHERE user_id = ? ORDER BY class_date DESC");
+        $stmt = $db->prepare("
+            SELECT a.*, c.code AS course_code, c.name AS course_name
+            FROM attendance a
+            INNER JOIN courses c ON c.id = a.course_id
+            WHERE a.user_id = ?
+            ORDER BY a.class_date DESC, c.name ASC
+        ");
         $stmt->execute([$userId]);
         return $stmt->fetchAll();
+    }
+
+    public static function findByBatch(string $batch): array
+    {
+        $db = getDB();
+        // If batch is empty, we still want to show something relevant, or nothing if strict
+        if ($batch === '') return [];
+
+        $stmt = $db->prepare("
+            SELECT a.*, c.code AS course_code, c.name AS course_name, u.name AS student_name, u.student_id AS sid
+            FROM attendance a
+            INNER JOIN courses c ON c.id = a.course_id
+            INNER JOIN users u ON u.id = a.user_id
+            WHERE u.batch = ?
+            ORDER BY a.class_date DESC, c.name ASC, u.name ASC
+        ");
+        $stmt->execute([$batch]);
+        return $stmt->fetchAll();
+    }
+
+    public static function getBatchStats(string $batch): array
+    {
+        $db = getDB();
+        if ($batch === '') return ['total_records' => 0, 'present_count' => 0];
+
+        $stmt = $db->prepare("
+            SELECT 
+                COUNT(*) as total_records,
+                SUM(CASE WHEN a.status = 'present' THEN 1 ELSE 0 END) as present_count
+            FROM attendance a
+            INNER JOIN users u ON u.id = a.user_id
+            WHERE u.batch = ?
+        ");
+        $stmt->execute([$batch]);
+        return $stmt->fetch();
     }
 
     public static function record(int $userId, int $courseId, string $date, string $status, string $notes = ''): array

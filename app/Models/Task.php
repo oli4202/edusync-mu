@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use function App\getDB;
+use function getDB;
 
 /**
  * Task Model

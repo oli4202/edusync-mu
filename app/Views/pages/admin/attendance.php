@@ -29,6 +29,11 @@
     <a href="/admin" class="btn btn-outline btn-sm">← Back to Admin Panel</a>
 </div>
 
+<div style="margin-bottom: 20px;">
+    <a href="/admin" class="btn btn-outline btn-sm">Back to Admin Panel</a>
+    <a href="/admin/students" class="btn btn-outline btn-sm" style="margin-left:10px;">Student Lookup</a>
+</div>
+
 <!-- Stats -->
 <div class="stats-grid">
     <div class="stat"><div class="stat-val"><?= $stats['totalRecords'] ?></div><div class="stat-lbl">Total Records</div></div>
@@ -41,31 +46,34 @@
     <div class="card-title-admin">📅 Select Course & Date</div>
     <form method="GET" class="filter-bar-admin">
         <div>
-            <label>Course</label>
-            <select name="course_id" required>
-                <option value="">Select course...</option>
-                <?php
-                $currentYear = null;
-                $currentSemester = null;
-                foreach ($courses as $c):
-                    if ($c['year'] != $currentYear || $c['semester'] != $currentSemester):
-                        if ($currentYear !== null) echo '</optgroup>';
-                        $yearLabel = $c['year'] . 'st Year';
-                        if ($c['year'] == 2) $yearLabel = '2nd Year';
-                        if ($c['year'] == 3) $yearLabel = '3rd Year';
-                        if ($c['year'] >= 4) $yearLabel = $c['year'] . 'th Year';
-                        echo '<optgroup label="' . $yearLabel . ' - Semester ' . $c['semester'] . '">';
-                        $currentYear = $c['year'];
-                        $currentSemester = $c['semester'];
-                    endif;
-                ?>
-                <option value="<?= $c['id'] ?>" <?= $selCourse == $c['id'] ? 'selected' : '' ?>><?= htmlspecialchars($c['code'].' — '.$c['name']) ?></option>
+            <label>Filter Batch</label>
+            <select name="batch" id="batchSelect">
+                <option value="">All Batches</option>
+                <?php foreach ($availableBatches as $batch): ?>
+                    <option value="<?= htmlspecialchars($batch) ?>" <?= $selBatch == $batch ? 'selected' : '' ?>>Batch <?= htmlspecialchars($batch) ?></option>
                 <?php endforeach; ?>
-                <?php if (!empty($courses)) echo '</optgroup>'; ?>
             </select>
         </div>
         <div>
-            <label>Class Date</label>
+            <label>Semester</label>
+            <select name="semester" id="semesterSelect">
+                <option value="">Select batch...</option>
+                <?php if ($selSemester): ?>
+                    <option value="<?= $selSemester ?>" selected>Semester <?= $selSemester ?></option>
+                <?php endif; ?>
+            </select>
+        </div>
+        <div>
+            <label>Course</label>
+            <select name="course_id" id="courseSelect" required>
+                <option value="">Select semester...</option>
+                <?php foreach ($courses as $c): ?>
+                    <option value="<?= $c['id'] ?>" <?= $selCourse == $c['id'] ? 'selected' : '' ?>><?= htmlspecialchars($c['code'].' — '.$c['name']) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div>
+            <label>Date</label>
             <input type="date" name="class_date" value="<?= $selDate ?>" required>
         </div>
         <button type="submit" class="btn btn-primary">Load Students</button>
@@ -90,12 +98,15 @@
         <button type="button" class="bulk-btn-admin" onclick="setAll('present')">✅ All Present</button>
         <button type="button" class="bulk-btn-admin" onclick="setAll('absent')">❌ All Absent</button>
         <button type="button" class="bulk-btn-admin" onclick="setAll('late')">⏰ All Late</button>
+        <a href="/admin/attendance/sheet?course_id=<?= $selCourse ?>&batch=<?= urlencode($selBatch) ?>&semester=<?= $selSemester ?>" class="bulk-btn-admin no-print" target="_blank" style="margin-left:auto; text-decoration:none;">🖨️ Printable Sheet</a>
     </div>
 
     <form method="POST">
         <input type="hidden" name="action" value="bulk_mark">
         <input type="hidden" name="course_id" value="<?= $selCourse ?>">
         <input type="hidden" name="class_date" value="<?= htmlspecialchars($selDate) ?>">
+        <input type="hidden" name="batch" value="<?= htmlspecialchars($selBatch) ?>">
+        <input type="hidden" name="semester" value="<?= htmlspecialchars((string) $selSemester) ?>">
         
         <table class="student-table-admin">
             <thead>
@@ -118,6 +129,9 @@
                     <td>
                         <div style="font-weight:500;"><?= htmlspecialchars($s['name']) ?></div>
                         <div style="font-size:11px;color:var(--muted);"><?= htmlspecialchars($s['email']) ?></div>
+                        <?php if (!empty($s['memberships'])): ?>
+                        <div style="font-size:11px;color:var(--muted);margin-top:4px;"><?= htmlspecialchars($s['memberships']) ?></div>
+                        <?php endif; ?>
                     </td>
                     <td style="font-size:13px;color:var(--muted);"><?= htmlspecialchars($s['student_id'] ?: '—') ?></td>
                     <td>
@@ -180,5 +194,95 @@ function setAll(status) {
     document.querySelectorAll('.att-select').forEach(sel => sel.value = status);
     document.querySelectorAll('.bulk-btn-admin').forEach(b => b.classList.remove('active'));
     event.target.classList.add('active');
+}
+
+document.getElementById('batchSelect').addEventListener('change', function() {
+    const batch = this.value;
+    const semSelect = document.getElementById('semesterSelect');
+    const courseSelect = document.getElementById('courseSelect');
+    
+    semSelect.innerHTML = '<option value="">Loading...</option>';
+    courseSelect.innerHTML = '<option value="">Select semester...</option>';
+
+    if (!batch) {
+        semSelect.innerHTML = '<option value="">Select batch...</option>';
+        return;
+    }
+
+    fetch(`/api/courses/semesters?batch=${batch}`)
+        .then(res => res.json())
+        .then(data => {
+            semSelect.innerHTML = '<option value="">Select semester...</option>';
+            data.forEach(sem => {
+                const opt = document.createElement('option');
+                opt.value = sem;
+                opt.textContent = `Semester ${sem}`;
+                semSelect.appendChild(opt);
+            });
+            // If we have a selected semester, trigger its change
+            if (semSelect.value) semSelect.dispatchEvent(new Event('change'));
+        });
+});
+
+document.getElementById('semesterSelect').addEventListener('change', function() {
+    const batch = document.getElementById('batchSelect').value;
+    const semester = this.value;
+    const courseSelect = document.getElementById('courseSelect');
+
+    if (!batch || !semester) {
+        courseSelect.innerHTML = '<option value="">Select semester...</option>';
+        return;
+    }
+
+    courseSelect.innerHTML = '<option value="">Loading courses...</option>';
+
+    fetch(`/api/courses/filter?batch=${batch}&semester=${semester}`)
+        .then(res => res.json())
+        .then(data => {
+            courseSelect.innerHTML = '<option value="">Select course...</option>';
+            data.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.textContent = `${c.code} — ${c.name}`;
+                courseSelect.appendChild(opt);
+            });
+        });
+});
+
+// Initialize on page load if batch is selected
+if (document.getElementById('batchSelect').value) {
+    const batch = document.getElementById('batchSelect').value;
+    const currentSem = "<?= $selSemester ?>";
+    const currentCourse = "<?= $selCourse ?>";
+
+    fetch(`/api/courses/semesters?batch=${batch}`)
+        .then(res => res.json())
+        .then(data => {
+            const semSelect = document.getElementById('semesterSelect');
+            semSelect.innerHTML = '<option value="">Select semester...</option>';
+            data.forEach(sem => {
+                const opt = document.createElement('option');
+                opt.value = sem;
+                opt.textContent = `Semester ${sem}`;
+                if (sem == currentSem) opt.selected = true;
+                semSelect.appendChild(opt);
+            });
+
+            if (currentSem) {
+                fetch(`/api/courses/filter?batch=${batch}&semester=${currentSem}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        const courseSelect = document.getElementById('courseSelect');
+                        courseSelect.innerHTML = '<option value="">Select course...</option>';
+                        data.forEach(c => {
+                            const opt = document.createElement('option');
+                            opt.value = c.id;
+                            opt.textContent = `${c.code} — ${c.name}`;
+                            if (c.id == currentCourse) opt.selected = true;
+                            courseSelect.appendChild(opt);
+                        });
+                    });
+            }
+        });
 }
 </script>

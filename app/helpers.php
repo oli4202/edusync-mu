@@ -1,7 +1,5 @@
 <?php
 
-namespace App;
-
 /**
  * Helper functions for the application
  */
@@ -75,40 +73,85 @@ function baseUrl(): string
 }
 
 /**
- * Call Google Gemini 2.5 Flash API for AI features
+ * Call AI API (Supports Groq for text and Gemini for images)
  */
-function callAI(string $prompt, string $systemPrompt = ''): array
+function callAI(string $prompt, string $systemPrompt = '', string $base64Image = ''): array
 {
-    $apiKey = getenv('GEMINI_API_KEY') ?: '';
-    if (!$apiKey || $apiKey === 'YOUR_GEMINI_API_KEY_HERE') {
-        return [
-            'success' => false,
-            'text' => "Gemini API key not configured"
+    // Try environment variables or config
+    $apiKeysPath = __DIR__ . '/../config/api-keys.php';
+    $api_keys = [];
+    if (file_exists($apiKeysPath)) {
+        include $apiKeysPath;
+    }
+
+    $geminiKey = getenv('GEMINI_API_KEY') ?: ($api_keys['GEMINI_API_KEY'] ?? '');
+    $groqKey = getenv('GROQ_API_KEY') ?: ($api_keys['GROQ_API_KEY'] ?? '');
+
+    // 1. Use Gemini specifically for images (Image-to-Text)
+    if ($base64Image && $geminiKey && strpos($geminiKey, 'YOUR_') === false) {
+        return callGeminiAI($prompt, $systemPrompt, $geminiKey, $base64Image);
+    }
+
+    // 2. Use Groq for everything else (Mainly side)
+    if ($groqKey && strpos($groqKey, 'YOUR_') === false) {
+        return callGroqAI_Internal($prompt, $systemPrompt, $groqKey, $base64Image);
+    }
+
+    // 3. Fallback to Gemini if Groq is not available
+    if ($geminiKey && strpos($geminiKey, 'YOUR_') === false) {
+        return callGeminiAI($prompt, $systemPrompt, $geminiKey, $base64Image);
+    }
+
+    return [
+        'success' => false,
+        'text' => "⚠️ AI API Key is not set.\n\nPlease go to **Admin > API Settings** and enter your Groq or Gemini API Key."
+    ];
+}
+
+/**
+ * Gemini API Implementation
+ */
+function callGeminiAI(string $prompt, string $systemPrompt, string $apiKey, string $base64Image = ''): array
+{
+    $fullPrompt = $systemPrompt ? $systemPrompt . "\n\n" . $prompt : $prompt;
+    $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' . $apiKey;
+
+    $parts = [['text' => $fullPrompt]];
+
+    if ($base64Image) {
+        // Remove data URI scheme if present
+        if (preg_match('/^data:image\/(\w+);base64,/', $base64Image, $matches)) {
+            $mimeType = 'image/' . $matches[1];
+            $data = substr($base64Image, strpos($base64Image, ',') + 1);
+        } else {
+            $mimeType = 'image/jpeg'; // Default
+            $data = $base64Image;
+        }
+
+        $parts[] = [
+            'inline_data' => [
+                'mime_type' => $mimeType,
+                'data' => $data
+            ]
         ];
     }
 
-    $fullPrompt = $systemPrompt ? $systemPrompt . "\n\n" . $prompt : $prompt;
-
-    $data = [
+    $payload = [
         'contents' => [[
-            'parts' => [['text' => $fullPrompt]]
+            'parts' => $parts
         ]],
         'generationConfig' => [
             'temperature' => 0.7,
             'maxOutputTokens' => 2048,
-            'topP' => 0.8,
-            'topK' => 40,
         ]
     ];
-
-    $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' . $apiKey;
 
     $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST => true,
         CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
-        CURLOPT_POSTFIELDS => json_encode($data),
+        CURLOPT_POSTFIELDS => json_encode($payload),
         CURLOPT_TIMEOUT => 30,
         CURLOPT_SSL_VERIFYPEER => false,
     ]);
@@ -120,16 +163,70 @@ function callAI(string $prompt, string $systemPrompt = ''): array
     if ($httpCode === 200) {
         $decoded = json_decode($response, true);
         $text = $decoded['candidates'][0]['content']['parts'][0]['text'] ?? '';
-        if ($text) {
-            return ['success' => true, 'text' => $text];
-        }
+        return ['success' => true, 'text' => $text];
     }
 
-    $decoded = json_decode($response, true);
-    $errMsg = $decoded['error']['message'] ?? '';
+    $error = json_decode($response, true);
+    $msg = $error['error']['message'] ?? "Unknown Error";
+    return ['success' => false, 'text' => "Gemini API Error: $msg (HTTP $httpCode)"];
+}
 
-    return [
-        'success' => false,
-        'text' => "Gemini API error (HTTP $httpCode)" . ($errMsg ? ": $errMsg" : "")
+/**
+ * Groq API Implementation (OpenAI compatible)
+ */
+function callGroqAI_Internal(string $prompt, string $systemPrompt, string $apiKey, string $base64Image = ''): array
+{
+    $url = 'https://api.groq.com/openai/v1/chat/completions';
+    
+    $content = [];
+    $content[] = ['type' => 'text', 'text' => $prompt];
+
+    if ($base64Image) {
+        // Groq supports vision on some models
+        if (!str_starts_with($base64Image, 'data:')) {
+            $base64Image = 'data:image/jpeg;base64,' . $base64Image;
+        }
+        $content[] = [
+            'type' => 'image_url',
+            'image_url' => ['url' => $base64Image]
+        ];
+    }
+
+    $payload = [
+        'model' => $base64Image ? 'llama-3.2-11b-vision-preview' : 'llama-3.3-70b-versatile',
+        'messages' => [
+            ['role' => 'system', 'content' => $systemPrompt ?: 'You are a helpful academic assistant for Metropolitan University Sylhet Software Engineering students.'],
+            ['role' => 'user', 'content' => $content]
+        ],
+        'temperature' => 0.7,
+        'max_tokens' => 2048
     ];
+
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST => true,
+        CURLOPT_HTTPHEADER => [
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $apiKey
+        ],
+        CURLOPT_POSTFIELDS => json_encode($payload),
+        CURLOPT_TIMEOUT => 30,
+        CURLOPT_SSL_VERIFYPEER => false,
+    ]);
+
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($httpCode === 200) {
+        $decoded = json_decode($response, true);
+        $text = $decoded['choices'][0]['message']['content'] ?? '';
+        return ['success' => true, 'text' => $text];
+    }
+
+    $error = json_decode($response, true);
+    $msg = $error['error']['message'] ?? "Unknown Error";
+
+    return ['success' => false, 'text' => "Groq API Error: $msg (HTTP $httpCode)"];
 }

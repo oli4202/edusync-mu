@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use function App\getDB;
+use function getDB;
 
 /**
  * Subject Model
@@ -21,6 +21,20 @@ class Subject
     {
         $db = getDB();
         $stmt = $db->prepare("SELECT * FROM subjects WHERE user_id = ? ORDER BY name");
+        $stmt->execute([$userId]);
+        return $stmt->fetchAll();
+    }
+
+    public static function findByUserWithStats(int $userId): array
+    {
+        $db = getDB();
+        $stmt = $db->prepare("
+            SELECT s.*,
+                (SELECT COUNT(*) FROM tasks WHERE subject_id=s.id AND status!='done') AS pending_tasks,
+                (SELECT COUNT(*) FROM tasks WHERE subject_id=s.id AND status='done') AS done_tasks,
+                (SELECT COALESCE(SUM(hours),0) FROM study_logs WHERE subject_id=s.id AND WEEK(logged_date)=WEEK(NOW())) AS week_hours
+            FROM subjects s WHERE s.user_id=? ORDER BY s.name
+        ");
         $stmt->execute([$userId]);
         return $stmt->fetchAll();
     }
@@ -73,5 +87,37 @@ class Subject
     {
         $db = getDB();
         $db->prepare("DELETE FROM subjects WHERE id = ?")->execute([$id]);
+    }
+
+    public static function syncForUserBatchSemester(int $userId, string $batch, int $semester): void
+    {
+        if ($batch === '' || $semester <= 0) {
+            return;
+        }
+
+        $db = getDB();
+        $courses = Course::findByBatchAndSemester($batch, $semester);
+
+        foreach ($courses as $course) {
+            $existsStmt = $db->prepare("SELECT id FROM subjects WHERE user_id = ? AND code = ? LIMIT 1");
+            $existsStmt->execute([$userId, $course['code']]);
+            if ($existsStmt->fetch()) {
+                continue;
+            }
+
+            $stmt = $db->prepare("
+                INSERT INTO subjects (user_id, name, code, color, year, semester, target_hours_per_week)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ");
+            $stmt->execute([
+                $userId,
+                $course['name'],
+                $course['code'],
+                '#22d3ee',
+                (int) ($course['year'] ?? date('Y')),
+                (int) ($course['semester'] ?? $semester),
+                5.0,
+            ]);
+        }
     }
 }

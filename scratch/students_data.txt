@@ -1,0 +1,414 @@
+SWE 03	
+	
+ID	Name 
+222-134-002	Bipresh
+222-134-005	Ariful Islam Sarker
+222-134-007	Tasnim Tabassum Fahrin
+222-134-008	 Ayesha Siddika Urme 
+222-134-010	Nosrul Alom Mahid
+222-134-012	Naahe
+222-134-013	Mahbub Khandakar 
+222-134-014	Nahida Ahmed Chowdhury 
+222-134-015	MD SHAKIL TALUKDAR
+222-134-016	Tasnima Akther Tisha
+222-134-017	Shahnaj Ismail
+222-134-022	Nadiya Rahman 
+222-134-023	Obro Deb 
+222-134-025	Khadiza Sultana Chowdhury Rimi
+222-134-026	Md. Absaruzzaman Omi 
+222-134-027	MAHFUJ HUSSAIN NADIM
+222-134-028	Naima
+222-134-030	MD Fardeen Hussain 
+222-134-033	Sayara Zarin Chowdhury
+222-134-035	Abdur Rahman Rifat
+213-134-022	Musharof Ahmed 
+213-134-021	MD MUSHFIQUR RAHMAN
+	SWE 04		
+		
+ID	Name	
+231-134-001	Md.Asif Mostofa	
+231-134-002	Syed Tanzim Ahmed	
+231-134-003	Kazi Abdul Halim 	
+231-134-004	Anika Tahsin	
+231-134-005	Noushin anjum raya	
+231-134-006	Amina Begum	
+231-134-007	Sayem Ahmed	
+231-134-008	Fojol Ahmed 	
+231-134-009	Radwan Rahman 	
+231-134-010	Nishat sadia akhi	
+231-134-011	Rafia Islam chowdhury	
+231-134-012	Uttam kumar das hridoy	
+231-134-013	Mahira mahjabin nowme	
+231-134-014	Meraj Monzur Tahmed	
+231-134-015	Sumaya Azmi Labonna	
+231-134-016	shabnam edris masuma	
+231-134-017	Arpita  Rani Saha	
+231-134-018	Debjani Roy	
+231-134-019	Bishwojit Roy Angshu 	
+231-134-020	AHSAN HABIB RAFAT	
+231-134-021	Sharmin Akter Smrity	
+231-134-022	Abdullah	
+231-134-023	Amzad Khan	
+231-134-024	Jawda Anan 	
+231-134-025	Fatheha Ahmed Liza	
+231-134-026	Syeda Alvi Muniath	
+231-134-027	Abdul Basith Emon	
+231-134-028	Laxmi Rani Shaha	
+231-134-029	Najir Hussain	
+231-134-030	Arifun Nobi Chowdhury 	
+231-134-031	Abdul Muhimen Tabib	
+231-134-032	Aminul Islam 	
+231-134-033	Robayedur Rahman	
+231-134-034	Mahedi Hasan	
+231-134-035	SHEKH MAHDI MESBAH	
+222-134-009	Rafid Hasan Sydney	
+213-134-024	Rubaath Ferdous	
+213-134-025	Raduan Chowdhury 	
+		
+			
+	
+SWE 05	
+	
+ID	Name
+232-134-001	Mohammed Tanvir
+232-134-002	Sadia Mabsurah
+232-134-003	Dewan Mahin Chowdhury
+232-134-004	Fawzia Fardowsi Tahia
+232-134-005	Nafisa Nanzeeb
+232-134-006	Amit Mitra
+232-134-007	NAZMUL HASAN EMON
+232-134-008	Anwarul Islam sayed
+232-134-009	Murad Hussain
+232-134-010	Guljar Hosen
+232-134-011	Anney Begum
+232-134-012	Taiyeaba shams
+232-134-013	Sadman Islam
+232-134-014	Suchana Rani Das
+232-134-015	Shahrin Rahman Samah
+232-134-016	Jony Sheikh
+232-134-017	Anik Roy
+232-134-018	Mahan Roy Utsa
+232-134-019	Dhiraj dhar dip
+232-134-020	MD Shaheenur Rashid
+232-134-021	Fahmida Chowdhury Tamanna
+232-134-022	Faiza akter borsha
+232-134-023	Sadiah Rahman chowdhury
+232-134-024	Tamim Amin Suhag
+232-134-025	Tasnia Akther
+232-134-026	Md Mutahar Mahmud Chy
+232-134-027	Muntassir Ahmed Nafi
+232-134-028	Ishfak Akbar Nahian
+232-134-029	Fayaz Masnun Alam
+232-134-030	Mufazzal Hasan Khan Midad
+232-134-031	Mahojabin Aziz
+232-134-032	Mehadi hasan
+232-134-033	Md. Abul Hasnath
+232-134-034	Ishrak Saleh Chowdhury
+232-134-035	Asjad Ahmed Afrahim
+232-134-036	Sahreyar Ahmed
+232-134-037	Prianto chandra dey
+232-134-038	Progga Dey Troyee
+232-134-039	Md. Tahmid Rahman
+232-134-040	Shakif Niaz
+232-134-041	Fahmida Rahman
+232-134-042	Gouhar Mojammel Hoque
+231-134-036	Mahir Ihsan Chowdhury
+231-134-037	Ahsanul Karim Sakib
+231-134-012	Uttom Kumar Das
+	
+	SWE 06								
+								
+Student ID			Name					
+231-134-021			Sharmin Akter Smrity					
+241-134-001			Mahbuba Siddika Aysha					
+241-134-002			Sumaiya Islam Chowdhury					
+241-134-003			Md. Anamul Haque					
+241-134-004			Tahmina Begum					
+241-134-005			Israt Jahan Nitu					
+241-134-006			Md. Morsalin					
+241-134-007			Nurin Begum					
+241-134-008			Syeda Nishat Rashid					
+241-134-009			Monisha Hossain					
+241-134-010			Fabiha Sanjeda Nuva					
+241-134-011			Tanvir Mahatab Rafid					
+241-134-012			Nazia Rahman Shirin					
+241-134-013			Mohammad Imran Hussain					
+241-134-014			Sudip Singha					
+241-134-015			Nawfat Haider Chaudhury					
+241-134-016			Partho Deb					
+241-134-017			Jannatul Ferdous Nishat					
+241-134-018			Fuad Hasan Fahim					
+241-134-019			Niloy Singha					
+241-134-020			Argho Bhattacharjee					
+241-134-021			Olyur Rob Oly					
+241-134-022			Anonna Sarkar Tithi					
+241-134-023			Abdul Ahad Shuvo					
+241-134-024			Monwar Ahmed Minar					
+241-134-025			Sheikh Athar Muhthasim Mahdi					
+241-134-026			Shakila Jahan Tasnia					
+241-134-027			Syeda Nafisa Tasnim					
+241-134-028			Promi Deb					
+241-134-029			Abida Ahmed Chowdhury					
+241-134-030			Nayem Sarwar Chowdhury					
+241-134-031			Abadur Rahman					
+241-134-032			Md. Muahidur Rahman Mipon					
+241-134-033			Noushin Jannat					
+241-134-034			Sahinur Rahman Suchi					
+241-134-035			Md. Khalid Hasan					
+241-134-036			Sodiol Abdullah Olid	
+
+SWE 07									
+									
+Student ID				Name					
+242-134-001				Humayra Anjum Moneesha					
+242-134-002				Niloptto Barman Das					
+242-134-003				Anisa Tahsin Nisa					
+242-134-004				Syed Sultan Mortuza					
+242-134-005				Prioma Das					
+242-134-006				Tuhura Malik Limu					
+242-134-007				Abu Sahan Shaif					
+242-134-008				Md. Abu Imtiaz					
+242-134-009				Kawser Ahamad					
+242-134-010				Marzan Husain					
+242-134-011				Iffath Parvez Choudhury					
+242-134-012				Jannatul Ferdous Tayiba					
+242-134-013				Sonia Begum					
+242-134-014				Avishikta Goswami Bidushi					
+242-134-015				Shashwoto Das Noyon					
+242-134-016				Asif Shadman Khan					
+242-134-017				Olied Ahmed Chowdhury					
+242-134-018				Shafayath Hussain Arman					
+242-134-019				Md Musthakim Ahmed Shahan					
+242-134-020				Chaity Sarkar Borsha					
+242-134-021				Mohathir Ahmed Chowdhury Iran					
+242-134-022				Hirok Roy					
+242-134-023				Rifat Bin Farhad					
+242-134-024				Md. Nazmul Hasan Fahim					
+242-134-025				Sakhawat Hossain Adil					
+242-134-026				Mst. Faiza Tarannum Dipa					
+242-134-027				Pallab Paul					
+242-134-028				Naeema Begum					
+242-134-029				Mohammad Munadil Islam Laskar					
+242-134-030				Avijit Dey Tonmoy					
+242-134-031				Tahmim Ahmed Lucky					
+242-134-032				Md. Abdullah All Mamun					
+242-134-033				Md. Moinul Islam Abir					
+242-134-034				Md. Shahriyar Mostafa Arif					
+242-134-035				Md. Montasir Alam Chowdhury					
+242-134-036				Md. Sahria Samon Talukdar					
+242-134-037				Atifa Khan					
+242-134-038				Murshed Ahmed					
+242-134-039				Mst. Taiba Anwar					
+242-134-040				Farjana Akther Tamanna					
+242-134-041				Ahsanul Kobir					
+242-134-042				Md. Muhibul Islam Abir					
+242-134-043				Sania Mohammed Abdul Malik	
+SWE 8th
+ID
+NAME
+251-134-001
+Sidratul Muntaha
+251-134-002
+Md. Asfaq Ahbab Mayaz
+251-134-003
+Jakaria Ahmed Tamim
+251-134-004
+Urbana Islam
+251-134-006
+Samira Tasnim
+251-134-007
+Rahi Ahmed
+251-134-008
+Prottoy Roy
+251-134-009
+Tashra Humayra Chowdhury
+251-134-011
+Parthib Nag Rahul
+251-134-012
+
+251-134-013
+Anika Ibnath
+251-134-014
+Khadija Begum
+251-134-015
+Ihteda Yammi Fahmi
+251-134-016
+Ritu Porna Goswarni
+251-134-017
+Shreya Kanu
+251-134-018
+Adiba Hussain Ikra
+251-134-019
+Md. Shuhanur Rahman
+251-134-020
+Mr. Asiful-Haque
+251-134-021
+Naheda Begum
+251-134-022
+Mo Mozaharul Holem Shuhan
+251-134-023
+Debajani Dey
+251-134-024
+Somaiya Akther Runa
+251-134-025
+Muktasid Ahmed Chowdhury
+251-134-026
+Zakada Hala Tapim
+251-134-027
+Ind Farmen Howlauar
+251-134-028
+Naleem Ahmed
+251-134-029
+
+251-134-030
+Salwa Abdun Nur
+251-134-031
+Ishtiak Ahmed Chowdhury
+251-134-032
+Israth Jahan Khan Sunna
+251-134-034
+Mahi Ahmed
+251-134-035
+Muntasir Ahmed
+251-134-036
+Hridi Asfia
+251-134-037
+Arian Ishmam
+251-134-038
+Tazul Islam
+251-134-039
+Orpita Das Jui
+251-134-040
+Mahfujur Rahman
+251-134-041
+Jamil Ahmed Hasan
+251-134-042
+Najmus Sakib Rafi
+231-134-012
+Uttam Kumar Das	
+SWE 9th			
+251-134-005	Mst. Nusrat Jahan mim 
+251-134-010	Ahsan Habib
+252-134-002	Maliha Asad Chowdhury
+252-134-003	Mahbuba Chowdhury Eity 
+252-134-005	Md Olidur Rahman 
+252-134-006	Rafsana Rahman 
+252-134-007	Debasish das
+252-134-008	Umme tasnim joba
+252-134-010	Adian Ashraf Chowdhury
+252-134-011	Rejwana Hasan Jannah 
+252-134-012	Hossain Akhiar
+252-134-013	Abid Ur Rahman
+252-134-014	Syed Zarif Bin Kamil 
+252-134-015	Shahria Haque Dina
+252-134-017	Rownak Nowshin Sadiba
+252-134-018	Tahsin Rahman
+252-134-019	Maliha Begom (Esha)
+252-134-020	Tazrin Ahmed
+252-134-021	Mst. Fabiha Masheat Chowdhury 
+252-134-022	Rashedul Hasan Mojumdar
+252-134-023	Aniqa Tabassum 
+252-134-024	Gazi Tafannum 
+252-134-025	MD.Arif Hossen 
+252-134-026	Daiyan Khandaker
+252-134-027	Md. Yousha Ahmed
+252-134-028	Kamrul Hasan Tamim 
+252-134-029	Nowshin Ahmed Oishe 
+252-134-030	Hafsa Rahman 
+252-134-031	Saiha Chowdhury
+252-134-032	Nabila Tanjim Chowdhury 
+252-134-033	Md.Faiaj Khan Mohan
+252-134-034	Tashfi Jannat Nusra
+252-134-036	Thasfiya Thasnim Thuha
+252-134-038	Md.Jubayer Hasan Fahim 
+252-134-039	Tabassum Saima 
+252-134-040	Md. Samiul Ahmed
+252-134-041	ASHRAFUL ISLAM CHOWDHURY 
+252-134-042	Md Anamul Haque
+252-134-043	Anindro Kishor Ovi 
+252-134-044	Md Akil Bin Bahar
+252-134-045	Arian Debnath
+252-134-046	Jihan Adiba Iqbal
+252-134-047	AL MOHAN MAHADI							
+SWE -10
+252-134-037  Ankur Roy Chowdhury
+253-134-001  Sabira Begum
+253-134-002  Mohammad Onik
+253-134-003  Tasfia Chowdhury
+253-134-004  Sumaiya Naznin
+253-134-005  Niloy Paul
+253-134-006  Bilash Mojumder Argho
+253-134-007  Rupanjana Chowdhury
+253-134-008  Biplob Biswas
+253-134-011  Maria Tasnim
+253-134-012  Moniruzzaman Moni
+253-134-013  Karima Sultana Rikta
+253-134-014  Asmeeta Debnath
+253-134-015  Umama Akter
+253-134-016  Muhtasim Enam Onwoy
+253-134-017  Amina Begum Rumi
+253-134-018  Anisha Iffat Nabiha
+253-134-019  Pradip Bhattacharjee
+253-134-020  Mayda Jannat Nura
+253-134-021  Aysha Akter
+253-134-022  Pushpita Rani Roy
+253-134-023  Md. Fahim Moontasir
+253-134-026  Srishti Talukder
+253-134-028  Taslima Jannat Maida
+253-134-029  Ponkoj Mollik
+253-134-030  Md. Mehdi Hasan Nafiz
+253-134-032  Mahjabin Akter
+253-134-033  Nosrat Jahan Tajnin
+253-134-034  Nowshin Jannat Chowdhury
+253-134-035  Tapos Kairi
+252-134-016  Ishmam Chowdhury
+
+SWE-11
+1	253-134-031	Arup Kumar Baysho Rishob
+2	261-134-01	Mst Maria Begum
+3	261-134-02	Fahmida Akter Liza
+4	261-134-03	Mustafa Mahin Chowdhury
+5	261-134-04	Thuya Banik
+6	261-134-05	Arham waresi
+7	261-134-06	Prionti Dhar
+8	261-134-07	Md.Mansibur Rahman
+9	261-134-08	Md Rubaiyat Hossain Rahib
+10	261-134-09	Tahmid Alom
+11	261-134-10	Nihad Sadi
+12	261-134-11	Md.Anan Habib
+13	261-134-12	Sadiya Islam Shikdar
+14	261-134-13	shumaya Jannat Thapadar
+15	261-134-14	Nusrat Rahma
+16	261-134-15	Tawsin sultana
+17	261-134-16	Ema Begum
+18	261-134-17	Ishtiaque Ahmed
+19	261-134-18	Abida Sultana
+20	261-134-19	Omar Abdul Matin
+21	261-134-20	Anas Abdul Matin
+22	261-134-21	Tahmina Haque Richi
+23	261-134-22	Simeka Alam
+24	261-134-23	Tasnim Khanom
+25	261-134-24	Sharmi Das Talukdar
+26	261-134-25	Wasif Rahman
+27	261-134-26	Asiya islam Lisa
+28	261-134-27	Rohima islam Muna
+29	261-134-28	M Raiyan
+30	261-134-29	Jobaida Azad Simi
+31	261-134-30	Syeda Maria Siddika
+32	261-134-31	Rezwana Islam Jerin
+33	261-134-32	Raiyan
+34	261-134-33	Khaled Muhammad Rabbi
+35	261-134-34	Nadia Iqbal Lucky
+36	261-134-35	Murthaza AL Monowar
+37	261-134-36	Shahi Tasfiya Sharmin
+38	261-134-37	Dima Nafertiti Tajolee
+39	261-134-38	Ankita Goswami Arthi
+40	261-134-39	Hafsa Begum
+41	261-134-40	Thaieba Mokki
+42	261-134-41	Marjana Mahmuda Priti
+43	261-134-42	Pritom Das
+44	261-134-43	Md. Al Jannat Hussain Zarif
+45	261-134-44	Sanjida Tabassum Anika
+46	261-134-45	Shamanta Ahsan
+47	261-134-46	Rafi Rakayet Shah Faridi
+48	261-134-47	Atif Rahman

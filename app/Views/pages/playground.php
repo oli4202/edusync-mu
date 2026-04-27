@@ -20,7 +20,7 @@
                     body: JSON.stringify({ code: this.code, input: '' })
                 });
                 const data = await resp.json();
-                
+
                 if (!resp.ok || data.success === false) {
                     this.outputColor = 'text-rose-400';
                     this.output = data.error || 'Python execution failed.';
@@ -34,7 +34,51 @@
                 this.outputColor = 'text-rose-400';
                 this.output = 'Failed to connect to execution server.';
             }
+        } else if (this.selectedLang === 'sql') {
+            try {
+                const resp = await fetch('/api/playground/run-sql', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code: this.code })
+                });
+                const data = await resp.json();
+
+                if (!resp.ok || data.success === false) {
+                    this.outputColor = 'text-rose-400';
+                    this.output = data.error || 'SQL execution failed.';
+                    return;
+                }
+
+                this.outputColor = 'text-accent-emerald';
+                let formattedResult = '';
+                data.results.forEach(res => {
+                    formattedResult += `> ${res.stmt}...\n`;
+                    if (res.type === 'table') {
+                        if (res.rowCount === 0) {
+                            formattedResult += '[Empty set]\n\n';
+                        } else {
+                            // Basic table formatting
+                            formattedResult += res.columns.join(' | ') + '\n';
+                            formattedResult += '-'.repeat(res.columns.join(' | ').length) + '\n';
+                            res.rows.slice(0, 10).forEach(row => {
+                                formattedResult += Object.values(row).join(' | ') + '\n';
+                            });
+                            if (res.rowCount > 10) formattedResult += `... and ${res.rowCount - 10} more rows.\n`;
+                            formattedResult += `\n(${res.rowCount} rows in set)\n\n`;
+                        }
+                    } else if (res.type === 'status') {
+                        formattedResult += `${res.message}. ${res.affectedRows} rows affected.\n\n`;
+                    } else if (res.type === 'error') {
+                        formattedResult += `ERROR: ${res.message}\n\n`;
+                    }
+                });
+                this.output = formattedResult;
+            } catch (e) {
+                this.outputColor = 'text-rose-400';
+                this.output = 'Failed to connect to database server.';
+            }
         } else {
+
             setTimeout(() => {
                 this.outputColor = 'text-slate-400 italic';
                 this.output = `The ${this.selectedLang} runner is currently in development. AI can still analyze this code!`;

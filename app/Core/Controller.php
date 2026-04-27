@@ -77,6 +77,18 @@ abstract class Controller
     }
 
     /**
+     * Require user to be faculty or admin
+     */
+    protected function requireFaculty(): void
+    {
+        $this->requireLogin();
+        if (!$this->session->isFaculty()) {
+            http_response_code(403);
+            die('Unauthorized: Faculty access required');
+        }
+    }
+
+    /**
      * Get current logged-in user
      */
     protected function currentUser(): ?array

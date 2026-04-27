@@ -37,17 +37,18 @@
 
             <form method="POST" action="/auth/login" class="space-y-6">
                 <div class="space-y-2">
-                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">Email Address</label>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">Student ID or Email</label>
                     <div class="relative group">
-                        <i data-lucide="mail" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-accent-cyan transition-colors"></i>
+                        <i data-lucide="id-card" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-accent-cyan transition-colors"></i>
                         <input 
-                            type="email" 
-                            name="email" 
+                            type="text" 
+                            name="identifier" 
                             required 
                             class="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3.5 text-sm text-white focus:outline-none focus:border-accent-cyan transition-all"
-                            placeholder="your@email.com"
+                            placeholder="e.g. 252-134-021 or your@email.com"
                         >
                     </div>
+                    <p class="text-[10px] text-slate-500 px-1">Roster accounts are auto-created. Default student password is the same as the student ID until changed.</p>
                 </div>
 
                 <div class="space-y-2">

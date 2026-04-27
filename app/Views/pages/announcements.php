@@ -37,7 +37,7 @@ $typeColors = [
         <div class="page-title">📢 Announcements</div>
         <div class="page-sub">Department notices, exam alerts, and event updates</div>
     </div>
-    <?php if ($isAdmin): ?>
+    <?php if ($isFaculty): ?>
     <button class="btn btn-primary" onclick="document.getElementById('postModal').classList.add('open')">+ Post Announcement</button>
     <?php endif; ?>
 </div>
@@ -57,7 +57,7 @@ $typeColors = [
 <div class="empty-state">
     <div style="font-size:40px;margin-bottom:12px;">📭</div>
     <div>No announcements yet.</div>
-    <?php if ($isAdmin): ?>
+    <?php if ($isFaculty): ?>
     <div style="margin-top:10px;"><button onclick="document.getElementById('postModal').classList.add('open')" class="btn btn-primary btn-sm">Post First Announcement</button></div>
     <?php endif; ?>
 </div>
@@ -82,7 +82,7 @@ $typeColors = [
         <span>⏳ Expires <?= date('M j, Y', strtotime($a['expires_at'])) ?></span>
         <?php endif; ?>
     </div>
-    <?php if ($isAdmin): ?>
+    <?php if ($isFaculty): ?>
     <div class="ann-actions">
         <form action="/announcements/pin" method="POST" style="display:inline">
             <input type="hidden" name="ann_id" value="<?= $a['id'] ?>">
@@ -100,7 +100,7 @@ $typeColors = [
 <?php endif; ?>
 
 <!-- Post Announcement Modal (Admin only) -->
-<?php if ($isAdmin): ?>
+<?php if ($isFaculty): ?>
 <div class="modal-overlay" id="postModal">
     <div class="modal">
         <div class="modal-title">📢 Post Announcement</div>

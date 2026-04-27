@@ -24,7 +24,10 @@
 
 <div class="admin-nav">
     <a href="/admin/attendance" class="btn btn-outline btn-sm">📋 Manage Attendance</a>
+    <a href="/admin/students" class="btn btn-outline btn-sm">Student Lookup</a>
+    <?php if ($this->session->userRole() === 'admin'): ?>
     <a href="/admin/api-settings" class="btn btn-outline btn-sm">⚙️ API Settings</a>
+    <?php endif; ?>
 </div>
 
 <!-- Stats -->

@@ -61,6 +61,72 @@ class AiController extends Controller
         $this->json(['text' => $result['text'] ?? '']);
     }
 
+    public function summarize(): void
+    {
+        $this->requireLogin();
+        $json = json_decode(file_get_contents('php://input'), true);
+        $text = $json['text'] ?? '';
+
+        if (strlen($text) < 20) {
+            $this->json(['success' => false, 'message' => 'Text is too short to summarize'], 400);
+            return;
+        }
+
+        $prompt = "Please summarize the following text for a student. Use bullet points if appropriate:\n\n" . $text;
+        $system = "You are an expert academic summarizer. Provide concise, clear summaries of educational content.";
+
+        $result = callAI($prompt, $system);
+        $this->json($result);
+    }
+
+    public function generateQuiz(): void
+    {
+        $this->requireLogin();
+        $json = json_decode(file_get_contents('php://input'), true);
+        $topic = $json['topic'] ?? '';
+        $count = (int)($json['count'] ?? 5);
+
+        if (!$topic) {
+            $this->json(['success' => false, 'message' => 'Topic is required'], 400);
+            return;
+        }
+
+        $prompt = "Generate $count multiple-choice questions about '$topic'. Return ONLY a JSON array of objects. Each object should have 'question', 'options' (array of 4 strings), and 'answer' (the correct string).";
+        $system = "You are a quiz generator. Output only valid JSON.";
+
+        $result = callAI($prompt, $system);
+        
+        // Try to parse the AI output as JSON if it's just a text field
+        if ($result['success']) {
+            $cleanJson = preg_replace('/```json|```/', '', $result['text']);
+            $quizData = json_decode(trim($cleanJson), true);
+            if ($quizData) {
+                $this->json(['success' => true, 'quiz' => $quizData]);
+                return;
+            }
+        }
+        
+        $this->json($result);
+    }
+
+    public function ocr(): void
+    {
+        $this->requireLogin();
+        $json = json_decode(file_get_contents('php://input'), true);
+        $image = $json['image'] ?? '';
+
+        if (!$image) {
+            $this->json(['success' => false, 'message' => 'No image data provided'], 400);
+            return;
+        }
+
+        $prompt = "Please extract the text from this image. It is an image of a handwritten or printed exam question. Just provide the extracted text, nothing else.";
+        $system = "You are an expert OCR assistant. Extract text exactly as it appears in the image.";
+
+        $result = callAI($prompt, $system, $image);
+        $this->json($result);
+    }
+
     public function runPython(): void
     {
         $this->requireLogin();
@@ -113,20 +179,29 @@ class AiController extends Controller
         $results = [];
 
         // Divide by semicolon but try to be smart about it (basic version)
-        // Note: In a production environment, you'd want a more robust SQL parser.
         $statements = array_filter(array_map('trim', explode(';', $code)));
 
         try {
             foreach ($statements as $stmtText) {
                 if (empty($stmtText)) continue;
                 
+                $isQuery = preg_match('/^\s*(SELECT|SHOW|DESCRIBE|EXPLAIN)/i', $stmtText);
+                
+                // Restriction: Only faculty/admin can run non-SELECT queries
+                if (!$isQuery && !$this->session->isFaculty()) {
+                    $results[] = [
+                        'type' => 'error',
+                        'stmt' => substr($stmtText, 0, 100),
+                        'message' => 'Restricted: Only faculty can perform data-modifying operations.'
+                    ];
+                    continue;
+                }
+                
                 $stmt = $db->prepare($stmtText);
                 $stmt->execute();
                 
-                $isQuery = stripos($stmtText, 'SELECT') === 0 || stripos($stmtText, 'SHOW') === 0 || stripos($stmtText, 'DESCRIBE') === 0 || stripos($stmtText, 'EXPLAIN') === 0;
-                
                 if ($isQuery) {
-                    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                    $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
                     $columns = [];
                     if (!empty($rows)) {
                         $columns = array_keys($rows[0]);

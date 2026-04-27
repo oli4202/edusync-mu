@@ -39,6 +39,22 @@ class Session
     }
 
     /**
+     * Check if user is a student
+     */
+    public function isStudent(): bool
+    {
+        return $this->userRole() === 'student';
+    }
+
+    /**
+     * Check if user is faculty or admin
+     */
+    public function isFaculty(): bool
+    {
+        return in_array($this->userRole(), ['faculty', 'admin']);
+    }
+
+    /**
      * Set user session data (on login)
      */
     public function loginUser(array $user): void

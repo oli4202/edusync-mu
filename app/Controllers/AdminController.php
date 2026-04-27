@@ -11,18 +11,19 @@ use App\Models\Attendance;
 use App\Models\Group;
 use function App\redirect;
 use function App\clean;
-use function App\getDB;
+use function getDB;
 
 class AdminController extends Controller
 {
     public function __construct()
     {
         parent::__construct();
-        $this->requireAdmin();
+        $this->requireFaculty();
     }
 
     public function index(): void
     {
+        User::ensureRosterSynced();
         $userId = $this->session->userId();
         $user = User::findById($userId);
 
@@ -79,6 +80,7 @@ class AdminController extends Controller
 
     public function manageAttendance(): void
     {
+        User::ensureRosterSynced();
         $userId = $this->session->userId();
         $user = User::findById($userId);
 
@@ -104,16 +106,22 @@ class AdminController extends Controller
                     }
                     $this->session->setFlash('success', "Attendance marked for $count students!");
                 }
-                redirect("/admin/attendance?course_id=$courseId&class_date=$classDate");
+                $redirectUrl = "/admin/attendance?course_id=$courseId&class_date=$classDate";
+                $redirectUrl .= '&batch=' . urlencode((string) ($_POST['batch'] ?? ''));
+                $redirectUrl .= '&semester=' . urlencode((string) ($_POST['semester'] ?? ''));
+                redirect($redirectUrl);
             }
         }
 
         $courses = Course::getAll();
-        $students = User::getAll(); // Should probably filter students only
-        $students = array_filter($students, fn($u) => $u['role'] === 'student');
-
         $selCourse = (int)($_GET['course_id'] ?? 0);
+        $selBatch = clean($_GET['batch'] ?? '');
+        $selSemester = (int)($_GET['semester'] ?? 0);
         $selDate = clean($_GET['class_date'] ?? date('Y-m-d'));
+
+        $students = User::getStudentsForAttendance($selBatch, $selSemester, $selCourse);
+
+        $availableBatches = User::getBatchOptions();
 
         $existingAtt = [];
         if ($selCourse && $selDate) {
@@ -129,29 +137,56 @@ class AdminController extends Controller
             'totalRecords' => Attendance::getTotalCount(),
             'todayCount' => Attendance::getTodayCount(),
         ];
-        ];
-        // Correct way for todayCount
-        $stmt = getDB()->prepare("SELECT COUNT(*) FROM attendance WHERE class_date=?");
-        $stmt->execute([date('Y-m-d')]);
-        $stats['todayCount'] = (int)$stmt->fetchColumn();
 
         $this->render('pages/admin/attendance', compact(
-            'user', 'msg', 'err', 'courses', 'students', 'selCourse', 'selDate', 'existingAtt', 'recentHistory', 'stats'
+            'courses', 'students', 'selCourse', 'selDate', 'selBatch', 'selSemester',
+            'existingAtt', 'recentHistory', 'stats', 'availableBatches'
         ));
+    }
+
+    public function attendanceSheet(): void
+    {
+        User::ensureRosterSynced();
+        $selCourseId = (int)($_GET['course_id'] ?? 0);
+        $selBatch = clean($_GET['batch'] ?? '');
+        $selSemester = (int)($_GET['semester'] ?? 0);
+
+        $course = $selCourseId ? Course::findById($selCourseId) : null;
+        $students = User::getStudentsForAttendance($selBatch, $selSemester, $selCourseId);
+
+        $this->render('pages/admin/attendance-sheet', compact(
+            'course', 'students', 'selBatch', 'selSemester'
+        ));
+    }
+
+    public function studentDirectory(): void
+    {
+        User::ensureRosterSynced();
+        $userId = $this->session->userId();
+        $user = User::findById($userId);
+        $studentId = clean($_GET['student_id'] ?? '');
+        $overview = $studentId !== '' ? User::getStudentOverviewByStudentId($studentId) : null;
+        $notFound = $studentId !== '' && $overview === null;
+
+        $this->render('pages/admin/student-directory', compact('user', 'studentId', 'overview', 'notFound'));
     }
 
     public function apiSettings(): void
     {
+        $this->requireAdmin();
         $userId = $this->session->userId();
         $user = User::findById($userId);
         $message = '';
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $claude = $_POST['claude'] ?? '';
-            $gemini = $_POST['gemini'] ?? '';
-            $hf = $_POST['hf'] ?? '';
+            $groq = trim($_POST['groq'] ?? '');
+            $gemini = trim($_POST['gemini'] ?? '');
 
-            $content = "<?php\n\n\$api_keys = [\n    'CLAUDE_API_KEY' => '" . addslashes($claude) . "',\n    'GEMINI_API_KEY' => '" . addslashes($gemini) . "',\n    'HF_API_KEY' => '" . addslashes($hf) . "',\n];";
+            $content = "<?php\n\n\$api_keys = [\n";
+            $content .= "    'GROQ_API_KEY' => '" . addslashes($groq) . "',\n";
+            $content .= "    'GEMINI_API_KEY' => '" . addslashes($gemini) . "',\n";
+            $content .= "];";
+            
             file_put_contents(__DIR__ . '/../../config/api-keys.php', $content);
             $message = 'API keys updated successfully!';
         }

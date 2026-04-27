@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use function App\getDB;
+use function getDB;
 
 /**
  * Grade Model
@@ -30,15 +30,15 @@ class Grade
         try {
             $db = getDB();
             $stmt = $db->prepare(
-                "INSERT INTO grades (user_id, subject_id, exam_name, marks_obtained, total_marks, exam_date) 
+                "INSERT INTO grades (user_id, subject_id, title, score, max_score, exam_date) 
                  VALUES (?, ?, ?, ?, ?, ?)"
             );
             $stmt->execute([
                 $userId,
                 $data['subject_id'],
-                $data['exam_name'],
-                $data['marks_obtained'],
-                $data['total_marks'],
+                $data['title'],
+                $data['score'],
+                $data['max_score'],
                 $data['exam_date'] ?? date('Y-m-d')
             ]);
             return ['success' => true, 'id' => $db->lastInsertId()];
@@ -51,10 +51,11 @@ class Grade
     {
         $db = getDB();
         $stmt = $db->prepare(
-            "SELECT subject_id, AVG(marks_obtained / total_marks * 100) as avg_score 
-             FROM grades 
-             WHERE user_id=? 
-             GROUP BY subject_id"
+            "SELECT g.subject_id, s.name as subject_name, AVG(g.score / g.max_score * 100) as avg_score 
+             FROM grades g
+             JOIN subjects s ON g.subject_id = s.id
+             WHERE g.user_id=? 
+             GROUP BY g.subject_id, s.name"
         );
         $stmt->execute([$userId]);
         return $stmt->fetchAll();

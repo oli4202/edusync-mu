@@ -14,17 +14,17 @@ class AnnouncementController extends Controller
         $this->requireLogin();
         $userId = $this->session->userId();
         $user = User::findById($userId);
-        $isAdmin = ($user['role'] === 'admin');
+        $isFaculty = $this->session->isFaculty();
 
-        $announcements = Announcement::findAllForUser($user['semester'] ?? 0, $isAdmin);
+        $announcements = Announcement::findAllForUser($user['semester'] ?? 0, $isFaculty);
         $flash = $this->session->getFlash();
 
-        $this->render('pages/announcements', compact('user', 'announcements', 'flash', 'isAdmin'));
+        $this->render('pages/announcements', compact('user', 'announcements', 'flash', 'isFaculty'));
     }
 
     public function post(): void
     {
-        $this->requireAdmin();
+        $this->requireFaculty();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (Announcement::create($this->session->userId(), $_POST)) {
                 $this->session->setFlash('success', 'Announcement posted!');
@@ -37,7 +37,7 @@ class AnnouncementController extends Controller
 
     public function delete(): void
     {
-        $this->requireAdmin();
+        $this->requireFaculty();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             Announcement::delete((int)$_POST['ann_id']);
             $this->session->setFlash('success', 'Announcement deleted.');
@@ -47,7 +47,7 @@ class AnnouncementController extends Controller
 
     public function pin(): void
     {
-        $this->requireAdmin();
+        $this->requireFaculty();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             Announcement::togglePin((int)$_POST['ann_id']);
             $this->session->setFlash('success', 'Announcement updated.');

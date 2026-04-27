@@ -36,6 +36,7 @@
                         <input 
                             type="text" 
                             name="name" 
+                            id="nameInput"
                             required 
                             class="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-sm text-white focus:outline-none focus:border-accent-cyan transition-all"
                             placeholder="John Doe"
@@ -84,16 +85,59 @@
                 </div>
 
                 <div class="space-y-2">
-                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">Student ID (Optional)</label>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">Role</label>
+                    <div class="relative group">
+                        <i data-lucide="briefcase" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-accent-cyan transition-colors z-10"></i>
+                        <select name="role" id="roleSelect" required class="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-sm text-white focus:outline-none focus:border-accent-cyan transition-all appearance-none relative z-0">
+                            <option value="student" class="text-slate-900">Student</option>
+                            <option value="faculty" class="text-slate-900">Faculty</option>
+                        </select>
+                        <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none z-10"></i>
+                    </div>
+                </div>
+
+                <div class="space-y-2" id="studentIdContainer">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">Student ID</label>
                     <div class="relative group">
                         <i data-lucide="id-card" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-accent-cyan transition-colors"></i>
                         <input 
                             type="text" 
                             name="student_id" 
+                            id="studentIdInput"
                             class="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-sm text-white focus:outline-none focus:border-accent-cyan transition-all"
-                            placeholder="e.g. MU123456"
+                            placeholder="e.g. 252-134-021"
                         >
                     </div>
+                    
+                    <!-- Student Info Preview -->
+                    <div id="studentPreview" class="hidden mt-3 p-3 bg-accent-cyan/10 border border-accent-cyan/20 rounded-xl animate-in fade-in slide-in-from-top-1">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-accent-cyan/20 flex items-center justify-center">
+                                <i data-lucide="check" class="w-4 h-4 text-accent-cyan"></i>
+                            </div>
+                            <div>
+                                <p id="previewName" class="text-xs font-bold text-white"></p>
+                                <p id="previewBatch" class="text-[10px] text-accent-cyan uppercase tracking-wider font-bold"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p id="studentHint" class="text-[10px] text-slate-500 px-1">Student accounts sync batch and semester from the official roster automatically.</p>
+                </div>
+
+                <div class="space-y-2 hidden" id="facultySecretContainer">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">Faculty Verification Code</label>
+                    <div class="relative group">
+                        <i data-lucide="shield-check" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-accent-cyan transition-colors"></i>
+                        <input 
+                            type="password" 
+                            name="faculty_secret" 
+                            id="facultySecretInput"
+                            class="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-sm text-white focus:outline-none focus:border-accent-cyan transition-all"
+                            placeholder="Enter department secret"
+                        >
+                    </div>
+                    <p class="text-[10px] text-slate-500 px-1">Verification is required for faculty accounts to access administrative features.</p>
                 </div>
 
                 <button type="submit" class="w-full mt-4 py-4 bg-gradient-to-r from-accent-cyan to-accent-purple text-dark-bg font-bold rounded-xl shadow-lg shadow-accent-cyan/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-xs">
@@ -113,4 +157,70 @@
 
 <script>
     lucide.createIcons();
+
+    const roleSelect = document.getElementById('roleSelect');
+    const studentIdContainer = document.getElementById('studentIdContainer');
+    const studentIdInput = document.getElementById('studentIdInput');
+    const facultySecretContainer = document.getElementById('facultySecretContainer');
+    const facultySecretInput = document.getElementById('facultySecretInput');
+    const studentPreview = document.getElementById('studentPreview');
+    const previewName = document.getElementById('previewName');
+    const previewBatch = document.getElementById('previewBatch');
+    const nameInput = document.getElementById('nameInput');
+
+    function toggleStudentId() {
+        if (roleSelect.value === 'faculty') {
+            studentIdContainer.classList.add('hidden');
+            studentIdInput.removeAttribute('required');
+            studentPreview.classList.add('hidden');
+            
+            facultySecretContainer.classList.remove('hidden');
+            facultySecretInput.setAttribute('required', '');
+        } else {
+            studentIdContainer.classList.remove('hidden');
+            studentIdInput.setAttribute('required', '');
+            
+            facultySecretContainer.classList.add('hidden');
+            facultySecretInput.removeAttribute('required');
+        }
+    }
+
+    // Lookup Student ID
+    let lookupTimeout;
+    studentIdInput.addEventListener('input', function() {
+        clearTimeout(lookupTimeout);
+        const sid = this.value.trim();
+        
+        if (sid.length < 5) {
+            studentPreview.classList.add('hidden');
+            return;
+        }
+
+        lookupTimeout = setTimeout(() => {
+            fetch(`/api/students/lookup?student_id=${encodeURIComponent(sid)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        previewName.textContent = data.data.name;
+                        previewBatch.textContent = `Batch ${data.data.batch} • Semester ${data.data.semester}`;
+                        studentPreview.classList.remove('hidden');
+                        
+                        // Auto-fill name if empty or default
+                        if (!nameInput.value || nameInput.value === 'John Doe') {
+                            nameInput.value = data.data.name;
+                        }
+                    } else {
+                        studentPreview.classList.add('hidden');
+                    }
+                })
+                .catch(() => {
+                    studentPreview.classList.add('hidden');
+                });
+        }, 500);
+    });
+
+    roleSelect.addEventListener('change', toggleStudentId);
+    
+    // Initial state
+    toggleStudentId();
 </script>

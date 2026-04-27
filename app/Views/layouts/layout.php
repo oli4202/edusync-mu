@@ -71,53 +71,164 @@
                         <p class="text-[10px] text-slate-500 uppercase tracking-[0.2em] mt-1">METROPOLITAN UNIVERSITY</p>
                     </div>
 
-                    <nav class="flex-1 space-y-2 overflow-y-auto pr-2 custom-scrollbar">
+                    <nav class="flex-1 space-y-1 overflow-y-auto pr-2 custom-scrollbar">
+                        <!-- General (Shared) -->
                         <div class="text-[10px] font-bold text-accent-cyan uppercase tracking-widest px-4 mb-2 opacity-60">General</div>
-                        
-                        <a href="/dashboard" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'dashboard' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
+
+                        <a href="/dashboard" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'dashboard' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
                             <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
                             <span class="text-sm font-medium">Dashboard</span>
                         </a>
 
-                        <a href="/subjects" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'subjects' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
+                        <?php if ($this->session->isStudent()): ?>
+                        <a href="/analytics" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'analytics' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
+                            <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+                            <span class="text-sm font-medium">Analytics</span>
+                        </a>
+
+                        <!-- Academic (Student) -->
+                        <div class="pt-3 pb-1">
+                            <div class="text-[10px] font-bold text-accent-cyan uppercase tracking-widest px-4 mb-2 opacity-60">Academic</div>
+                        </div>
+
+                        <a href="/subjects" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'subjects' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
                             <i data-lucide="book-open" class="w-5 h-5"></i>
                             <span class="text-sm font-medium">Subjects</span>
                         </a>
 
-                        <a href="/tasks" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'tasks' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
+                        <a href="/tasks" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'tasks' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
                             <i data-lucide="check-square" class="w-5 h-5"></i>
                             <span class="text-sm font-medium">Tasks</span>
                         </a>
 
-                        <div class="pt-4 pb-2">
-                            <div class="text-[10px] font-bold text-accent-cyan uppercase tracking-widest px-4 mb-2 opacity-60">Academic</div>
-                        </div>
-
-                        <a href="/grades" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'grades' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
+                        <a href="/grades" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'grades' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
                             <i data-lucide="graduation-cap" class="w-5 h-5"></i>
                             <span class="text-sm font-medium">Grades</span>
                         </a>
 
-                        <a href="/attendance" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'attendance' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
+                        <a href="/attendance" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'attendance' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
                             <i data-lucide="calendar-check" class="w-5 h-5"></i>
                             <span class="text-sm font-medium">Attendance</span>
                         </a>
+                        <?php endif; ?>
 
-                        <a href="/flashcards" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'flashcards' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
+                        <?php if ($this->session->isFaculty()): ?>
+                        <!-- Class Management (Faculty) -->
+                        <div class="pt-3 pb-1">
+                            <div class="text-[10px] font-bold text-accent-cyan uppercase tracking-widest px-4 mb-2 opacity-60">Class Management</div>
+                        </div>
+
+                        <a href="/admin/attendance" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'attendance' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
+                            <i data-lucide="clipboard-check" class="w-5 h-5"></i>
+                            <span class="text-sm font-medium">Mark Attendance</span>
+                        </a>
+                        <?php endif; ?>
+
+                        <!-- Shared Calendar -->
+                        <a href="/calendar" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'calendar' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
+                            <i data-lucide="calendar" class="w-5 h-5"></i>
+                            <span class="text-sm font-medium">Calendar</span>
+                        </a>
+
+                        <!-- Resources (Shared) -->
+                        <div class="pt-3 pb-1">
+                            <div class="text-[10px] font-bold text-accent-cyan uppercase tracking-widest px-4 mb-2 opacity-60">Resources</div>
+                        </div>
+
+                        <a href="/question-bank" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'question-bank' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
+                            <i data-lucide="database" class="w-5 h-5"></i>
+                            <span class="text-sm font-medium">Question Bank</span>
+                        </a>
+
+                        <?php if ($this->session->isStudent()): ?>
+                        <a href="/question-bank/submit" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'submit-question' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
+                            <i data-lucide="file-plus" class="w-5 h-5"></i>
+                            <span class="text-sm font-medium">Submit Question</span>
+                        </a>
+
+                        <a href="/flashcards" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'flashcards' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
                             <i data-lucide="layers" class="w-5 h-5"></i>
                             <span class="text-sm font-medium">Flashcards</span>
                         </a>
+                        <?php endif; ?>
 
-                        <a href="/groups" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'groups' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
+                        <a href="/learn" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'learn' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
+                            <i data-lucide="book-marked" class="w-5 h-5"></i>
+                            <span class="text-sm font-medium">Learn</span>
+                        </a>
+
+                        <?php if ($this->session->isStudent()): ?>
+                        <!-- AI Tools (Student) -->
+                        <div class="pt-3 pb-1">
+                            <div class="text-[10px] font-bold text-accent-cyan uppercase tracking-widest px-4 mb-2 opacity-60">AI Tools</div>
+                        </div>
+
+                        <a href="/ai" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'ai' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
+                            <i data-lucide="bot" class="w-5 h-5"></i>
+                            <span class="text-sm font-medium">AI Assistant</span>
+                        </a>
+
+                        <a href="/suggestions" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'suggestions' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
+                            <i data-lucide="lightbulb" class="w-5 h-5"></i>
+                            <span class="text-sm font-medium">Suggestions</span>
+                        </a>
+
+                        <a href="/playground" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'playground' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
+                            <i data-lucide="terminal" class="w-5 h-5"></i>
+                            <span class="text-sm font-medium">Playground</span>
+                        </a>
+                        <?php endif; ?>
+
+                        <!-- Community (Shared/Student) -->
+                        <div class="pt-3 pb-1">
+                            <div class="text-[10px] font-bold text-accent-cyan uppercase tracking-widest px-4 mb-2 opacity-60">Community</div>
+                        </div>
+
+                        <?php if ($this->session->isStudent()): ?>
+                        <a href="/groups" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'groups' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
                             <i data-lucide="users" class="w-5 h-5"></i>
                             <span class="text-sm font-medium">Study Groups</span>
                         </a>
+                        <?php endif; ?>
 
+                        <a href="/announcements" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'announcements' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
+                            <i data-lucide="megaphone" class="w-5 h-5"></i>
+                            <span class="text-sm font-medium">Announcements</span>
+                        </a>
+
+                        <?php if ($this->session->isStudent()): ?>
+                        <a href="/partners" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'partners' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
+                            <i data-lucide="user-plus" class="w-5 h-5"></i>
+                            <span class="text-sm font-medium">Partners</span>
+                        </a>
+
+                        <!-- Career & Finance (Student) -->
+                        <div class="pt-3 pb-1">
+                            <div class="text-[10px] font-bold text-accent-cyan uppercase tracking-widest px-4 mb-2 opacity-60">Career & Finance</div>
+                        </div>
+
+                        <a href="/jobs" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'jobs' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
+                            <i data-lucide="briefcase" class="w-5 h-5"></i>
+                            <span class="text-sm font-medium">Jobs</span>
+                        </a>
+
+                        <a href="/fees" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'fees' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
+                            <i data-lucide="credit-card" class="w-5 h-5"></i>
+                            <span class="text-sm font-medium">Fees</span>
+                        </a>
+                        <?php endif; ?>
+
+                        <a href="/prospectus" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'prospectus' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
+                            <i data-lucide="file-text" class="w-5 h-5"></i>
+                            <span class="text-sm font-medium">Prospectus</span>
+                        </a>
+
+                        <!-- Administration (admin only) -->
                         <?php if ($this->session->userRole() === 'admin'): ?>
-                            <div class="pt-4 pb-2">
+                            <div class="pt-3 pb-1">
                                 <div class="text-[10px] font-bold text-red-400 uppercase tracking-widest px-4 mb-2 opacity-60">Administration</div>
                             </div>
-                            <a href="/admin" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'admin' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
+                            <a href="/admin" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'admin' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
                                 <i data-lucide="shield-check" class="w-5 h-5"></i>
                                 <span class="text-sm font-medium">Admin Panel</span>
                             </a>

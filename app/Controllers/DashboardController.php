@@ -3,8 +3,10 @@
 namespace App\Controllers;
 
 use App\Core\Controller;
-use App\Models\{Subject, Task, Grade, Attendance, User, StudyLog, Question};
-use function App\getDB;
+use App\Models\{Subject, Task, Grade, Attendance, User, StudyLog, Question, Course};
+use function getDB;
+use function App\redirect;
+use function App\clean;
 
 /**
  * DashboardController — Main dashboard and analytics
@@ -14,21 +16,39 @@ class DashboardController extends Controller
     public function index(): void
     {
         $this->requireLogin();
+        User::ensureRosterSynced();
         $userId = $this->session->userId();
         $user = User::findById($userId);
 
-        // Get stats
-        $tasksDueCount = Task::getTasksDueSoon($userId);
-        $doneCount = Task::getDoneCount($userId);
-        $weekHours = StudyLog::getWeeklyHours($userId);
+        if (($user['role'] ?? 'student') === 'student') {
+            Subject::syncForUserBatchSemester((int) $userId, (string) ($user['batch'] ?? ''), (int) ($user['semester'] ?? 1));
+            $user = User::findById($userId);
+        }
 
-        // Upcoming tasks
-        $upcomingTasks = Task::getUpcomingTasks($userId);
+        if ($this->session->isFaculty()) {
+            // Faculty Dashboard
+            $pendingQuestions = Question::findPending();
+            $pendingAnswers = \App\Models\Answer::findPending();
+            
+            $todayAttendanceCount = Attendance::getTodayCount();
 
-        // Recent questions
-        $recentQuestions = Question::getRecentApproved();
+            $studentCount = User::getStudentCount();
 
-        $this->render('dashboard/index', compact('user', 'tasksDueCount', 'doneCount', 'weekHours', 'upcomingTasks', 'recentQuestions'));
+            $this->render('dashboard/faculty', compact('user', 'pendingQuestions', 'pendingAnswers', 'todayAttendanceCount', 'studentCount'));
+        } else {
+            // Get stats
+            $tasksDueCount = Task::getTasksDueSoon($userId);
+            $doneCount = Task::getDoneCount($userId);
+            $weekHours = StudyLog::getWeeklyHours($userId);
+
+            // Upcoming tasks
+            $upcomingTasks = Task::getUpcomingTasks($userId);
+
+            // Recent questions
+            $recentQuestions = Question::getRecentApproved();
+
+            $this->render('dashboard/index', compact('user', 'tasksDueCount', 'doneCount', 'weekHours', 'upcomingTasks', 'recentQuestions'));
+        }
     }
 
     public function analytics(): void
@@ -49,42 +69,165 @@ class DashboardController extends Controller
     public function subjects(): void
     {
         $this->requireLogin();
+        User::ensureRosterSynced();
         $userId = $this->session->userId();
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $action = $_POST['action'] ?? '';
+            if ($action === 'add') {
+                $name = clean($_POST['name'] ?? '');
+                $code = clean($_POST['code'] ?? '');
+                $color = clean($_POST['color'] ?? '#4f46e5');
+                $semester = (int)($_POST['semester'] ?? 1);
+                $year = (int)($_POST['year'] ?? date('Y'));
+                $target_hours = (float)($_POST['target_hours'] ?? 5.0);
+
+                if ($name) {
+                    Subject::create($userId, [
+                        'name' => $name,
+                        'code' => $code,
+                        'color' => $color,
+                        'semester' => $semester,
+                        'year' => $year,
+                        'target_hours_per_week' => $target_hours
+                    ]);
+                    $this->session->setFlash('success', 'Subject added successfully!');
+                }
+            } elseif ($action === 'delete') {
+                $subjectId = (int)($_POST['subject_id'] ?? 0);
+                if ($subjectId) {
+                    Subject::delete($subjectId);
+                    $this->session->setFlash('success', 'Subject removed.');
+                }
+            }
+            redirect('/subjects');
+        }
+
         $user = User::findById($userId);
-        $subjects = Subject::findByUser($userId);
-        $this->render('pages/subjects', compact('user', 'subjects'));
+        Subject::syncForUserBatchSemester((int) $userId, (string) ($user['batch'] ?? ''), (int) ($user['semester'] ?? 1));
+        $user = User::findById($userId);
+
+        // Fetch subjects with stats (like pending tasks, done tasks)
+        $subjects = Subject::findByUserWithStats($userId);
+
+        // Get all courses to populate datalist (filtered by user's batch)
+        $courses = \App\Models\Course::findByBatch($user['batch'] ?? '');
+        if (empty($courses)) {
+            $courses = \App\Models\Course::getAll(); // Fallback if no specific batch courses found
+        }
+        $courseCatalog = [];
+        foreach ($courses as $course) {
+            $displayName = trim($course['code'] . ': ' . $course['name']);
+            $courseCatalog[$displayName] = [
+                'code' => $course['code'],
+                'semester' => (int) $course['semester'],
+                'year' => (int) $course['year'],
+            ];
+        }
+
+        $this->render('pages/subjects', compact('user', 'subjects', 'courses', 'courseCatalog'));
     }
 
     public function tasks(): void
     {
         $this->requireLogin();
+        User::ensureRosterSynced();
         $userId = $this->session->userId();
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $action = $_POST['action'] ?? '';
+            if ($action === 'add') {
+                $title = clean($_POST['title'] ?? '');
+                $subjectId = (int)($_POST['subject_id'] ?? 0);
+                $type = clean($_POST['type'] ?? 'assignment');
+                $dueDate = clean($_POST['due_date'] ?? '');
+                
+                if ($title && $subjectId && $dueDate) {
+                    Task::create($userId, [
+                        'title' => $title,
+                        'subject_id' => $subjectId,
+                        'type' => $type,
+                        'due_date' => $dueDate
+                    ]);
+                    $this->session->setFlash('success', 'Task created successfully!');
+                }
+            } elseif ($action === 'delete') {
+                $taskId = (int)($_POST['task_id'] ?? 0);
+                if ($taskId) {
+                    Task::delete($taskId);
+                    $this->session->setFlash('success', 'Task deleted.');
+                }
+            } elseif ($action === 'toggle') {
+                $taskId = (int)($_POST['task_id'] ?? 0);
+                $status = clean($_POST['status'] ?? 'pending');
+                if ($taskId) {
+                    Task::updateStatus($taskId, $status);
+                }
+            }
+            redirect('/tasks');
+        }
+
         $user = User::findById($userId);
         $tasks = Task::findByUser($userId);
-        $this->render('pages/tasks', compact('user', 'tasks'));
+        $subjects = Subject::findByUser($userId);
+        
+        $this->render('pages/tasks', compact('user', 'tasks', 'subjects'));
     }
 
     public function grades(): void
     {
         $this->requireLogin();
+        User::ensureRosterSynced();
         $userId = $this->session->userId();
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $action = $_POST['action'] ?? '';
+            if ($action === 'add') {
+                $subjectId = (int)($_POST['subject_id'] ?? 0);
+                $examName = clean($_POST['exam_name'] ?? '');
+                $marks = (float)($_POST['marks_obtained'] ?? 0);
+                $total = (float)($_POST['total_marks'] ?? 100);
+                $date = clean($_POST['exam_date'] ?? date('Y-m-d'));
+                
+                if ($subjectId && $examName && $total > 0) {
+                    Grade::create($userId, [
+                        'subject_id' => $subjectId,
+                        'title' => $examName,
+                        'score' => $marks,
+                        'max_score' => $total,
+                        'exam_date' => $date
+                    ]);
+                    $this->session->setFlash('success', 'Grade added successfully!');
+                }
+            }
+            redirect('/grades');
+        }
+
         $user = User::findById($userId);
         $grades = Grade::findByUser($userId);
-        $this->render('pages/grades', compact('user', 'grades'));
+        $subjects = Subject::findByUser($userId);
+        
+        $this->render('pages/grades', compact('user', 'grades', 'subjects'));
     }
 
     public function attendance(): void
     {
         $this->requireLogin();
+        User::ensureRosterSynced();
         $userId = $this->session->userId();
         $user = User::findById($userId);
-        $attendance = Attendance::findByUser($userId);
-        $this->render('pages/attendance', compact('user', 'attendance'));
+        
+        $myAttendance = Attendance::findByUser($userId);
+        $batchAttendance = Attendance::findByBatch($user['batch'] ?? '');
+        $batchStats = Attendance::getBatchStats($user['batch'] ?? '');
+
+        $this->render('pages/attendance', compact('user', 'myAttendance', 'batchAttendance', 'batchStats'));
     }
 
     public function calendar(): void
     {
         $this->requireLogin();
+        User::ensureRosterSynced();
         $userId = $this->session->userId();
         $user = User::findById($userId);
 

@@ -39,6 +39,16 @@ class PageController extends Controller
         'result-lookup' => '/result-lookup',
         'result' => '/result-lookup',
         'admin' => '/admin',
+        'manage-attendance' => '/admin/attendance',
+        'api-settings' => '/admin/api-settings',
+        // AJAX mappings
+        'ai-suggest' => '/api/ai/suggest',
+        'ai-compact' => '/api/question-bank/compact-answer',
+        'bookmark' => '/api/question-bank/bookmark',
+        'upvote' => '/api/question-bank/upvote',
+        'mu-result' => '/api/result-lookup',
+        'run-python' => '/api/playground/run-python',
+        'run-sql' => '/api/playground/run-sql',
     ];
 
     public function page(string $page): void

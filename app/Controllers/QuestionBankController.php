@@ -9,7 +9,7 @@ use App\Models\Answer;
 use App\Models\User;
 use function App\redirect;
 use function App\clean;
-use function App\getDB;
+use function getDB;
 use function App\callAI;
 
 class QuestionBankController extends Controller
@@ -24,10 +24,12 @@ class QuestionBankController extends Controller
             'course' => $_GET['course'] ?? '',
             'topic' => $_GET['topic'] ?? '',
             'type' => $_GET['type'] ?? '',
+            'batch' => $_GET['batch'] ?? '',
             'q' => $_GET['q'] ?? ''
         ];
 
         $usingDb = Question::hasApprovedQuestions();
+        $availableBatches = \App\Models\Course::getDistinctBatches();
 
         if ($usingDb) {
             $courses = Question::getCourseSummariesFromDb();
@@ -68,7 +70,8 @@ class QuestionBankController extends Controller
             'totalQ',
             'totalQuestionCount',
             'examHistory',
-            'usingDb'
+            'usingDb',
+            'availableBatches'
         ));
     }
 
@@ -128,15 +131,17 @@ class QuestionBankController extends Controller
         $userId = $this->session->userId();
         $user = User::findById($userId);
         $courses = Course::getAll();
+        $availableBatches = Course::getDistinctBatches();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $courseCode = strtoupper(trim($_POST['course_code'] ?? ''));
             $questionText = trim($_POST['question_text'] ?? '');
+            $questionImage = $_POST['question_image'] ?? ''; // Base64 image data
 
-            if ($courseCode === '' || $questionText === '') {
-                $error = 'Course code and question text are required.';
+            if ($courseCode === '' || ($questionText === '' && $questionImage === '')) {
+                $error = 'Course code and either question text or an image are required.';
                 $old = ['course_code' => $courseCode, 'question_text' => $questionText];
-                $this->render('pages/submit-question', compact('user', 'courses', 'error', 'old'));
+                $this->render('pages/submit-question', compact('user', 'courses', 'error', 'old', 'availableBatches'));
                 return;
             }
 
@@ -144,16 +149,16 @@ class QuestionBankController extends Controller
             if (!$course) {
                 $error = 'Course code not found. Please choose a valid course.';
                 $old = ['course_code' => $courseCode, 'question_text' => $questionText];
-                $this->render('pages/submit-question', compact('user', 'courses', 'error', 'old'));
+                $this->render('pages/submit-question', compact('user', 'courses', 'error', 'old', 'availableBatches'));
                 return;
             }
 
             $db = getDB();
             $stmt = $db->prepare("
-                INSERT INTO questions (course_id, submitted_by, question_text, is_approved)
-                VALUES (?, ?, ?, 0)
+                INSERT INTO questions (course_id, submitted_by, question_text, image_path, is_approved)
+                VALUES (?, ?, ?, ?, 0)
             ");
-            $stmt->execute([(int) $course['id'], $userId, clean($questionText)]);
+            $stmt->execute([(int) $course['id'], $userId, clean($questionText), $questionImage]);
 
             $this->session->setFlash('success', 'Question submitted for review. Thank you.');
             redirect('/question-bank');
@@ -161,7 +166,7 @@ class QuestionBankController extends Controller
 
         $error = '';
         $old = ['course_code' => '', 'question_text' => ''];
-        $this->render('pages/submit-question', compact('user', 'courses', 'error', 'old'));
+        $this->render('pages/submit-question', compact('user', 'courses', 'error', 'old', 'availableBatches'));
     }
 
     public function bookmark(): void

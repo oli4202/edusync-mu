@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use function App\getDB;
+use function getDB;
 use function App\clean;
 
 /**
@@ -443,6 +443,11 @@ class Question
         if (!empty($filters['type'])) {
             $conditions[] = 'q.question_type = ?';
             $params[] = $filters['type'];
+        }
+
+        if (!empty($filters['batch'])) {
+            $conditions[] = 'FIND_IN_SET(?, c.batch)';
+            $params[] = preg_replace('/[^0-9]/', '', $filters['batch']);
         }
 
         if (!empty($filters['q'])) {
