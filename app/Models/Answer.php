@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use function getDB;
-use function App\clean;
 
 /**
  * Answer Model

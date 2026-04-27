@@ -6,7 +6,6 @@ use App\Core\Controller;
 use App\Models\Group;
 use App\Models\Subject;
 use App\Models\User;
-use function App\redirect;
 
 class GroupController extends Controller
 {

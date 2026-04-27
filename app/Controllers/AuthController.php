@@ -5,8 +5,6 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Models\Subject;
 use App\Models\User;
-use function App\clean;
-use function App\redirect;
 
 /**
  * AuthController — Handles authentication (login, signup, logout)

@@ -5,7 +5,6 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Models\Job;
 use App\Models\User;
-use function App\redirect;
 
 class JobController extends Controller
 {

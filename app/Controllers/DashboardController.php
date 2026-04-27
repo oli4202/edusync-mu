@@ -5,8 +5,6 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Models\{Subject, Task, Grade, Attendance, User, StudyLog, Question, Course};
 use function getDB;
-use function App\redirect;
-use function App\clean;
 
 /**
  * DashboardController — Main dashboard and analytics

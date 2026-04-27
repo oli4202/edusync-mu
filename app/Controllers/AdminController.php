@@ -9,8 +9,6 @@ use App\Models\User;
 use App\Models\Course;
 use App\Models\Attendance;
 use App\Models\Group;
-use function App\redirect;
-use function App\clean;
 use function getDB;
 
 class AdminController extends Controller

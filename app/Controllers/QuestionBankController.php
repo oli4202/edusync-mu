@@ -7,10 +7,7 @@ use App\Models\Course;
 use App\Models\Question;
 use App\Models\Answer;
 use App\Models\User;
-use function App\redirect;
-use function App\clean;
 use function getDB;
-use function App\callAI;
 
 class QuestionBankController extends Controller
 {

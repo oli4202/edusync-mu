@@ -4,7 +4,6 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Models\User;
-use function App\callAI;
 
 class AiController extends Controller
 {

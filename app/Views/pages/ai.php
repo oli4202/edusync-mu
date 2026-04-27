@@ -46,10 +46,24 @@
                     system: 'You are a helpful academic assistant for Metropolitan University Sylhet, Bangladesh, Software Engineering department students.'
                 })
             });
-            const data = await resp.json();
-            this.chatHistory.push({ role: 'ai', text: data.text || 'Error occurred.' });
+            const raw = await resp.text();
+            let data = {};
+            try { data = JSON.parse(raw); } catch (_) {}
+
+            if (!resp.ok) {
+                const message = data.text || data.error || `AI request failed (HTTP ${resp.status}).`;
+                this.chatHistory.push({ role: 'ai', text: message });
+                return;
+            }
+
+            if (!data.text) {
+                this.chatHistory.push({ role: 'ai', text: 'AI service returned an unexpected response format.' });
+                return;
+            }
+
+            this.chatHistory.push({ role: 'ai', text: data.text });
         } catch (e) {
-            this.chatHistory.push({ role: 'ai', text: 'Failed to connect to AI server.' });
+            this.chatHistory.push({ role: 'ai', text: `Failed to connect to AI server: ${e?.message || 'Unknown error'}` });
         } finally {
             this.isThinking = false;
             this.$nextTick(() => {
@@ -87,10 +101,18 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ prompt })
             });
-            const data = await resp.json();
-            this.toolResult = data.text || 'Could not generate result.';
+            const raw = await resp.text();
+            let data = {};
+            try { data = JSON.parse(raw); } catch (_) {}
+
+            if (!resp.ok) {
+                this.toolResult = data.text || data.error || `AI request failed (HTTP ${resp.status}).`;
+                return;
+            }
+
+            this.toolResult = data.text || 'AI service returned an unexpected response format.';
         } catch (e) {
-            this.toolResult = 'Error: Failed to connect to AI service.';
+            this.toolResult = `Error: Failed to connect to AI service (${e?.message || 'Unknown error'}).`;
         } finally {
             this.isThinking = false;
         }
