@@ -133,9 +133,9 @@ class QuestionBankController extends Controller
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $courseCode = strtoupper(trim($_POST['course_code'] ?? ''));
             $questionText = trim($_POST['question_text'] ?? '');
-            $questionImage = $_POST['question_image'] ?? ''; // Base64 image data
+            $questionImageBase64 = $_POST['question_image'] ?? ''; // Base64 image data from canvas/file input
 
-            if ($courseCode === '' || ($questionText === '' && $questionImage === '')) {
+            if ($courseCode === '' || ($questionText === '' && $questionImageBase64 === '')) {
                 $error = 'Course code and either question text or an image are required.';
                 $old = ['course_code' => $courseCode, 'question_text' => $questionText];
                 $this->render('pages/submit-question', compact('user', 'courses', 'error', 'old', 'availableBatches'));
@@ -150,12 +150,35 @@ class QuestionBankController extends Controller
                 return;
             }
 
+            // Save image to disk instead of storing raw base64 in DB
+            $imagePath = null;
+            if ($questionImageBase64 !== '') {
+                // Strip data URI prefix if present (e.g. "data:image/png;base64,")
+                if (preg_match('/^data:image\/(\w+);base64,/', $questionImageBase64, $matches)) {
+                    $ext = strtolower($matches[1]) === 'jpeg' ? 'jpg' : strtolower($matches[1]);
+                    $imageData = base64_decode(preg_replace('/^data:image\/\w+;base64,/', '', $questionImageBase64));
+                } else {
+                    $ext = 'png';
+                    $imageData = base64_decode($questionImageBase64);
+                }
+
+                if ($imageData !== false && strlen($imageData) > 0) {
+                    $uploadDir = __DIR__ . '/../../public/uploads/questions/';
+                    if (!is_dir($uploadDir)) {
+                        mkdir($uploadDir, 0755, true);
+                    }
+                    $filename = 'q_' . time() . '_' . uniqid() . '.' . $ext;
+                    file_put_contents($uploadDir . $filename, $imageData);
+                    $imagePath = 'uploads/questions/' . $filename;
+                }
+            }
+
             $db = getDB();
             $stmt = $db->prepare("
                 INSERT INTO questions (course_id, submitted_by, question_text, image_path, is_approved)
                 VALUES (?, ?, ?, ?, 0)
             ");
-            $stmt->execute([(int) $course['id'], $userId, clean($questionText), $questionImage]);
+            $stmt->execute([(int) $course['id'], $userId, clean($questionText), $imagePath]);
 
             $this->session->setFlash('success', 'Question submitted for review. Thank you.');
             redirect('/question-bank');
