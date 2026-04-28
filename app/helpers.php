@@ -73,6 +73,23 @@ function baseUrl(): string
 }
 
 /**
+ * Resolve a user avatar path/url to a browser-safe URL.
+ */
+function avatarUrl(?string $avatar, string $name = 'Student'): string
+{
+    $avatar = trim((string)$avatar);
+    if ($avatar !== '') {
+        if (preg_match('#^https?://#i', $avatar)) {
+            return $avatar;
+        }
+        return '/' . ltrim($avatar, '/');
+    }
+
+    $label = rawurlencode(trim($name) !== '' ? $name : 'Student');
+    return "https://ui-avatars.com/api/?name={$label}&background=0f172a&color=22d3ee&size=128";
+}
+
+/**
  * Call AI API (Supports Groq for text and Gemini for images)
  */
 function callAI(string $prompt, string $systemPrompt = '', string $base64Image = ''): array

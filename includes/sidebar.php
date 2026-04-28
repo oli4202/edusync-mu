@@ -108,7 +108,7 @@ $user = $user ?? currentUser();
     <div class="sidebar-footer">
         <div class="user-card">
             <div class="user-chip">
-                <div class="avatar"><?= strtoupper(substr($user['name'] ?? 'U', 0, 1)) ?></div>
+                <img class="avatar" src="<?= htmlspecialchars(avatarUrl($user['avatar'] ?? '', $user['name'] ?? 'User')) ?>" alt="<?= htmlspecialchars($user['name'] ?? 'User') ?>">
                 <div class="user-copy">
                     <div class="user-name"><?= htmlspecialchars($user['name'] ?? 'User') ?></div>
                     <div class="user-role"><?= htmlspecialchars($user['department'] ?? 'Software Engineering') ?></div>

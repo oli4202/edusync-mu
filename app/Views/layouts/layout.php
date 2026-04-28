@@ -237,9 +237,11 @@
 
                     <div class="mt-auto pt-6 border-t border-slate-800">
                         <div class="flex items-center gap-3 px-2 mb-4">
-                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-cyan to-accent-purple flex items-center justify-center font-bold text-dark-bg shadow-lg shadow-accent-cyan/20">
-                                <?php echo strtoupper(substr($user['name'] ?? 'U', 0, 1)); ?>
-                            </div>
+                            <img
+                                src="<?php echo htmlspecialchars(avatarUrl($user['avatar'] ?? '', $user['name'] ?? 'User')); ?>"
+                                alt="<?php echo htmlspecialchars($user['name'] ?? 'User'); ?>"
+                                class="w-10 h-10 rounded-xl object-cover border border-slate-700 shadow-lg shadow-accent-cyan/20"
+                            >
                             <div class="flex-1 min-w-0">
                                 <p class="text-sm font-bold truncate"><?php echo htmlspecialchars($user['name'] ?? ''); ?></p>
                                 <p class="text-[10px] text-slate-500 truncate uppercase tracking-tighter"><?php echo htmlspecialchars($user['role'] ?? 'Student'); ?></p>

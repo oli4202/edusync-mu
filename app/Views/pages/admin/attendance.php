@@ -22,6 +22,7 @@
 .status-present{color:#34d399;} .status-absent{color:#f87171;} .status-late{color:#fbbf24;} .status-excused{color:#60a5fa;}
 .action-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
 .btn-outline[disabled]{opacity:.6;cursor:not-allowed;}
+.student-avatar-admin{width:30px;height:30px;border-radius:999px;object-fit:cover;border:1px solid rgba(148,163,184,.35);margin-right:8px;vertical-align:middle;}
 @media(max-width:900px){.filter-bar-admin{grid-template-columns:1fr 1fr;}.stats-grid{grid-template-columns:1fr;}}
 @media(max-width:640px){.filter-bar-admin{grid-template-columns:1fr;}}
 </style>
@@ -138,6 +139,7 @@
                 <tr>
                     <td style="color:var(--muted);font-size:12px;"><?= $i++ ?></td>
                     <td>
+                        <img class="student-avatar-admin" src="<?= htmlspecialchars(avatarUrl($s['avatar'] ?? '', $s['name'] ?? 'Student')) ?>" alt="<?= htmlspecialchars($s['name'] ?? 'Student') ?>">
                         <div style="font-weight:500;"><?= htmlspecialchars($s['name']) ?></div>
                         <div style="font-size:11px;color:var(--muted);"><?= htmlspecialchars($s['email']) ?></div>
                         <?php if (!empty($s['memberships'])): ?>
@@ -189,7 +191,7 @@
             ?>
             <tr>
                 <td><?= $showDate ? '<strong>'.$dateStr.'</strong>' : '' ?></td>
-                <td><?= htmlspecialchars($r['student_name']) ?></td>
+                <td><img class="student-avatar-admin" src="<?= htmlspecialchars(avatarUrl($r['student_avatar'] ?? '', $r['student_name'] ?? 'Student')) ?>" alt="<?= htmlspecialchars($r['student_name'] ?? 'Student') ?>"><?= htmlspecialchars($r['student_name']) ?></td>
                 <td style="color:var(--muted);"><?= htmlspecialchars($r['sid'] ?: '—') ?></td>
                 <td class="status-<?= $r['status'] ?>" style="font-weight:600;"><?= ucfirst($r['status']) ?></td>
                 <td style="color:var(--muted);"><?= htmlspecialchars($r['notes'] ?: '—') ?></td>

@@ -7,7 +7,7 @@
 .partner-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:22px; transition:all .2s; }
 .partner-card:hover { border-color:var(--accent); }
 .partner-top { display:flex; align-items:center; gap:14px; margin-bottom:14px; }
-.partner-avatar { width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent2)); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:16px; color:#0a0e1a; flex-shrink:0; }
+.partner-avatar { width:44px; height:44px; border-radius:50%; object-fit:cover; border:1px solid var(--border); flex-shrink:0; }
 .partner-name { font-family:'Syne',sans-serif; font-size:15px; font-weight:700; }
 .partner-info { font-size:12px; color:var(--muted); }
 .partner-bio { font-size:13px; color:var(--muted); line-height:1.5; margin-bottom:12px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
@@ -43,7 +43,7 @@
     <?php foreach ($students as $s): ?>
     <div class="partner-card">
         <div class="partner-top">
-            <div class="partner-avatar"><?= strtoupper(substr($s['name'],0,1)) ?></div>
+            <img class="partner-avatar" src="<?= htmlspecialchars(avatarUrl($s['avatar'] ?? '', $s['name'] ?? 'Student')) ?>" alt="<?= htmlspecialchars($s['name'] ?? 'Student') ?>">
             <div>
                 <div class="partner-name"><?= htmlspecialchars($s['name']) ?></div>
                 <div class="partner-info">

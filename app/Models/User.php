@@ -340,7 +340,7 @@ class User
         self::ensureRosterSynced();
         $db = getDB();
         $query = "
-            SELECT u.id, u.name, u.email, u.student_id, u.batch, u.semester, u.department, u.streak, u.bio,
+            SELECT u.id, u.name, u.email, u.student_id, u.batch, u.semester, u.department, u.streak, u.bio, u.avatar,
                 (SELECT COUNT(*) FROM follows WHERE follower_id=? AND following_id=u.id) AS is_following,
                 (SELECT COUNT(*) FROM follows WHERE follower_id=u.id) AS following_count,
                 (SELECT COUNT(*) FROM follows WHERE following_id=u.id) AS follower_count,
@@ -432,12 +432,12 @@ class User
         }
 
         $sql = "
-            SELECT DISTINCT u.id, u.name, u.email, u.student_id, u.batch, u.semester,
+            SELECT DISTINCT u.id, u.name, u.email, u.student_id, u.batch, u.semester, u.avatar,
                 GROUP_CONCAT(DISTINCT CONCAT('Batch ', m.batch, ' / Sem ', m.semester) ORDER BY m.semester DESC SEPARATOR ', ') AS memberships
             FROM users u
             INNER JOIN student_batch_memberships m ON m.user_id = u.id
             WHERE " . implode(' AND ', $conditions) . "
-            GROUP BY u.id, u.name, u.email, u.student_id, u.batch, u.semester
+            GROUP BY u.id, u.name, u.email, u.student_id, u.batch, u.semester, u.avatar
             ORDER BY u.name ASC
         ";
 

@@ -53,8 +53,7 @@ $existingAnswersText = implode("\n\n", array_column($answers, 'answer_text'));
 .author { display: flex; align-items: center; gap: 10px; }
 .author-avatar {
     width: 34px; height: 34px; border-radius: 50%;
-    background: linear-gradient(135deg, #818cf8, #22d3ee);
-    display: flex; align-items: center; justify-content: center; color: #0a0e1a; font-weight: 700;
+    object-fit: cover; border: 1px solid #1e2d45;
 }
 .author-name { font-size: 14px; font-weight: 600; }
 .answer-date { font-size: 12px; color: #94a3b8; }
@@ -163,7 +162,7 @@ $existingAnswersText = implode("\n\n", array_column($answers, 'answer_text'));
                     <div class="answer-card">
                         <div class="answer-header">
                             <div class="author">
-                                <div class="author-avatar"><?= htmlspecialchars(strtoupper(substr($answer['author_name'] ?? 'A', 0, 1))) ?></div>
+                                <img class="author-avatar" src="<?= htmlspecialchars(avatarUrl($answer['author_avatar'] ?? '', $answer['author_name'] ?? 'Author')) ?>" alt="<?= htmlspecialchars($answer['author_name'] ?? 'Author') ?>">
                                 <div>
                                     <div class="author-name"><?= htmlspecialchars($answer['author_name'] ?? 'Anonymous') ?></div>
                                     <div class="answer-date"><?= htmlspecialchars(\App\timeAgo($answer['created_at'])) ?></div>

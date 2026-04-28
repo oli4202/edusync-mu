@@ -97,6 +97,7 @@ $presentRate = $totalClasses > 0 ? round(($presentCount / $totalClasses) * 100, 
                             <tr>
                                 <td><?php echo date('M d, Y', strtotime($record['class_date'])); ?></td>
                                 <td>
+                                    <img class="student-avatar" src="<?php echo htmlspecialchars(avatarUrl($record['student_avatar'] ?? '', $record['student_name'] ?? 'Student')); ?>" alt="<?php echo htmlspecialchars($record['student_name'] ?? 'Student'); ?>">
                                     <strong><?php echo htmlspecialchars($record['student_name'] ?? ''); ?></strong>
                                     <div style="font-size:11px;color:#64748b;"><?php echo htmlspecialchars($record['sid'] ?? ''); ?></div>
                                 </td>
@@ -231,4 +232,5 @@ td {
 }
 
 .empty-state { padding: 40px; text-align: center; color: #64748b; font-style: italic; }
+.student-avatar { width:28px; height:28px; border-radius:999px; object-fit:cover; border:1px solid #1e2d45; margin-right:8px; vertical-align:middle; }
 </style>

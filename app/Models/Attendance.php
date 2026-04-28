@@ -38,7 +38,7 @@ class Attendance
         if ($batch === '') return [];
 
         $stmt = $db->prepare("
-            SELECT a.*, c.code AS course_code, c.name AS course_name, u.name AS student_name, u.student_id AS sid
+            SELECT a.*, c.code AS course_code, c.name AS course_name, u.name AS student_name, u.student_id AS sid, u.avatar AS student_avatar
             FROM attendance a
             INNER JOIN courses c ON c.id = a.course_id
             INNER JOIN users u ON u.id = a.user_id
@@ -97,7 +97,7 @@ class Attendance
     public static function getRecentHistoryForCourse(int $courseId, int $limit = 100): array
     {
         $db = getDB();
-        $stmt = $db->prepare("SELECT a.*, u.name AS student_name, u.student_id AS sid 
+        $stmt = $db->prepare("SELECT a.*, u.name AS student_name, u.student_id AS sid, u.avatar AS student_avatar
             FROM attendance a JOIN users u ON a.user_id=u.id 
             WHERE a.course_id=? ORDER BY a.class_date DESC, u.name ASC LIMIT ?");
         $stmt->execute([$courseId, $limit]);

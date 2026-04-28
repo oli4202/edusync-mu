@@ -13,7 +13,7 @@ class Answer
     {
         $db = getDB();
         $stmt = $db->prepare("
-            SELECT a.*, u.name AS author_name
+            SELECT a.*, u.name AS author_name, u.avatar AS author_avatar
             FROM answers a
             LEFT JOIN users u ON a.user_id = u.id
             WHERE a.question_id = ? AND a.is_approved = 1
