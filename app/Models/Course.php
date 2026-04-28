@@ -9,6 +9,11 @@ use function getDB;
  */
 class Course
 {
+    private const TERM_MAP = [
+        1 => 'Spring',
+        2 => 'Summer',
+        0 => 'Winter',
+    ];
     /**
      * Get all courses
      */
@@ -73,6 +78,35 @@ class Course
         $stmt = $db->prepare("SELECT DISTINCT semester FROM courses WHERE (FIND_IN_SET(?, batch) OR batch IS NULL) AND status = 'active' ORDER BY semester");
         $stmt->execute([$batchNum]);
         return array_column($stmt->fetchAll(), 'semester');
+    }
+
+    public static function getSemesterOptionsByBatch(string $batch): array
+    {
+        $semesters = self::getSemestersByBatch($batch);
+        sort($semesters, SORT_NUMERIC);
+
+        $options = [];
+        foreach ($semesters as $semester) {
+            $sem = (int)$semester;
+            $options[] = [
+                'value' => $sem,
+                'label' => sprintf('Semester %d (%s)', $sem, self::getSemesterTerm($sem)),
+                'term' => self::getSemesterTerm($sem),
+                'year_index' => (int)ceil($sem / 3),
+            ];
+        }
+
+        return $options;
+    }
+
+    public static function getSemesterTerm(int $semester): string
+    {
+        if ($semester <= 0) {
+            return 'Unknown';
+        }
+
+        $mod = $semester % 3;
+        return self::TERM_MAP[$mod] ?? 'Unknown';
     }
 
     /**

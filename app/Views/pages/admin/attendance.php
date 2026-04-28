@@ -1,28 +1,29 @@
 <?php $pageTitle = 'Manage Attendance — EduSync Admin'; ?>
 
 <style>
-.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px;}
-.stat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;}
-.stat-val{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--accent);}
-.stat-lbl{font-size:12px;color:var(--muted);margin-top:4px;}
-.card-admin{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px;}
-.card-title-admin{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border);}
-.filter-bar-admin{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;margin-bottom:20px;}
-.filter-bar-admin label{font-size:12px;color:var(--muted);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px;}
-.filter-bar-admin select, .filter-bar-admin input{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;min-width:200px;}
-.student-table-admin{width:100%;border-collapse:collapse;}
-.student-table-admin th{text-align:left;font-size:12px;color:var(--muted);padding:10px 12px;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.5px;}
-.student-table-admin td{padding:12px;border-bottom:1px solid rgba(30,45,69,.5);font-size:14px;}
+.stats-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:24px;}
+.stat{background:linear-gradient(145deg,rgba(255,255,255,.04),rgba(255,255,255,.02));border:1px solid rgba(148,163,184,.25);border-radius:14px;padding:18px 18px 16px;box-shadow:0 12px 30px rgba(2,6,23,.2);}
+.stat-val{font-family:'Syne',sans-serif;font-size:30px;font-weight:800;color:#67e8f9;line-height:1;}
+.stat-lbl{font-size:12px;color:#94a3b8;margin-top:8px;letter-spacing:.04em;text-transform:uppercase;}
+.card-admin{background:linear-gradient(180deg,rgba(15,23,42,.84),rgba(15,23,42,.74));border:1px solid rgba(148,163,184,.22);border-radius:18px;padding:24px;margin-bottom:18px;box-shadow:0 20px 40px rgba(2,6,23,.18);}
+.card-title-admin{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid rgba(148,163,184,.22);}
+.filter-bar-admin{display:grid;grid-template-columns:repeat(4,minmax(170px,1fr)) auto;gap:14px;align-items:end;margin-bottom:18px;}
+.filter-bar-admin label{font-size:11px;color:#94a3b8;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.08em;font-weight:700;}
+.filter-bar-admin select,.filter-bar-admin input{background:rgba(15,23,42,.75);border:1px solid rgba(148,163,184,.3);border-radius:10px;padding:11px 14px;color:#e2e8f0;font-size:14px;font-family:inherit;outline:none;width:100%;transition:border-color .2s,box-shadow .2s;}
+.filter-bar-admin select:focus,.filter-bar-admin input:focus{border-color:#22d3ee;box-shadow:0 0 0 3px rgba(34,211,238,.18);}
+.student-table-admin,.history-table-admin{width:100%;border-collapse:collapse;border-radius:12px;overflow:hidden;}
+.student-table-admin th,.history-table-admin th{text-align:left;font-size:11px;color:#94a3b8;padding:11px 12px;border-bottom:1px solid rgba(148,163,184,.22);background:rgba(30,41,59,.45);text-transform:uppercase;letter-spacing:.08em;}
+.student-table-admin td,.history-table-admin td{padding:12px;border-bottom:1px solid rgba(148,163,184,.12);font-size:14px;}
+.student-table-admin tbody tr:hover,.history-table-admin tbody tr:hover{background:rgba(148,163,184,.08);}
 .bulk-actions-admin{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
-.bulk-btn-admin{padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:rgba(255,255,255,.03);color:var(--text);transition:all .2s;}
-.bulk-btn-admin:hover{border-color:var(--accent);color:var(--accent);}
-.bulk-btn-admin.active{border-color:var(--accent);background:rgba(34,211,238,.1);color:var(--accent);}
-.history-table-admin{width:100%;border-collapse:collapse;font-size:13px;}
-.history-table-admin th{text-align:left;font-size:11px;color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--border);text-transform:uppercase;}
-.history-table-admin td{padding:8px 10px;border-bottom:1px solid rgba(30,45,69,.4);}
-.status-present{color:var(--accent3);} .status-absent{color:var(--danger);}
-.status-late{color:var(--warn);} .status-excused{color:var(--accent2);}
-@media(max-width:700px){.stats-grid{grid-template-columns:1fr;}.filter-bar-admin{flex-direction:column;}}
+.bulk-btn-admin{padding:8px 14px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid rgba(148,163,184,.3);background:rgba(15,23,42,.72);color:#cbd5e1;transition:all .2s;}
+.bulk-btn-admin:hover{border-color:#22d3ee;color:#67e8f9;}
+.bulk-btn-admin.active{border-color:#22d3ee;background:rgba(34,211,238,.14);color:#67e8f9;}
+.status-present{color:#34d399;} .status-absent{color:#f87171;} .status-late{color:#fbbf24;} .status-excused{color:#60a5fa;}
+.action-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+.btn-outline[disabled]{opacity:.6;cursor:not-allowed;}
+@media(max-width:900px){.filter-bar-admin{grid-template-columns:1fr 1fr;}.stats-grid{grid-template-columns:1fr;}}
+@media(max-width:640px){.filter-bar-admin{grid-template-columns:1fr;}}
 </style>
 
 <div style="margin-bottom: 20px;">
@@ -59,7 +60,7 @@
             <select name="semester" id="semesterSelect">
                 <option value="">Select batch...</option>
                 <?php if ($selSemester): ?>
-                    <option value="<?= $selSemester ?>" selected>Semester <?= $selSemester ?></option>
+                    <option value="<?= $selSemester ?>" selected>Semester <?= $selSemester ?> (<?= htmlspecialchars(\App\Models\Course::getSemesterTerm((int)$selSemester)) ?>)</option>
                 <?php endif; ?>
             </select>
         </div>
@@ -77,6 +78,16 @@
             <input type="date" name="class_date" value="<?= $selDate ?>" required>
         </div>
         <button type="submit" class="btn btn-primary">Load Students</button>
+    </form>
+
+    <form method="POST" class="action-row" style="margin-top:10px;">
+        <input type="hidden" name="action" value="random_results">
+        <input type="hidden" name="batch" value="<?= htmlspecialchars($selBatch) ?>">
+        <input type="hidden" name="semester" value="<?= htmlspecialchars((string)$selSemester) ?>">
+        <button type="submit" class="btn btn-outline" <?= (!$selBatch || !$selSemester) ? 'disabled' : '' ?>>
+            Generate Random Results For This Batch+Semester
+        </button>
+        <span style="font-size:12px;color:#94a3b8;">Type 3 UI: grouped by batch and semester with auto-labeled terms.</span>
     </form>
 </div>
 
@@ -215,8 +226,8 @@ document.getElementById('batchSelect').addEventListener('change', function() {
             semSelect.innerHTML = '<option value="">Select semester...</option>';
             data.forEach(sem => {
                 const opt = document.createElement('option');
-                opt.value = sem;
-                opt.textContent = `Semester ${sem}`;
+                opt.value = sem.value;
+                opt.textContent = sem.label;
                 semSelect.appendChild(opt);
             });
             // If we have a selected semester, trigger its change
@@ -262,9 +273,9 @@ if (document.getElementById('batchSelect').value) {
             semSelect.innerHTML = '<option value="">Select semester...</option>';
             data.forEach(sem => {
                 const opt = document.createElement('option');
-                opt.value = sem;
-                opt.textContent = `Semester ${sem}`;
-                if (sem == currentSem) opt.selected = true;
+                opt.value = sem.value;
+                opt.textContent = sem.label;
+                if (String(sem.value) === String(currentSem)) opt.selected = true;
                 semSelect.appendChild(opt);
             });
 

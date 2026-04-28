@@ -18,7 +18,7 @@ class CourseController extends Controller
             $this->json(['error' => 'Batch is required'], 400);
         }
 
-        $semesters = Course::getSemestersByBatch($batch);
+        $semesters = Course::getSemesterOptionsByBatch($batch);
         $this->json($semesters);
     }
 

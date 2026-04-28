@@ -9,6 +9,8 @@ use App\Models\User;
 use App\Models\Course;
 use App\Models\Attendance;
 use App\Models\Group;
+use App\Models\Grade;
+use App\Models\Subject;
 use function getDB;
 
 class AdminController extends Controller
@@ -107,6 +109,49 @@ class AdminController extends Controller
                 $redirectUrl = "/admin/attendance?course_id=$courseId&class_date=$classDate";
                 $redirectUrl .= '&batch=' . urlencode((string) ($_POST['batch'] ?? ''));
                 $redirectUrl .= '&semester=' . urlencode((string) ($_POST['semester'] ?? ''));
+                redirect($redirectUrl);
+            } elseif ($action === 'random_results') {
+                $batch = clean($_POST['batch'] ?? '');
+                $semester = (int)($_POST['semester'] ?? 0);
+
+                if ($batch === '' || $semester <= 0) {
+                    $this->session->setFlash('error', 'Select batch and semester before generating random results.');
+                } else {
+                    $students = User::getStudentsForAttendance($batch, $semester, 0);
+                    $generated = 0;
+
+                    foreach ($students as $student) {
+                        $studentId = (int)($student['id'] ?? 0);
+                        if ($studentId <= 0) {
+                            continue;
+                        }
+
+                        Subject::syncForUserBatchSemester($studentId, $batch, $semester);
+                        $subjects = Subject::findByUser($studentId);
+                        foreach ($subjects as $subject) {
+                            if ((int)($subject['semester'] ?? 0) !== $semester) {
+                                continue;
+                            }
+
+                            $maxScore = 100.0;
+                            $score = (float)random_int(45, 95);
+                            Grade::create($studentId, [
+                                'subject_id' => (int)$subject['id'],
+                                'title' => 'Semester ' . $semester . ' Random Final',
+                                'score' => $score,
+                                'max_score' => $maxScore,
+                                'exam_date' => date('Y-m-d'),
+                            ]);
+                            $generated++;
+                        }
+                    }
+
+                    $this->session->setFlash('success', "Random results generated: $generated records.");
+                }
+
+                $redirectUrl = '/admin/attendance';
+                $redirectUrl .= '?batch=' . urlencode($batch);
+                $redirectUrl .= '&semester=' . urlencode((string)$semester);
                 redirect($redirectUrl);
             }
         }
