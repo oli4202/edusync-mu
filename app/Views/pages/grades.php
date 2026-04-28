@@ -141,7 +141,7 @@ td {
 
             <div class="form-group">
                 <label>Exam Name *</label>
-                <input type="text" name="exam_name" required placeholder="e.g. Midterm">
+                <input type="text" name="exam_name" required placeholder="e.g. Final / Class Test 1 / Viva">
             </div>
             
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
@@ -151,8 +151,11 @@ td {
                 </div>
                 <div class="form-group">
                     <label>Total Marks *</label>
-                    <input type="number" step="0.1" name="total_marks" required value="100">
+                    <input type="number" step="0.1" name="total_marks" required value="40">
                 </div>
+            </div>
+            <div style="font-size:12px;color:var(--muted);margin-top:-8px;">
+                No midterm. Use: Final 40, Internal 60 (Attendance 10, CT 15+15, Assignment/Presentation 10, Viva 10).
             </div>
 
             <div class="form-group">

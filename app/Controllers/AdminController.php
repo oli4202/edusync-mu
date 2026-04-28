@@ -119,6 +119,16 @@ class AdminController extends Controller
                 } else {
                     $students = User::getStudentsForAttendance($batch, $semester, 0);
                     $generated = 0;
+                    $db = getDB();
+                    $existsStmt = $db->prepare("SELECT COUNT(*) FROM grades WHERE user_id = ? AND subject_id = ? AND title = ?");
+                    $components = [
+                        ['title' => 'Attendance', 'max' => 10, 'min' => 6],
+                        ['title' => 'Class Test 1', 'max' => 15, 'min' => 7],
+                        ['title' => 'Class Test 2', 'max' => 15, 'min' => 7],
+                        ['title' => 'Assignment/Presentation', 'max' => 10, 'min' => 5],
+                        ['title' => 'Viva', 'max' => 10, 'min' => 5],
+                        ['title' => 'Final', 'max' => 40, 'min' => 16],
+                    ];
 
                     foreach ($students as $student) {
                         $studentId = (int)($student['id'] ?? 0);
@@ -132,17 +142,23 @@ class AdminController extends Controller
                             if ((int)($subject['semester'] ?? 0) !== $semester) {
                                 continue;
                             }
+                            $subjectId = (int)$subject['id'];
+                            foreach ($components as $component) {
+                                $title = 'Semester ' . $semester . ' ' . $component['title'];
+                                $existsStmt->execute([$studentId, $subjectId, $title]);
+                                if ((int)$existsStmt->fetchColumn() > 0) {
+                                    continue;
+                                }
 
-                            $maxScore = 100.0;
-                            $score = (float)random_int(45, 95);
-                            Grade::create($studentId, [
-                                'subject_id' => (int)$subject['id'],
-                                'title' => 'Semester ' . $semester . ' Random Final',
-                                'score' => $score,
-                                'max_score' => $maxScore,
-                                'exam_date' => date('Y-m-d'),
-                            ]);
-                            $generated++;
+                                Grade::create($studentId, [
+                                    'subject_id' => $subjectId,
+                                    'title' => $title,
+                                    'score' => (float)random_int((int)$component['min'], (int)$component['max']),
+                                    'max_score' => (float)$component['max'],
+                                    'exam_date' => date('Y-m-d'),
+                                ]);
+                                $generated++;
+                            }
                         }
                     }
 

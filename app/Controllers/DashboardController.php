@@ -184,7 +184,7 @@ class DashboardController extends Controller
                 $subjectId = (int)($_POST['subject_id'] ?? 0);
                 $examName = clean($_POST['exam_name'] ?? '');
                 $marks = (float)($_POST['marks_obtained'] ?? 0);
-                $total = (float)($_POST['total_marks'] ?? 100);
+                $total = (float)($_POST['total_marks'] ?? 40);
                 $date = clean($_POST['exam_date'] ?? date('Y-m-d'));
                 
                 if ($subjectId && $examName && $total > 0) {
