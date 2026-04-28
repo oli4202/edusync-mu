@@ -3,7 +3,7 @@ $currentPage = 'grades';
 ?>
 
 <div class="page-header">
-    <h2>My Grades</h2>
+    <h2>All Student Grades</h2>
     <div style="display:flex; gap:10px;">
         <button class="btn btn-primary" onclick="openModal('addGrade')">+ Add Grade</button>
         <a href="/result-lookup" class="result-link">MU Official Result</a>
@@ -15,6 +15,8 @@ $currentPage = 'grades';
         <table>
             <thead>
                 <tr>
+                    <th>Student</th>
+                    <th>Subject</th>
                     <th>Exam</th>
                     <th>Marks</th>
                     <th>Percentage</th>
@@ -24,6 +26,14 @@ $currentPage = 'grades';
             <tbody>
                 <?php foreach ($grades as $grade): ?>
                     <tr>
+                        <td>
+                            <strong><?php echo htmlspecialchars($grade['student_name'] ?? ''); ?></strong>
+                            <div style="font-size:11px;color:#64748b;"><?php echo htmlspecialchars($grade['student_id'] ?? ''); ?></div>
+                        </td>
+                        <td>
+                            <strong><?php echo htmlspecialchars($grade['subject_code'] ?? 'N/A'); ?></strong>
+                            <div style="font-size:11px;color:#64748b;"><?php echo htmlspecialchars($grade['subject_name'] ?? 'Unknown Subject'); ?></div>
+                        </td>
                         <td><?php echo htmlspecialchars($grade['exam_name']); ?></td>
                         <td><?php echo $grade['marks_obtained']; ?> / <?php echo $grade['total_marks']; ?></td>
                         <td>

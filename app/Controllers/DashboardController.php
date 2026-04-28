@@ -202,7 +202,7 @@ class DashboardController extends Controller
         }
 
         $user = User::findById($userId);
-        $grades = Grade::findByUser($userId);
+        $grades = Grade::findAllForStudentsView();
         $subjects = Subject::findByUser($userId);
         
         $this->render('pages/grades', compact('user', 'grades', 'subjects'));

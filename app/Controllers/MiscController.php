@@ -4,6 +4,8 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Models\User;
+use App\Models\Course;
+use App\Models\Grade;
 
 class MiscController extends Controller
 {
@@ -18,7 +20,38 @@ class MiscController extends Controller
     {
         $this->requireLogin();
         $user = User::findById($this->session->userId());
-        $this->render('pages/result-lookup', compact('user'));
+
+        $selectedBatch = clean($_GET['batch'] ?? (string)($user['batch'] ?? ''));
+        $selectedSemester = (int)($_GET['semester'] ?? (int)($user['semester'] ?? 0));
+        $searchStudentId = clean($_GET['student_id'] ?? '');
+
+        $batchOptions = User::getBatchOptions();
+        $semesterOptions = $selectedBatch !== '' ? Course::getSemesterOptionsByBatch($selectedBatch) : [];
+        $sheet = ['courses' => [], 'students' => []];
+        if ($selectedBatch !== '' && $selectedSemester > 0) {
+            $sheet = Grade::getBatchSemesterResultSheet($selectedBatch, $selectedSemester);
+        }
+
+        $selectedRow = null;
+        if ($searchStudentId !== '' && !empty($sheet['students'])) {
+            foreach ($sheet['students'] as $row) {
+                if (strcasecmp((string)$row['student']['student_id'], $searchStudentId) === 0) {
+                    $selectedRow = $row;
+                    break;
+                }
+            }
+        }
+
+        $this->render('pages/result-lookup', compact(
+            'user',
+            'selectedBatch',
+            'selectedSemester',
+            'searchStudentId',
+            'batchOptions',
+            'semesterOptions',
+            'sheet',
+            'selectedRow'
+        ));
     }
 
     public function lookupOfficialResult(): void

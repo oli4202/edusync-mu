@@ -1,224 +1,187 @@
 <?php $currentPage = 'result-lookup'; ?>
 
 <style>
-.result-hero { background:linear-gradient(135deg,rgba(34,211,238,.08),rgba(129,140,248,.08)); border:1px solid rgba(34,211,238,.2); border-radius:20px; padding:32px; text-align:center; margin-bottom:28px; }
-.result-hero h2 { font-family:'Syne',sans-serif; font-size:20px; font-weight:800; margin-bottom:8px; }
-.mu-logo { font-size:40px; margin-bottom:12px; }
-.search-card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:28px; max-width:700px; margin:0 auto 28px; }
-.search-title { font-family:'Syne',sans-serif; font-size:16px; font-weight:700; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid var(--border); }
-.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-.field { margin-bottom:4px; }
-.field label { font-size:12px; color:var(--muted); display:block; margin-bottom:6px; text-transform:uppercase; letter-spacing:.4px; }
-.result-table-wrap { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:24px; max-width:900px; margin:0 auto; display:none; }
-.result-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:12px; }
-.result-title-text { font-family:'Syne',sans-serif; font-size:16px; font-weight:700; }
-.result-info { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:20px; padding:16px; background:rgba(34,211,238,.04); border:1px solid rgba(34,211,238,.1); border-radius:12px; }
-.info-item label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.4px; }
-.info-item span { font-size:14px; font-weight:600; display:block; margin-top:3px; }
-.gpa-highlight { font-family:'Syne',sans-serif; font-size:24px; font-weight:800; color:var(--accent); }
-.loading-state { text-align:center; padding:32px; display:none; }
-.error-state { text-align:center; padding:24px; color:#f87171; display:none; }
-.note-box { background:rgba(251,191,36,.06); border:1px solid rgba(251,191,36,.2); border-radius:10px; padding:14px; font-size:13px; color:var(--muted); margin-bottom:20px; line-height:1.6; }
-@media(max-width:900px){ .form-grid,.result-info{ grid-template-columns:1fr; } }
+.result-wrap { display:grid; gap:18px; }
+.result-card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:20px; }
+.result-title { font-family:'Syne',sans-serif; font-size:18px; font-weight:800; margin-bottom:6px; }
+.result-sub { color:var(--muted); font-size:13px; }
+.filter-grid { display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:12px; align-items:end; }
+.field label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px; display:block; }
+.field input, .field select { width:100%; }
+.sheet-table-wrap { overflow:auto; border:1px solid var(--border); border-radius:12px; }
+.sheet-table { width:100%; border-collapse:collapse; min-width:920px; }
+.sheet-table th { background:#0f172a; color:#94a3b8; font-size:11px; text-transform:uppercase; letter-spacing:.05em; padding:10px; border-bottom:1px solid var(--border); }
+.sheet-table td { padding:10px; border-bottom:1px solid rgba(148,163,184,.12); font-size:13px; }
+.sheet-table tbody tr:hover { background:rgba(34,211,238,.06); }
+.sheet-row-active { background:rgba(34,211,238,.12) !important; }
+.g-a { color:#34d399; font-weight:700; }
+.g-b { color:#22d3ee; font-weight:700; }
+.g-c { color:#fbbf24; font-weight:700; }
+.g-d { color:#fb923c; font-weight:700; }
+.g-f { color:#f87171; font-weight:700; }
+.student-chip { display:flex; align-items:center; gap:8px; }
+.avatar-sm { width:28px; height:28px; border-radius:999px; object-fit:cover; border:1px solid var(--border); }
+.detail-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:10px; }
+.detail-box { border:1px solid var(--border); border-radius:10px; padding:10px; background:rgba(255,255,255,.02); }
+.detail-box .lbl { color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.05em; }
+.detail-box .val { font-size:14px; font-weight:700; margin-top:4px; }
+.subject-breakdown { margin-top:14px; border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+.subject-breakdown table { width:100%; border-collapse:collapse; }
+.subject-breakdown th, .subject-breakdown td { padding:10px; border-bottom:1px solid rgba(148,163,184,.12); font-size:13px; text-align:left; }
+@media (max-width: 980px) { .filter-grid { grid-template-columns:1fr; } .detail-grid { grid-template-columns:1fr 1fr; } }
 </style>
 
-<div class="page-title">MU Official Result Lookup</div>
-<div class="page-sub">Search official results from Metropolitan University Sylhet - Department of Software Engineering</div>
+<?php
+$courses = $sheet['courses'] ?? [];
+$rows = $sheet['students'] ?? [];
+?>
 
-<div class="result-hero">
-    <div class="mu-logo">Results</div>
-    <h2>Metropolitan University Sylhet</h2>
-    <p style="color:var(--muted);font-size:14px;margin-top:6px;">Department of Software Engineering - Official Result Portal</p>
-    <a href="https://metrouni.edu.bd/sites/department-of-software-engineering/result-se" target="_blank" class="btn btn-outline" style="margin-top:16px;font-size:12px;">Open Official MU Website</a>
-</div>
-
-<div class="note-box">
-    <strong>How this works:</strong> This page fetches your result directly from the official MU Sylhet result system. Enter your details below and click Search. Results are loaded live from <strong>metrouni.edu.bd</strong>.
-</div>
-
-<div class="search-card">
-    <div class="search-title">Search Your Result</div>
-    <div class="form-grid">
-        <div class="field">
-            <label>Academic Year</label>
-            <select id="acYear">
-                <option value="">Select Year</option>
-                <option value="2026">2026</option>
-                <option value="2025">2025</option>
-                <option value="2024">2024</option>
-                <option value="2023">2023</option>
-                <option value="2022">2022</option>
-            </select>
-        </div>
-        <div class="field">
-            <label>Term / Semester</label>
-            <select id="term">
-                <option value="">Select Term</option>
-                <option value="Spring">Spring</option>
-                <option value="Summer">Summer</option>
-                <option value="Fall">Fall</option>
-            </select>
-        </div>
-        <div class="field">
-            <label>Programme</label>
-            <select id="programme">
-                <option value="">Select Programme</option>
-                <option value="B.Sc in Software Engineering">B.Sc in Software Engineering</option>
-                <option value="M.Sc in Software Engineering">M.Sc in Software Engineering</option>
-            </select>
-        </div>
-        <div class="field">
-            <label>Batch</label>
-            <input type="text" id="batch" placeholder="e.g. 2021, 2022, 2023..." value="<?= htmlspecialchars($user['batch'] ?? '') ?>">
-        </div>
-        <div class="field">
-            <label>Exam Type</label>
-            <select id="examType">
-                <option value="">Select Type</option>
-                <option value="Semester Final">Semester Final</option>
-                <option value="Mid-Term">Mid-Term</option>
-                <option value="Make-Up">Make-Up</option>
-            </select>
-        </div>
-        <div class="field">
-            <label>Student ID / Code</label>
-            <input type="text" id="studentCode" placeholder="Your student ID..." value="<?= htmlspecialchars($user['student_id'] ?? '') ?>">
-        </div>
+<div class="result-wrap">
+    <div class="result-card">
+        <div class="result-title">Batch-Wise Semester Result Sheet</div>
+        <div class="result-sub">Marks are normalized to 100 per subject. Click any student row or search by student ID to highlight and view full semester breakdown.</div>
     </div>
-    <button class="btn btn-primary" style="margin-top:16px;width:100%" onclick="searchResult()">Search Result</button>
-</div>
 
-<div class="loading-state" id="loadingState">
-    <div style="font-size:40px;margin-bottom:12px;">Loading</div>
-    <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:6px;">Fetching your result...</div>
-    <div style="color:var(--muted);font-size:13px;">Connecting to MU Sylhet result server</div>
-</div>
-
-<div class="error-state" id="errorState">
-    <div style="font-size:40px;margin-bottom:10px;">Error</div>
-    <div id="errorMsg" style="font-size:15px;margin-bottom:16px;"></div>
-    <div style="font-size:13px;color:var(--muted);max-width:500px;margin:0 auto;line-height:1.7;">
-        The official MU result server may be temporarily unavailable, or the details entered may not match any records.
-        Try visiting the <a href="https://metrouni.edu.bd/sites/department-of-software-engineering/result-se" target="_blank" style="color:var(--accent)">official MU result page</a> directly.
+    <div class="result-card">
+        <form method="GET" action="/result-lookup" class="filter-grid">
+            <div class="field">
+                <label>Batch</label>
+                <select name="batch" required>
+                    <option value="">Select batch</option>
+                    <?php foreach ($batchOptions as $b): ?>
+                        <option value="<?= htmlspecialchars($b) ?>" <?= $selectedBatch === $b ? 'selected' : '' ?>>Batch <?= htmlspecialchars($b) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="field">
+                <label>Semester</label>
+                <select name="semester" required>
+                    <option value="">Select semester</option>
+                    <?php foreach ($semesterOptions as $opt): ?>
+                        <option value="<?= (int)$opt['value'] ?>" <?= $selectedSemester === (int)$opt['value'] ? 'selected' : '' ?>><?= htmlspecialchars($opt['label']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="field">
+                <label>Search Student ID</label>
+                <input type="text" name="student_id" placeholder="e.g. 241-134-010" value="<?= htmlspecialchars($searchStudentId ?? '') ?>">
+            </div>
+            <button class="btn btn-primary" type="submit">Show Result Sheet</button>
+        </form>
     </div>
-</div>
 
-<div class="result-table-wrap" id="resultWrap">
-    <div class="result-header">
-        <div class="result-title-text">Examination Result</div>
-        <button class="btn btn-outline btn-sm" onclick="window.print()">Print Result</button>
-    </div>
-    <div class="result-info" id="resultInfo"></div>
-    <table class="data-table" id="resultTable">
-        <thead>
-            <tr>
-                <th>Course Code</th>
-                <th>Course Title</th>
-                <th>Credit Hours</th>
-                <th>Marks</th>
-                <th>Grade</th>
-                <th>Grade Point</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody id="resultBody"></tbody>
-    </table>
-    <div style="margin-top:20px;display:flex;gap:24px;justify-content:flex-end;align-items:center;padding-top:16px;border-top:1px solid var(--border);">
-        <div style="text-align:right;">
-            <div style="font-size:13px;color:var(--muted);">Semester GPA</div>
-            <div class="gpa-highlight" id="sgpaVal">-</div>
+    <?php if ($selectedBatch === '' || $selectedSemester <= 0): ?>
+        <div class="result-card">
+            <div class="result-sub">Select a batch and semester to view results.</div>
         </div>
-        <div style="text-align:right;">
-            <div style="font-size:13px;color:var(--muted);">Total Credits</div>
-            <div class="gpa-highlight" id="totalCredits">-</div>
+    <?php elseif (empty($rows)): ?>
+        <div class="result-card">
+            <div class="result-sub">No grade records found for Batch <?= htmlspecialchars($selectedBatch) ?>, Semester <?= (int)$selectedSemester ?>.</div>
         </div>
-    </div>
-    <div style="margin-top:16px;font-size:12px;color:var(--muted);text-align:center;padding:12px;border:1px solid var(--border);border-radius:8px;">
-        This result is fetched live from Metropolitan University Sylhet official servers. For any discrepancy, contact the Examination Controller's Office.
-    </div>
+    <?php else: ?>
+        <div class="result-card">
+            <div class="sheet-table-wrap">
+                <table class="sheet-table">
+                    <thead>
+                        <tr>
+                            <th>Student ID</th>
+                            <th>Student Name</th>
+                            <?php foreach ($courses as $course): ?>
+                                <th><?= htmlspecialchars($course['code']) ?><br><span style="font-size:10px;color:#64748b;"><?= htmlspecialchars($course['name']) ?></span></th>
+                            <?php endforeach; ?>
+                            <th>Overall /100</th>
+                            <th>Grade</th>
+                            <th>CG</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($rows as $row): ?>
+                            <?php
+                            $sid = (string)$row['student']['student_id'];
+                            $isActive = ($searchStudentId !== '' && strcasecmp($sid, (string)$searchStudentId) === 0);
+                            $gradeText = (string)$row['overall_grade'];
+                            $gradeClass = 'g-f';
+                            if (str_starts_with($gradeText, 'A')) $gradeClass = 'g-a';
+                            elseif (str_starts_with($gradeText, 'B')) $gradeClass = 'g-b';
+                            elseif (str_starts_with($gradeText, 'C')) $gradeClass = 'g-c';
+                            elseif ($gradeText === 'D') $gradeClass = 'g-d';
+                            ?>
+                            <tr class="<?= $isActive ? 'sheet-row-active' : '' ?>" onclick="window.location.href='/result-lookup?batch=<?= urlencode($selectedBatch) ?>&semester=<?= (int)$selectedSemester ?>&student_id=<?= urlencode($sid) ?>'">
+                                <td><strong><?= htmlspecialchars($sid) ?></strong></td>
+                                <td>
+                                    <div class="student-chip">
+                                        <img class="avatar-sm" src="<?= htmlspecialchars(avatarUrl($row['student']['avatar'] ?? '', $row['student']['name'] ?? 'Student')) ?>" alt="<?= htmlspecialchars($row['student']['name'] ?? 'Student') ?>">
+                                        <span><?= htmlspecialchars($row['student']['name']) ?></span>
+                                    </div>
+                                </td>
+                                <?php
+                                $subjectMap = [];
+                                foreach ($row['subjects'] as $subject) {
+                                    $subjectMap[$subject['code']] = $subject;
+                                }
+                                foreach ($courses as $course):
+                                    $code = (string)$course['code'];
+                                    $sub = $subjectMap[$code] ?? ['marks_100' => 0, 'grade' => 'F'];
+                                    $subGrade = (string)$sub['grade'];
+                                    $subClass = 'g-f';
+                                    if (str_starts_with($subGrade, 'A')) $subClass = 'g-a';
+                                    elseif (str_starts_with($subGrade, 'B')) $subClass = 'g-b';
+                                    elseif (str_starts_with($subGrade, 'C')) $subClass = 'g-c';
+                                    elseif ($subGrade === 'D') $subClass = 'g-d';
+                                ?>
+                                    <td style="text-align:center;"><?= number_format((float)$sub['marks_100'], 1) ?> <span class="<?= $subClass ?>"><?= htmlspecialchars($subGrade) ?></span></td>
+                                <?php endforeach; ?>
+                                <td style="text-align:center;"><strong><?= number_format((float)$row['overall_marks'], 2) ?></strong></td>
+                                <td style="text-align:center;" class="<?= $gradeClass ?>"><?= htmlspecialchars($row['overall_grade']) ?></td>
+                                <td style="text-align:center;"><?= number_format((float)$row['overall_gp'], 2) ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <?php if (!empty($selectedRow)): ?>
+            <?php
+            $selectedGrade = (string)$selectedRow['overall_grade'];
+            $selectedGradeClass = 'g-f';
+            if (str_starts_with($selectedGrade, 'A')) $selectedGradeClass = 'g-a';
+            elseif (str_starts_with($selectedGrade, 'B')) $selectedGradeClass = 'g-b';
+            elseif (str_starts_with($selectedGrade, 'C')) $selectedGradeClass = 'g-c';
+            elseif ($selectedGrade === 'D') $selectedGradeClass = 'g-d';
+            ?>
+            <div class="result-card">
+                <div class="result-title">Highlighted Student Result</div>
+                <div class="detail-grid">
+                    <div class="detail-box"><div class="lbl">Student</div><div class="val"><?= htmlspecialchars($selectedRow['student']['name']) ?></div></div>
+                    <div class="detail-box"><div class="lbl">Student ID</div><div class="val"><?= htmlspecialchars($selectedRow['student']['student_id']) ?></div></div>
+                    <div class="detail-box"><div class="lbl">Overall Marks</div><div class="val"><?= number_format((float)$selectedRow['overall_marks'], 2) ?>/100</div></div>
+                    <div class="detail-box"><div class="lbl">Overall Grade</div><div class="val <?= $selectedGradeClass ?>"><?= htmlspecialchars($selectedRow['overall_grade']) ?> (CG <?= number_format((float)$selectedRow['overall_gp'], 2) ?>)</div></div>
+                </div>
+
+                <div class="subject-breakdown">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Course</th>
+                                <th>Marks /100</th>
+                                <th>Grade</th>
+                                <th>GP</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($selectedRow['subjects'] as $sub): ?>
+                                <tr>
+                                    <td><strong><?= htmlspecialchars($sub['code']) ?></strong> - <?= htmlspecialchars($sub['name']) ?></td>
+                                    <td><?= number_format((float)$sub['marks_100'], 1) ?></td>
+                                    <td><?= htmlspecialchars($sub['grade']) ?></td>
+                                    <td><?= number_format((float)$sub['gp'], 2) ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        <?php endif; ?>
+    <?php endif; ?>
 </div>
-
-<script>
-async function searchResult() {
-    const year = document.getElementById('acYear').value;
-    const term = document.getElementById('term').value;
-    const prog = document.getElementById('programme').value;
-    const batch = document.getElementById('batch').value.trim();
-    const type = document.getElementById('examType').value;
-    const code = document.getElementById('studentCode').value.trim();
-
-    if (!year || !term || !code) {
-        alert('Please fill in at least Academic Year, Term, and Student ID.');
-        return;
-    }
-
-    document.getElementById('loadingState').style.display = 'block';
-    document.getElementById('resultWrap').style.display = 'none';
-    document.getElementById('errorState').style.display = 'none';
-
-    try {
-        const resp = await fetch('/api/result-lookup', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ year, term, programme: prog, batch, examType: type, code })
-        });
-        const data = await resp.json();
-
-        document.getElementById('loadingState').style.display = 'none';
-
-        if (data.error) {
-            document.getElementById('errorState').style.display = 'block';
-            document.getElementById('errorMsg').textContent = data.error;
-            return;
-        }
-
-        document.getElementById('resultInfo').innerHTML = `
-            <div class="info-item"><label>Student Name</label><span>${data.name || '-'}</span></div>
-            <div class="info-item"><label>Student ID</label><span>${data.id || code}</span></div>
-            <div class="info-item"><label>Programme</label><span>${data.programme || prog || '-'}</span></div>
-            <div class="info-item"><label>Batch</label><span>${data.batch || batch || '-'}</span></div>
-            <div class="info-item"><label>Semester / Term</label><span>${term} ${year}</span></div>
-            <div class="info-item"><label>Exam Type</label><span>${type || '-'}</span></div>
-        `;
-
-        const tbody = document.getElementById('resultBody');
-        tbody.innerHTML = '';
-        let totalGP = 0;
-        let totalCr = 0;
-
-        (data.results || []).forEach((result) => {
-            tbody.innerHTML += `<tr>
-                <td><strong>${result.code || '-'}</strong></td>
-                <td>${result.title || '-'}</td>
-                <td style="text-align:center">${result.credit || '-'}</td>
-                <td style="text-align:center">${result.marks || '-'}</td>
-                <td style="text-align:center;font-weight:800;color:${gradeColor(result.grade)}">${result.grade || '-'}</td>
-                <td style="text-align:center">${result.gp || '-'}</td>
-                <td style="text-align:center">${result.status || '-'}</td>
-            </tr>`;
-
-            if (result.gp && result.credit) {
-                totalGP += result.gp * result.credit;
-                totalCr += parseFloat(result.credit);
-            }
-        });
-
-        document.getElementById('sgpaVal').textContent = totalCr > 0 ? (totalGP / totalCr).toFixed(2) : (data.sgpa || '-');
-        document.getElementById('totalCredits').textContent = totalCr || data.totalCredits || '-';
-        document.getElementById('resultWrap').style.display = 'block';
-    } catch (error) {
-        document.getElementById('loadingState').style.display = 'none';
-        document.getElementById('errorState').style.display = 'block';
-        document.getElementById('errorMsg').textContent = 'Connection error. Please try again or visit the MU website directly.';
-    }
-}
-
-function gradeColor(grade) {
-    if (!grade) return 'var(--muted)';
-    if (grade.startsWith('A')) return '#34d399';
-    if (grade.startsWith('B')) return '#22d3ee';
-    if (grade.startsWith('C')) return '#fbbf24';
-    if (grade === 'D') return '#f97316';
-    return '#f87171';
-}
-</script>
