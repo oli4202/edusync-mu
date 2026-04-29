@@ -269,6 +269,31 @@ class DashboardController extends Controller
         $this->render('pages/attendance', compact('user', 'myAttendance', 'batchAttendance', 'batchStats', 'subjectReport'));
     }
 
+    public function attendanceSubjectDetails(): void
+    {
+        $this->requireLogin();
+        $userId = $this->session->userId();
+        $user = User::findById($userId);
+        
+        $courseCode = clean($_GET['course_code'] ?? '');
+        if (!$courseCode) {
+            redirect('/attendance');
+        }
+
+        $db = getDB();
+        $stmt = $db->prepare("
+            SELECT a.*, c.name as course_name 
+            FROM attendance a 
+            JOIN courses c ON a.course_id = c.id 
+            WHERE a.user_id = ? AND (c.code = ? OR c.name = ?)
+            ORDER BY a.class_date DESC
+        ");
+        $stmt->execute([$userId, $courseCode, $courseCode]);
+        $details = $stmt->fetchAll();
+
+        $this->render('pages/attendance-subject-details', compact('user', 'courseCode', 'details'));
+    }
+
     public function calendar(): void
     {
         $this->requireLogin();

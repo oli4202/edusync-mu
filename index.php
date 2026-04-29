@@ -42,6 +42,7 @@ $router->get('/grades', 'App\Controllers\DashboardController@grades');
 $router->post('/grades', 'App\Controllers\DashboardController@grades');
 $router->get('/attendance', 'App\Controllers\DashboardController@attendance');
 $router->post('/attendance', 'App\Controllers\DashboardController@attendance');
+$router->get('/attendance/details', 'App\Controllers\DashboardController@attendanceSubjectDetails');
 $router->get('/calendar', 'App\Controllers\DashboardController@calendar');
 $router->get('/routine', 'App\Controllers\DashboardController@routine');
 

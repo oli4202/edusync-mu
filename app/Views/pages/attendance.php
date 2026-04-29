@@ -78,7 +78,7 @@ $currentPage = 'attendance';
             <div class="grid grid-cols-1 gap-4">
                 <?php if (!empty($subjectReport)): ?>
                     <?php foreach ($subjectReport as $report): ?>
-                        <div class="glass-card p-5 border border-white/5 hover:border-white/10 transition-all group">
+                        <a href="/attendance/details?course_code=<?php echo urlencode($report['course_code']); ?>" class="glass-card p-5 border border-white/5 hover:border-white/10 transition-all group block">
                             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                                 <div class="flex items-center gap-4">
                                     <div class="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center justify-center">
@@ -116,7 +116,7 @@ $currentPage = 'attendance';
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </a>
                     <?php endforeach; ?>
                 <?php else: ?>
                     <div class="glass-card p-12 text-center opacity-50">
