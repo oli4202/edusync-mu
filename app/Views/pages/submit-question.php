@@ -20,16 +20,16 @@
         <form action="/question-bank/submit" method="POST">
             <div class="field">
                 <label>Batch</label>
-                <select id="batchSelect" class="form-control">
+                <select id="batchSelect" name="batch" class="form-control">
                     <option value="">Select Batch</option>
                     <?php foreach ($availableBatches as $batch): ?>
-                        <option value="<?= htmlspecialchars($batch) ?>">Batch <?= htmlspecialchars($batch) ?></option>
+                        <option value="<?= htmlspecialchars($batch) ?>" <?= (isset($user['batch']) && strpos($user['batch'], $batch) !== false) ? 'selected' : '' ?>>Batch <?= htmlspecialchars($batch) ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
             <div class="field">
                 <label>Semester</label>
-                <select id="semesterSelect" class="form-control">
+                <select id="semesterSelect" name="semester" class="form-control">
                     <option value="">Select batch first</option>
                 </select>
             </div>
@@ -41,8 +41,7 @@
             </div>
 
             <script>
-            document.getElementById('batchSelect').addEventListener('change', function() {
-                const batch = this.value;
+            function updateSemesters(batch, selectedSem = null) {
                 const semSelect = document.getElementById('semesterSelect');
                 const courseSelect = document.getElementById('courseSelect');
                 
@@ -58,20 +57,26 @@
                     .then(res => res.json())
                     .then(data => {
                         semSelect.innerHTML = '<option value="">Select semester</option>';
+                        if (data.error) {
+                            semSelect.innerHTML = `<option value="">${data.error}</option>`;
+                            return;
+                        }
                         data.forEach(sem => {
                             const opt = document.createElement('option');
-                            opt.value = sem;
-                            opt.textContent = `Semester ${sem}`;
+                            opt.value = sem.value;
+                            opt.textContent = sem.label;
+                            if (selectedSem == sem.value) opt.selected = true;
                             semSelect.appendChild(opt);
                         });
+                        
+                        if (selectedSem) {
+                            updateCourses(batch, selectedSem);
+                        }
                     });
-            });
+            }
 
-            document.getElementById('semesterSelect').addEventListener('change', function() {
-                const batch = document.getElementById('batchSelect').value;
-                const semester = this.value;
+            function updateCourses(batch, semester) {
                 const courseSelect = document.getElementById('courseSelect');
-
                 if (!batch || !semester) {
                     courseSelect.innerHTML = '<option value="">Select semester first</option>';
                     return;
@@ -83,6 +88,10 @@
                     .then(res => res.json())
                     .then(data => {
                         courseSelect.innerHTML = '<option value="">Select course</option>';
+                        if (data.length === 0) {
+                            courseSelect.innerHTML = '<option value="">No courses found</option>';
+                            return;
+                        }
                         data.forEach(c => {
                             const opt = document.createElement('option');
                             opt.value = c.code;
@@ -90,6 +99,24 @@
                             courseSelect.appendChild(opt);
                         });
                     });
+            }
+
+            document.getElementById('batchSelect').addEventListener('change', function() {
+                updateSemesters(this.value);
+            });
+
+            document.getElementById('semesterSelect').addEventListener('change', function() {
+                const batch = document.getElementById('batchSelect').value;
+                updateCourses(batch, this.value);
+            });
+
+            // Initial load if batch is pre-selected
+            window.addEventListener('DOMContentLoaded', () => {
+                const initialBatch = document.getElementById('batchSelect').value;
+                const userSemester = <?= (int)($user['semester'] ?? 0) ?>;
+                if (initialBatch) {
+                    updateSemesters(initialBatch, userSemester);
+                }
             });
             </script>
             <div class="field">
