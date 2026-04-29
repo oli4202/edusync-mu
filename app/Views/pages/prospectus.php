@@ -288,15 +288,29 @@
 
     <div class="leadership-grid">
         <div class="leader-card">
-            <div class="leader-role">Founder &amp; Chairman</div>
-            <div class="leader-name">Dr. Toufique Rahman Chowdhury</div>
-            <p class="leader-message">Metropolitan University has traversed a length of twenty years since its inception. We have been able to make our presence felt, growing as we have planned, working here with devotion and a vision for a bright tomorrow.</p>
+            <div class="flex flex-col md:flex-row gap-6">
+                <div class="w-32 h-40 bg-slate-200 rounded-xl overflow-hidden flex-shrink-0 border-2 border-mu-navy/10">
+                    <img src="/founder_chairman_portrait_1777489249933.png" alt="Dr. Toufique Rahman Chowdhury" class="w-full h-full object-cover">
+                </div>
+                <div>
+                    <div class="leader-role">Founder &amp; Chairman</div>
+                    <div class="leader-name">Dr. Toufique Rahman Chowdhury</div>
+                    <p class="leader-message">Metropolitan University has traversed a length of twenty years since its inception. We have been able to make our presence felt, growing as we have planned, working here with devotion and a vision for a bright tomorrow.</p>
+                </div>
+            </div>
         </div>
 
         <div class="leader-card">
-            <div class="leader-role">Vice Chancellor</div>
-            <div class="leader-name">Prof. Dr. Mohammad Jahirul Hoque</div>
-            <p class="leader-message">Our mission is providing quality tertiary education at an affordable cost. We are engaged in shaping future citizens, grooming them as human beings imbued with values and roots.</p>
+            <div class="flex flex-col md:flex-row gap-6">
+                <div class="w-32 h-40 bg-mu-navy/5 rounded-xl overflow-hidden flex-shrink-0 border-2 border-mu-navy/10 flex items-center justify-center">
+                    <i data-lucide="user" class="w-12 h-12 text-mu-navy/20"></i>
+                </div>
+                <div>
+                    <div class="leader-role">Vice Chancellor</div>
+                    <div class="leader-name">Prof. Dr. Mohammad Jahirul Hoque</div>
+                    <p class="leader-message">Our mission is providing quality tertiary education at an affordable cost. We are engaged in shaping future citizens, grooming them as human beings imbued with values and roots.</p>
+                </div>
+            </div>
         </div>
     </div>
 
