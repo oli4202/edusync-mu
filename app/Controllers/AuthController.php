@@ -75,7 +75,8 @@ class AuthController extends Controller
         }
 
         $error = '';
-        $this->render('auth/signup', compact('error'));
+        $facultyRoster = require __DIR__ . '/../Data/faculty_data.php';
+        $this->render('auth/signup', compact('error', 'facultyRoster'));
     }
 
     /**
@@ -105,9 +106,13 @@ class AuthController extends Controller
         if ($password !== $confirmPassword) $errors[] = 'Passwords do not match.';
         
         if ($role === 'faculty') {
-            $requiredSecret = getenv('FACULTY_SECRET') ?: 'MU-FACULTY-2026';
-            if ($facultySecret !== $requiredSecret) {
-                $errors[] = 'Invalid faculty verification code.';
+            $facultyRoster = require __DIR__ . '/../Data/faculty_data.php';
+            $facultySecret = strtoupper(trim($facultySecret));
+            if (!isset($facultyRoster[$facultySecret])) {
+                $errors[] = 'Invalid Faculty Verification Code. Please use your official Shortened Form (e.g., AAC).';
+            } else {
+                // Enforce the exact official name from the roster
+                $name = $facultyRoster[$facultySecret]['name'];
             }
         }
 
@@ -118,7 +123,8 @@ class AuthController extends Controller
 
         if (!empty($errors)) {
             $error = implode(' ', $errors);
-            $this->render('auth/signup', compact('error', 'name', 'email'));
+            $facultyRoster = require __DIR__ . '/../Data/faculty_data.php';
+            $this->render('auth/signup', compact('error', 'name', 'email', 'facultyRoster'));
             return;
         }
 
@@ -134,10 +140,12 @@ class AuthController extends Controller
             $this->session->setFlash('success', 'Welcome to EduSync!');
             redirect('/dashboard');
         } else {
+            $facultyRoster = require __DIR__ . '/../Data/faculty_data.php';
             $this->render('auth/signup', [
                 'error' => $result['message'],
                 'name' => $name,
-                'email' => $email
+                'email' => $email,
+                'facultyRoster' => $facultyRoster
             ]);
         }
     }

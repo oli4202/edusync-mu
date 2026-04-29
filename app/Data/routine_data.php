@@ -26,18 +26,18 @@ return [
     'days' => ['SUN', 'MON', 'TUES', 'WED', 'THU'],
 
     'batches' => [
-        '3rd (16)', '4th (24)', '5th (42)', '6th (55)',
+        '3rd (16)', '4th (24)', '5th (42)', '6th (35)',
         '7th (43)', '8th (41)', '9th (44)', '10th (35)', '11th (40)',
     ],
 
     // Color codes for courses (for visual grouping)
     'colors' => [
-        'SWE' => '#e8d5f5',  // light purple
-        'GED' => '#fce4ec',  // light pink
-        'MAT' => '#fff3e0',  // light orange
-        'PHY' => '#e3f2fd',  // light blue
+        'SWE' => '#611494ff',  // light purple
+        'GED' => '#6062c4ff',  // light pink
+        'MAT' => '#795926ff',  // light orange
+        'PHY' => '#a9acadff',  // light blue
         'CSE' => '#e8f5e9',  // light green
-        'default' => '#f5f5f5',
+        'default' => '#aa9a0ca2',
     ],
 
     // Routine data: day => batch => [[slot_index, course, room, faculty], ...]
@@ -56,13 +56,11 @@ return [
                 [4, 'SWE-432', '203', 'NHN'],
                 [5, 'SWE-313 CN', '301', 'NHN'],
             ],
-            '6th (55)' => [
-                [0, 'SWE-234 DS', '101', 'BD'],
-                [1, 'SWE-234 DS & DA', '', ''],
+            '6th (35)' => [
+                [0, 'SWE-321 UI/UX', '101', 'DD'],
+                [1, 'SWE-321 UI/UX', '101', 'DD'],
                 [2, 'SWE-122 WP', '101', 'LN'],
                 [3, 'SWE-122 WP', '101', 'LN'],
-                [4, 'SWE-216 DLD Lab', '109', 'AAC'],
-                [5, 'SWE-216 DLD Lab', '109', 'AAC'],
             ],
             '7th (43)' => [
                 [0, 'SWE-202 SD', '306', 'FA'],
@@ -97,8 +95,8 @@ return [
                 [4, 'GED-403 ED', '305', 'MSC'],
             ],
             '5th (42)' => [],
-            '6th (55)' => [
-                [1, 'GED-101 ADP', 'EXTN 1', 'MMF'],
+            '6th (35)' => [
+                [1, 'SWE-211 BSP', 'EXTN 1', 'MMZ'],
                 [2, 'SWE-115 AI', '203', 'AAC'],
             ],
             '7th (43)' => [
@@ -132,9 +130,9 @@ return [
                 [4, 'SWE-317 ML', '301', 'NHN'],
                 [5, 'SWE-313 CN', '401', 'NHN'],
             ],
-            '6th (55)' => [
-                [2, 'SWE-316 ALAB', '101', 'AAC'],
-                [3, 'SWE-316 AI', '101', 'AAC'],
+            '6th (35)' => [
+                [2, 'SWE-316 AI Lab', '301', 'AAC'],
+                [3, 'SWE-316 AI Lab', '301', 'AAC'],
             ],
             '7th (43)' => [],
             '8th (41)' => [
@@ -168,7 +166,7 @@ return [
                 [5, 'SWE-401 DMT', '101', 'MKB'],
             ],
             '5th (42)' => [],
-            '6th (55)' => [],
+            '6th (35)' => [],
             '7th (43)' => [
                 [2, 'SWE-234 SASP Lab', '101', 'NSC'],
                 [3, 'SWE-234 AADP Lab', '101', 'NSC'],
@@ -201,9 +199,9 @@ return [
                 [1, 'SWE-461 ES & IOT', '109', 'MAK'],
             ],
             '5th (42)' => [],
-            '6th (55)' => [
-                [0, 'SWE-315 M', 'EXTN 1', 'AAC'],
-                [1, 'GED-101 WP', 'EXTN 1', 'MMF'],
+            '6th (35)' => [
+                [1, 'SWE-115 AI', 'EXTN 1', 'AAC'],
+                [2, 'SWE-211 BSP', 'EXTN 1', 'MMZ'],
             ],
             '7th (43)' => [
                 [0, 'MAT-211 NA', 'EXTN 1', 'RP'],

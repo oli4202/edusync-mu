@@ -124,6 +124,11 @@
                         </a>
                         <?php endif; ?>
 
+                        <a href="/routine" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'routine' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
+                            <i data-lucide="clock" class="w-5 h-5"></i>
+                            <span class="text-sm font-medium">Routine</span>
+                        </a>
+
                         <!-- Shared Calendar -->
                         <a href="/calendar" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'calendar' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
                             <i data-lucide="calendar" class="w-5 h-5"></i>

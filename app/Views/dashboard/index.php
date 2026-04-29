@@ -19,6 +19,10 @@ $currentPage = 'dashboard';
                 <i data-lucide="plus-circle" class="w-4 h-4"></i>
                 New Task
             </a>
+            <a href="/routine" class="px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 rounded-xl text-xs font-bold transition-all duration-200 flex items-center gap-2">
+                <i data-lucide="clock" class="w-4 h-4"></i>
+                Routine
+            </a>
             <a href="/ai" class="px-4 py-2 bg-accent-purple/10 hover:bg-accent-purple/20 border border-accent-purple/20 text-accent-purple rounded-xl text-xs font-bold transition-all duration-200 flex items-center gap-2">
                 <i data-lucide="sparkles" class="w-4 h-4"></i>
                 AI Help

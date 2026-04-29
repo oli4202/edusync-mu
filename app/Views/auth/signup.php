@@ -31,17 +31,34 @@
             <form method="POST" action="/auth/signup" class="space-y-5">
                 <div class="space-y-2">
                     <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">Full Name</label>
-                    <div class="relative group">
+                    
+                    <!-- Student Name Input -->
+                    <div class="relative group" id="studentNameContainer">
                         <i data-lucide="user" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-accent-cyan transition-colors"></i>
                         <input 
                             type="text" 
-                            name="name" 
+                            name="name_student" 
                             id="nameInput"
-                            required 
                             class="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-sm text-white focus:outline-none focus:border-accent-cyan transition-all"
                             placeholder="John Doe"
                             value="<?php echo htmlspecialchars($name ?? ''); ?>"
                         >
+                    </div>
+
+                    <!-- Faculty Name Select -->
+                    <div class="relative group hidden" id="facultyNameContainer">
+                        <i data-lucide="user-check" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-accent-cyan transition-colors z-10"></i>
+                        <select name="name_faculty" id="facultyNameSelect" class="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-sm text-white focus:outline-none focus:border-accent-cyan transition-all appearance-none relative z-0">
+                            <option value="" disabled selected>Select your official name</option>
+                            <?php if (isset($facultyRoster)): ?>
+                                <?php foreach ($facultyRoster as $code => $faculty): ?>
+                                    <option value="<?php echo htmlspecialchars($faculty['name']); ?>" class="text-slate-900">
+                                        <?php echo htmlspecialchars($faculty['name']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                        <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none z-10"></i>
                     </div>
                 </div>
 
@@ -126,18 +143,18 @@
                 </div>
 
                 <div class="space-y-2 hidden" id="facultySecretContainer">
-                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">Faculty Verification Code</label>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">Faculty Short Form</label>
                     <div class="relative group">
                         <i data-lucide="shield-check" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-accent-cyan transition-colors"></i>
                         <input 
-                            type="password" 
+                            type="text" 
                             name="faculty_secret" 
                             id="facultySecretInput"
                             class="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-sm text-white focus:outline-none focus:border-accent-cyan transition-all"
-                            placeholder="Enter department secret"
+                            placeholder="e.g. AAC or NSC"
                         >
                     </div>
-                    <p class="text-[10px] text-slate-500 px-1">Verification is required for faculty accounts to access administrative features.</p>
+                    <p class="text-[10px] text-slate-500 px-1">Used to verify your identity and automatically link your classes.</p>
                 </div>
 
                 <button type="submit" class="w-full mt-4 py-4 bg-gradient-to-r from-accent-cyan to-accent-purple text-dark-bg font-bold rounded-xl shadow-lg shadow-accent-cyan/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-xs">
@@ -166,7 +183,11 @@
     const studentPreview = document.getElementById('studentPreview');
     const previewName = document.getElementById('previewName');
     const previewBatch = document.getElementById('previewBatch');
+    
+    const studentNameContainer = document.getElementById('studentNameContainer');
     const nameInput = document.getElementById('nameInput');
+    const facultyNameContainer = document.getElementById('facultyNameContainer');
+    const facultyNameSelect = document.getElementById('facultyNameSelect');
 
     function toggleStudentId() {
         if (roleSelect.value === 'faculty') {
@@ -176,12 +197,29 @@
             
             facultySecretContainer.classList.remove('hidden');
             facultySecretInput.setAttribute('required', '');
+
+            studentNameContainer.classList.add('hidden');
+            nameInput.removeAttribute('name');
+            nameInput.removeAttribute('required');
+
+            facultyNameContainer.classList.remove('hidden');
+            facultyNameSelect.setAttribute('name', 'name');
+            facultyNameSelect.setAttribute('required', '');
+
         } else {
             studentIdContainer.classList.remove('hidden');
             studentIdInput.setAttribute('required', '');
             
             facultySecretContainer.classList.add('hidden');
             facultySecretInput.removeAttribute('required');
+
+            studentNameContainer.classList.remove('hidden');
+            nameInput.setAttribute('name', 'name');
+            nameInput.setAttribute('required', '');
+
+            facultyNameContainer.classList.add('hidden');
+            facultyNameSelect.removeAttribute('name');
+            facultyNameSelect.removeAttribute('required');
         }
     }
 

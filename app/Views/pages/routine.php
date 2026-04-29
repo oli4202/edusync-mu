@@ -2,217 +2,21 @@
 $currentPage = 'routine'; 
 ?>
 
-<style>
-.routine-container {
-    max-width: 1000px;
-    margin: 0 auto;
-    font-family: 'Inter', sans-serif;
-    color: var(--text);
-}
-
-.routine-header {
-    background: #fff;
-    border-radius: 12px;
-    padding: 24px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-    margin-bottom: 24px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 16px;
-}
-
-.routine-title h1 {
-    font-size: 24px;
-    font-weight: 800;
-    color: #1a2a6c;
-    margin: 0 0 4px 0;
-}
-
-.routine-title p {
-    font-size: 13px;
-    color: var(--muted);
-    margin: 0;
-}
-
-.batch-selector {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.batch-pill {
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    background: #f1f5f9;
-    color: #475569;
-    text-decoration: none;
-    transition: all 0.2s;
-    border: 1px solid transparent;
-}
-
-.batch-pill:hover {
-    background: #e2e8f0;
-}
-
-.batch-pill.active {
-    background: #c8102e;
-    color: #fff;
-    box-shadow: 0 2px 8px rgba(200,16,46,0.3);
-}
-
-.routine-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.day-card {
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-    overflow: hidden;
-    border-left: 4px solid transparent;
-}
-
-.day-card.current-day {
-    border-left-color: #c8102e;
-}
-
-.day-header {
-    padding: 16px 20px;
-    background: #f8fafc;
-    border-bottom: 1px solid #e2e8f0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.day-name {
-    font-size: 18px;
-    font-weight: 800;
-    color: #1e293b;
-    letter-spacing: 0.5px;
-}
-
-.current-badge {
-    background: #c8102e;
-    color: #fff;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 4px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-}
-
-.slots-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 1px;
-    background: #e2e8f0;
-}
-
-.slot {
-    background: #fff;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    min-height: 120px;
-    transition: background 0.2s;
-}
-
-.slot:hover {
-    background: #f8fafc;
-}
-
-.slot-time {
-    font-size: 11px;
-    font-weight: 700;
-    color: #64748b;
-    margin-bottom: 8px;
-}
-
-.course-card {
-    background: #f1f5f9;
-    border-radius: 8px;
-    padding: 10px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    border-left: 3px solid #cbd5e1;
-}
-
-.course-code {
-    font-size: 13px;
-    font-weight: 700;
-    color: #0f172a;
-    line-height: 1.3;
-    margin-bottom: 6px;
-}
-
-.course-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 11px;
-    font-weight: 600;
-}
-
-.room-badge {
-    background: rgba(0,0,0,0.05);
-    padding: 2px 6px;
-    border-radius: 4px;
-    color: #475569;
-}
-
-.faculty-badge {
-    color: #c8102e;
-}
-
-.empty-slot {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: 1;
-    color: #cbd5e1;
-    font-size: 12px;
-    font-style: italic;
-}
-
-/* Empty state for a whole day */
-.day-empty {
-    padding: 30px;
-    text-align: center;
-    color: #94a3b8;
-    font-size: 14px;
-    background: #fff;
-}
-
-@media(max-width: 768px) {
-    .slots-container {
-        grid-template-columns: 1fr;
-    }
-    .slot {
-        min-height: auto;
-    }
-}
-</style>
-
-<div class="routine-container">
-    <div class="routine-header">
-        <div class="routine-title">
-            <h1>Class Routine</h1>
-            <p><?= htmlspecialchars($routineData['department'] ?? 'Department') ?> • <?= htmlspecialchars($routineData['version'] ?? 'Version') ?></p>
+<div class="space-y-6">
+    <!-- Header & Batch Selection -->
+    <div class="glass-card p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div>
+            <h1 class="font-syne text-3xl font-extrabold text-white mb-1">Class Routine</h1>
+            <p class="text-sm text-slate-400 font-medium">
+                <?= htmlspecialchars($routineData['department'] ?? 'Department') ?> • 
+                <span class="text-accent-cyan"><?= htmlspecialchars($routineData['version'] ?? 'Version') ?></span>
+            </p>
         </div>
-        <div class="batch-selector">
+        
+        <div class="flex flex-wrap gap-2">
             <?php foreach ($routineData['batches'] as $batch): ?>
-                <a href="?batch=<?= urlencode($batch) ?>" class="batch-pill <?= $selectedBatch === $batch ? 'active' : '' ?>">
+                <a href="?batch=<?= urlencode($batch) ?>" 
+                   class="px-4 py-2 rounded-xl text-xs font-bold transition-all border <?= $selectedBatch === $batch ? 'bg-accent-cyan text-dark-bg border-accent-cyan shadow-[0_0_15px_rgba(34,211,238,0.3)]' : 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/10' ?>">
                     <?= htmlspecialchars($batch) ?>
                 </a>
             <?php endforeach; ?>
@@ -220,19 +24,20 @@ $currentPage = 'routine';
     </div>
 
     <?php if (!$selectedBatch): ?>
-        <div style="background: #fff; padding: 40px; border-radius: 12px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
-            <div style="font-size: 48px; margin-bottom: 16px;">📅</div>
-            <h2 style="font-size: 20px; color: #1e293b; margin-bottom: 8px;">Select a Batch</h2>
-            <p style="color: #64748b;">Please select your batch from the options above to view the routine.</p>
+        <div class="glass-card p-12 text-center flex flex-col items-center justify-center">
+            <div class="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4">
+                <i data-lucide="calendar" class="w-8 h-8 text-accent-cyan"></i>
+            </div>
+            <h2 class="font-syne text-xl font-bold text-white mb-2">Select a Batch</h2>
+            <p class="text-slate-400 text-sm max-w-sm">Please select your specific batch from the options above to view the detailed class schedule.</p>
         </div>
     <?php else: ?>
-        <div class="routine-grid">
+        <div class="space-y-6">
             <?php foreach ($routineData['days'] as $day): ?>
                 <?php 
                 $isCurrentDay = ($day === $currentDay);
                 $daySchedule = $routineData['schedule'][$day][$selectedBatch] ?? [];
                 
-                // Map the day schedule by slot index for easy access
                 $slotsMap = [];
                 foreach ($daySchedule as $item) {
                     $slotsMap[$item[0]] = [
@@ -242,50 +47,70 @@ $currentPage = 'routine';
                     ];
                 }
                 ?>
-                <div class="day-card <?= $isCurrentDay ? 'current-day' : '' ?>">
-                    <div class="day-header">
-                        <div class="day-name"><?= htmlspecialchars($day) ?></div>
-                        <?php if ($isCurrentDay): ?>
-                            <div class="current-badge">Today</div>
-                        <?php endif; ?>
+                
+                <div class="glass-card overflow-hidden transition-all duration-300 <?= $isCurrentDay ? 'border-l-4 border-l-accent-cyan shadow-[0_0_20px_rgba(34,211,238,0.1)] ring-1 ring-accent-cyan/20' : '' ?>">
+                    <!-- Day Header -->
+                    <div class="px-6 py-4 border-b border-white/5 bg-white/[0.02] flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <h3 class="font-syne text-lg font-bold text-white tracking-wide"><?= htmlspecialchars($day) ?></h3>
+                            <?php if ($isCurrentDay): ?>
+                                <span class="px-2.5 py-1 rounded bg-accent-cyan/20 text-accent-cyan text-[10px] font-extrabold uppercase tracking-widest border border-accent-cyan/20">Today</span>
+                            <?php endif; ?>
+                        </div>
                     </div>
                     
                     <?php if (empty($daySchedule)): ?>
-                        <div class="day-empty">No classes scheduled for today. Take a break! ☕</div>
+                        <div class="p-8 text-center flex flex-col items-center justify-center bg-white/[0.01]">
+                            <i data-lucide="coffee" class="w-6 h-6 text-slate-500 mb-2"></i>
+                            <p class="text-slate-400 text-sm font-medium">No classes scheduled for today. Take a break!</p>
+                        </div>
                     <?php else: ?>
-                        <div class="slots-container">
+                        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-px bg-white/5">
                             <?php foreach ($routineData['time_slots'] as $index => $timeSlot): ?>
-                                <?php 
-                                // Only show slot if it has a class, or maybe we want to show all slots?
-                                // Usually showing all slots looks better in a grid.
-                                ?>
-                                <div class="slot">
-                                    <div class="slot-time"><?= htmlspecialchars($timeSlot['start']) ?> - <?= htmlspecialchars($timeSlot['end']) ?></div>
+                                <div class="bg-[#0a0e1a] p-4 flex flex-col min-h-[140px] transition-colors hover:bg-white/[0.02]">
+                                    <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                                        <i data-lucide="clock" class="w-3 h-3"></i>
+                                        <?= htmlspecialchars($timeSlot['start']) ?> - <?= htmlspecialchars($timeSlot['end']) ?>
+                                    </div>
                                     
                                     <?php if (isset($slotsMap[$index])): ?>
                                         <?php 
                                         $class = $slotsMap[$index];
-                                        // Simple color matching
-                                        $bgColor = '#f1f5f9';
-                                        $borderColor = '#cbd5e1';
+                                        $bgColor = 'rgba(255, 255, 255, 0.05)';
+                                        $borderColor = 'rgba(255, 255, 255, 0.1)';
+                                        
                                         foreach ($routineData['colors'] as $prefix => $color) {
                                             if ($prefix !== 'default' && str_starts_with($class['course'], $prefix)) {
                                                 $bgColor = $color;
-                                                // Darken border color slightly
-                                                $borderColor = 'rgba(0,0,0,0.1)';
+                                                $borderColor = 'transparent';
                                                 break;
                                             }
                                         }
                                         ?>
-                                        <div class="course-card" style="background: <?= $bgColor ?>; border-left-color: <?= $borderColor ?>;">
-                                            <div class="course-code"><?= htmlspecialchars($class['course']) ?></div>
-                                            <div class="course-meta">
-                                                <span class="room-badge">📍 <?= htmlspecialchars($class['room'] ?: 'TBA') ?></span>
-                                                <span class="faculty-badge"><?= htmlspecialchars($class['faculty']) ?></span>
+                                        <div class="flex-1 rounded-xl p-3 flex flex-col justify-between relative overflow-hidden group shadow-lg" style="background: <?= $bgColor ?>; border: 1px solid <?= $borderColor ?>;">
+                                            <!-- Dark overlay to ensure text readability on the custom colored backgrounds -->
+                                            <div class="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors"></div>
+                                            
+                                            <div class="relative z-10">
+                                                <div class="font-bold text-white text-sm leading-tight mb-2 drop-shadow-md">
+                                                    <?= htmlspecialchars($class['course']) ?>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="relative z-10 flex justify-between items-end mt-2">
+                                                <div class="flex items-center gap-1 text-[11px] font-bold text-white/90 bg-black/30 px-2 py-1 rounded backdrop-blur-sm">
+                                                    <i data-lucide="map-pin" class="w-3 h-3"></i>
+                                                    <?= htmlspecialchars($class['room'] ?: 'TBA') ?>
+                                                </div>
+                                                <div class="text-xs font-black text-white bg-black/40 px-2 py-1 rounded shadow-sm">
+                                                    <?= htmlspecialchars($class['faculty']) ?>
+                                                </div>
                                             </div>
                                         </div>
                                     <?php else: ?>
-                                        <div class="empty-slot">-</div>
+                                        <div class="flex-1 flex items-center justify-center">
+                                            <span class="w-8 h-[1px] bg-white/10"></span>
+                                        </div>
                                     <?php endif; ?>
                                 </div>
                             <?php endforeach; ?>
@@ -296,3 +121,9 @@ $currentPage = 'routine';
         </div>
     <?php endif; ?>
 </div>
+
+<script>
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+</script>
