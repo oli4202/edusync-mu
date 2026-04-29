@@ -258,11 +258,20 @@ const existingAnswers = <?php echo json_encode($existingAnswersText); ?>;
 /* ── Read Aloud (Web Speech API — 100% free, no API key) ── */
 let isSpeaking = false;
 
+/* ── Read Aloud (Web Speech API — Neural AI Voices) ── */
+let currentUtterance = null;
+let isSpeaking = false;
+
 function toggleReadAloud() {
     const btn = document.getElementById('readAloudBtn');
     const label = document.getElementById('readAloudText');
 
     if (isSpeaking) {
+        if (speechSynthesis.paused) {
+            speechSynthesis.resume();
+            label.textContent = 'Stop Reading';
+            return;
+        }
         speechSynthesis.cancel();
         isSpeaking = false;
         label.textContent = 'Read Aloud';
@@ -276,55 +285,137 @@ function toggleReadAloud() {
         return;
     }
 
-    // Build the text to read: question + all answers
+    // Check if text is too short and image exists -> offer OCR
+    const hasImage = <?= json_encode(!empty($attachmentPath)) ?>;
+    if (questionText.trim().length < 5 && hasImage) {
+        if (confirm('The question text is empty. Would you like to use AI to scan the image and read it aloud?')) {
+            scanAndRead();
+            return;
+        }
+    }
+
+    // Build the text to read
     let textToRead = questionText;
     const answerCards = document.querySelectorAll('.answer-text');
     if (answerCards.length > 0) {
-        textToRead += '. Here are the answers: ';
+        textToRead += '. Here are the community answers. ';
         answerCards.forEach((card, i) => {
             textToRead += ' Answer ' + (i + 1) + ': ' + card.textContent + '. ';
         });
     }
 
-    const utterance = new SpeechSynthesisUtterance(textToRead);
-    utterance.rate = 0.95;
-    utterance.pitch = 1;
-    utterance.lang = 'en-US';
+    if (!textToRead.trim()) {
+        alert('Nothing to read.');
+        return;
+    }
 
-    // Try to pick a good English voice
+    currentUtterance = new SpeechSynthesisUtterance(textToRead);
+    currentUtterance.rate = 1.0;
+    currentUtterance.pitch = 1.0;
+    currentUtterance.lang = 'en-US';
+
+    // Advanced Voice Selection: Try to find a "Neural" or "Natural" voice (Edge/Chrome)
     const voices = speechSynthesis.getVoices();
-    const englishVoice = voices.find(v => v.lang.startsWith('en') && v.name.includes('Google'))
-        || voices.find(v => v.lang.startsWith('en'));
-    if (englishVoice) utterance.voice = englishVoice;
+    let selectedVoice = voices.find(v => v.name.includes('Natural') || v.name.includes('Neural') || v.name.includes('Online'));
+    
+    // Fallback to Google voices or standard English
+    if (!selectedVoice) selectedVoice = voices.find(v => v.name.includes('Google') && v.lang.startsWith('en'));
+    if (!selectedVoice) selectedVoice = voices.find(v => v.lang.startsWith('en'));
+    
+    if (selectedVoice) currentUtterance.voice = selectedVoice;
 
-    utterance.onstart = () => {
+    currentUtterance.onstart = () => {
         isSpeaking = true;
         label.textContent = 'Stop Reading';
         btn.classList.remove('btn-outline');
         btn.classList.add('btn-reading');
     };
 
-    utterance.onend = () => {
+    currentUtterance.onend = () => {
         isSpeaking = false;
         label.textContent = 'Read Aloud';
         btn.classList.remove('btn-reading');
         btn.classList.add('btn-outline');
     };
 
-    utterance.onerror = () => {
+    currentUtterance.onerror = (event) => {
+        console.error('SpeechSynthesis Error:', event);
         isSpeaking = false;
         label.textContent = 'Read Aloud';
         btn.classList.remove('btn-reading');
         btn.classList.add('btn-outline');
     };
 
-    speechSynthesis.speak(utterance);
+    speechSynthesis.speak(currentUtterance);
 }
 
-// Pre-load voices (some browsers need this)
+async function scanAndRead() {
+    const btn = document.getElementById('readAloudBtn');
+    const label = document.getElementById('readAloudText');
+    const imagePath = <?= json_encode($attachmentPath) ?>;
+    
+    label.textContent = 'Scanning Image...';
+    btn.disabled = true;
+
+    try {
+        // Convert image to base64 (needed for AI API)
+        const response = await fetch(imagePath);
+        const blob = await response.blob();
+        const reader = new FileReader();
+        
+        const base64 = await new Promise((resolve) => {
+            reader.onloadend = () => resolve(reader.result);
+            reader.readAsDataURL(blob);
+        });
+
+        // Call OCR API
+        const ocrResponse = await fetch('/api/ai/ocr', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: base64 })
+        });
+        
+        const data = await ocrResponse.json();
+        if (data.success && data.text) {
+            // Update the question text locally so it can be read
+            const textToRead = "Extracted from image: " + data.text;
+            
+            // Start speaking the extracted text
+            const utterance = new SpeechSynthesisUtterance(textToRead);
+            const voices = speechSynthesis.getVoices();
+            let selectedVoice = voices.find(v => v.name.includes('Neural') || v.name.includes('Online')) || voices[0];
+            if (selectedVoice) utterance.voice = selectedVoice;
+            
+            utterance.onstart = () => {
+                isSpeaking = true;
+                label.textContent = 'Stop Reading';
+                btn.disabled = false;
+                btn.classList.add('btn-reading');
+            };
+            
+            utterance.onend = () => {
+                isSpeaking = false;
+                label.textContent = 'Read Aloud';
+                btn.classList.remove('btn-reading');
+            };
+
+            speechSynthesis.speak(utterance);
+        } else {
+            throw new Error(data.message || 'Could not extract text from image.');
+        }
+    } catch (err) {
+        alert('OCR Failed: ' + err.message);
+        label.textContent = 'Read Aloud';
+        btn.disabled = false;
+    }
+}
+
+// Pre-load voices
 if ('speechSynthesis' in window) {
     speechSynthesis.getVoices();
-    speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = speechSynthesis.getVoices;
+    }
 }
 
 /* ── AI Compact Answer ── */

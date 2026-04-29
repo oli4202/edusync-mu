@@ -245,14 +245,16 @@ class AdminController extends Controller
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $groq = trim($_POST['groq'] ?? '');
             $gemini = trim($_POST['gemini'] ?? '');
+            $preferred = trim($_POST['preferred_vision'] ?? 'groq');
 
             $content = "<?php\n\n\$api_keys = [\n";
             $content .= "    'GROQ_API_KEY' => '" . addslashes($groq) . "',\n";
             $content .= "    'GEMINI_API_KEY' => '" . addslashes($gemini) . "',\n";
+            $content .= "    'PREFERRED_VISION_MODEL' => '" . addslashes($preferred) . "',\n";
             $content .= "];";
             
             file_put_contents(__DIR__ . '/../../config/api-keys.php', $content);
-            $message = 'API keys updated successfully!';
+            $message = 'API settings updated successfully!';
         }
 
         include __DIR__ . '/../../config/api-keys.php';

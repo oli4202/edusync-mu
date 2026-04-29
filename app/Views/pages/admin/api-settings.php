@@ -32,15 +32,32 @@
         </div>
 
         <div class="form-group-admin">
-            <label class="label-admin" for="gemini">Gemini API Key (Image Analysis)</label>
+            <label class="label-admin" for="gemini">Gemini API Key (Backup Engine)</label>
             <input type="text" id="gemini" name="gemini" class="input-admin" value="<?= htmlspecialchars($api_keys['GEMINI_API_KEY'] ?? '') ?>" placeholder="AIzaSy...">
             <small style="color: var(--muted); font-size: 11px; margin-top: 8px; display: block; line-height: 1.4;">
                 Get your free Gemini API key from <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: var(--accent);">Google AI Studio</a>.
             </small>
         </div>
+
+        <div class="form-group-admin">
+            <label class="label-admin">Preferred Vision Model (for Reading Images)</label>
+            <div style="display: flex; gap: 20px; margin-top: 10px;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="radio" name="preferred_vision" value="groq" <?= ($api_keys['PREFERRED_VISION_MODEL'] ?? 'groq') === 'groq' ? 'checked' : '' ?>>
+                    <span style="font-size: 14px; color: white;">Groq (Fastest)</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="radio" name="preferred_vision" value="gemini" <?= ($api_keys['PREFERRED_VISION_MODEL'] ?? 'groq') === 'gemini' ? 'checked' : '' ?>>
+                    <span style="font-size: 14px; color: white;">Gemini (Most Accurate)</span>
+                </label>
+            </div>
+            <small style="color: var(--muted); font-size: 11px; margin-top: 12px; display: block; line-height: 1.4;">
+                This model will be used when you click "Read Aloud" on an image question.
+            </small>
+        </div>
         
-        <button type="submit" class="btn btn-primary w-full" style="margin-top: 10px;">
-            Save & Activate AI
+        <button type="submit" class="btn btn-primary w-full" style="margin-top: 20px;">
+            Save & Update Engine
         </button>
     </form>
 </div>

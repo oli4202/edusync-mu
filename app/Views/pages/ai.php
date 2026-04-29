@@ -15,6 +15,7 @@
 
     tools: {
         chat: { title: 'AI Chat Assistant', sub: 'Ask any academic question about your SE courses at MU Sylhet', icon: 'message-square', color: 'text-accent-cyan', bg: 'bg-accent-cyan/10' },
+        study: { title: 'Study Assistant', sub: 'Upload PDF/Images → AI reads & explains', icon: 'upload-cloud', color: 'text-white', bg: 'bg-accent-cyan', url: '/ai/study' },
         compact: { title: 'Compact Answer', sub: 'Paste a question → get a concise, exam-ready answer', icon: 'clipboard-list', color: 'text-accent-emerald', bg: 'bg-accent-emerald/10' },
         flashcard: { title: 'Flashcard Gen', sub: 'Paste your notes → AI generates Q&A flashcards', icon: 'layers', color: 'text-accent-purple', bg: 'bg-accent-purple/10' },
         quiz: { title: 'Quiz Generator', sub: 'Paste notes → AI creates a mini exam to test yourself', icon: 'help-circle', color: 'text-orange-400', bg: 'bg-orange-400/10' },
@@ -33,7 +34,7 @@
         
         this.$nextTick(() => {
             const msgs = this.$refs.chatMessages;
-            msgs.scrollTop = msgs.scrollHeight;
+            if(msgs) msgs.scrollTop = msgs.scrollHeight;
         });
 
         try {
@@ -68,7 +69,7 @@
             this.isThinking = false;
             this.$nextTick(() => {
                 const msgs = this.$refs.chatMessages;
-                msgs.scrollTop = msgs.scrollHeight;
+                if(msgs) msgs.scrollTop = msgs.scrollHeight;
             });
         }
     },
@@ -131,7 +132,7 @@
             <nav class="flex-1 space-y-1 overflow-y-auto custom-scrollbar pr-2">
                 <template x-for="(tool, id) in tools" :key="id">
                     <button 
-                        @click="currentTool = id; toolResult = ''; toolInput = ''"
+                        @click="if(tool.url) { window.location.href = tool.url; } else { currentTool = id; toolResult = ''; toolInput = ''; }"
                         class="w-full flex items-center gap-3 p-3 rounded-xl transition-all duration-200 group text-left"
                         :class="currentTool === id ? 'bg-white/10 text-white border border-white/10' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200 border border-transparent'"
                     >
@@ -195,7 +196,7 @@
             </template>
 
             <!-- Tool View -->
-            <template x-if="currentTool !== 'chat'">
+            <template x-if="currentTool !== 'chat' && currentTool !== 'study'">
                 <div class="space-y-6">
                     <!-- Tool Specific Options -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -274,7 +275,7 @@
                         </button>
                     </div>
                 </template>
-                <template x-if="currentTool !== 'chat'">
+                <template x-if="currentTool !== 'chat' && currentTool !== 'study'">
                     <button 
                         @click="runTool()"
                         :disabled="!toolInput.trim() || isThinking"

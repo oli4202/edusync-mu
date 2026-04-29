@@ -2,6 +2,7 @@ vendor/
 .env
 uploads/*
 !uploads/.gitkeep
+config/api-keys.php
 *.log
 node_modules/
 .DS_Store

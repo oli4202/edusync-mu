@@ -103,20 +103,30 @@ function callAI(string $prompt, string $systemPrompt = '', string $base64Image =
 
     $geminiKey = getenv('GEMINI_API_KEY') ?: ($api_keys['GEMINI_API_KEY'] ?? '');
     $groqKey = getenv('GROQ_API_KEY') ?: ($api_keys['GROQ_API_KEY'] ?? '');
+    $preferred = getenv('PREFERRED_VISION_MODEL') ?: ($api_keys['PREFERRED_VISION_MODEL'] ?? 'groq');
 
-    // 1. Use Gemini specifically for images (Image-to-Text)
-    if ($base64Image && $geminiKey && strpos($geminiKey, 'YOUR_') === false) {
-        return callGeminiAI($prompt, $systemPrompt, $geminiKey, $base64Image);
+    // 1. If image is present, follow the preference
+    if ($base64Image) {
+        if ($preferred === 'gemini' && $geminiKey && strpos($geminiKey, 'YOUR_') === false) {
+            return callGeminiAI($prompt, $systemPrompt, $geminiKey, $base64Image);
+        }
+        if ($groqKey && strpos($groqKey, 'YOUR_') === false) {
+            return callGroqAI_Internal($prompt, $systemPrompt, $groqKey, $base64Image);
+        }
+        // Fallback to Gemini if Groq failed or not set
+        if ($geminiKey && strpos($geminiKey, 'YOUR_') === false) {
+            return callGeminiAI($prompt, $systemPrompt, $geminiKey, $base64Image);
+        }
     }
 
-    // 2. Use Groq for everything else (Mainly side)
+    // 2. Default Text Flow: Use Groq if available
     if ($groqKey && strpos($groqKey, 'YOUR_') === false) {
-        return callGroqAI_Internal($prompt, $systemPrompt, $groqKey, $base64Image);
+        return callGroqAI_Internal($prompt, $systemPrompt, $groqKey, '');
     }
 
-    // 3. Fallback to Gemini if Groq is not available
+    // 3. Last fallback
     if ($geminiKey && strpos($geminiKey, 'YOUR_') === false) {
-        return callGeminiAI($prompt, $systemPrompt, $geminiKey, $base64Image);
+        return callGeminiAI($prompt, $systemPrompt, $geminiKey, '');
     }
 
     return [
@@ -131,14 +141,14 @@ function callAI(string $prompt, string $systemPrompt = '', string $base64Image =
 function callGeminiAI(string $prompt, string $systemPrompt, string $apiKey, string $base64Image = ''): array
 {
     $fullPrompt = $systemPrompt ? $systemPrompt . "\n\n" . $prompt : $prompt;
-    $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' . $apiKey;
+    $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' . $apiKey;
 
     $parts = [['text' => $fullPrompt]];
 
     if ($base64Image) {
         // Remove data URI scheme if present
-        if (preg_match('/^data:image\/(\w+);base64,/', $base64Image, $matches)) {
-            $mimeType = 'image/' . $matches[1];
+        if (preg_match('/^data:([\w\/]+);base64,/', $base64Image, $matches)) {
+            $mimeType = $matches[1];
             $data = substr($base64Image, strpos($base64Image, ',') + 1);
         } else {
             $mimeType = 'image/jpeg'; // Default
@@ -210,7 +220,7 @@ function callGroqAI_Internal(string $prompt, string $systemPrompt, string $apiKe
     }
 
     $payload = [
-        'model' => $base64Image ? 'llama-3.2-11b-vision-preview' : 'llama-3.3-70b-versatile',
+        'model' => $base64Image ? 'llama-3.2-90b-vision-preview' : 'llama-3.3-70b-versatile',
         'messages' => [
             ['role' => 'system', 'content' => $systemPrompt ?: 'You are a helpful academic assistant for Metropolitan University Sylhet Software Engineering students.'],
             ['role' => 'user', 'content' => $content]

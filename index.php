@@ -99,15 +99,18 @@ $router->get('/partners', 'App\Controllers\JobController@partners');
 $router->post('/partners/follow', 'App\Controllers\JobController@follow');
 $router->post('/partners/unfollow', 'App\Controllers\JobController@unfollow');
 
-// AI routes
+// AI & Productivity
 $router->get('/ai', 'App\Controllers\AiController@index');
-$router->get('/playground', 'App\Controllers\AiController@playground');
-$router->get('/suggestions', 'App\Controllers\AiController@suggestions');
+$router->get('/ai/playground', 'App\Controllers\AiController@playground');
+$router->get('/ai/suggestions', 'App\Controllers\AiController@suggestions');
+$router->get('/ai/study', 'App\Controllers\AiController@studyTool');
+
 $router->post('/api/ai/chat', 'App\Controllers\AiController@chat');
 $router->post('/api/ai/suggest', 'App\Controllers\AiController@suggest');
 $router->post('/api/ai/summarize', 'App\Controllers\AiController@summarize');
 $router->post('/api/ai/quiz', 'App\Controllers\AiController@generateQuiz');
 $router->post('/api/ai/ocr', 'App\Controllers\AiController@ocr');
+$router->post('/api/ai/analyze-file', 'App\Controllers\AiController@analyzeFile');
 $router->post('/api/playground/run-python', 'App\Controllers\AiController@runPython');
 $router->post('/api/playground/run-sql', 'App\Controllers\AiController@runSql');
 

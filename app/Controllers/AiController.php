@@ -230,4 +230,48 @@ class AiController extends Controller
             ], 400);
         }
     }
+
+    public function studyTool(): void
+    {
+        $this->requireLogin();
+        $userId = $this->session->userId();
+        $user = User::findById($userId);
+        $this->render('pages/ai/study', compact('user'));
+    }
+
+    public function analyzeFile(): void
+    {
+        $this->requireLogin();
+        $json = json_decode(file_get_contents('php://input'), true);
+        $fileData = $json['file'] ?? '';
+        $fileName = $json['name'] ?? 'document';
+        $promptOverride = $json['prompt'] ?? '';
+
+        if (!$fileData) {
+            $this->json(['success' => false, 'message' => 'No file data provided'], 400);
+            return;
+        }
+
+        $system = "You are an expert AI Study Assistant for Metropolitan University students. 
+        You analyze uploaded documents (images or PDFs) and help students understand them.
+        Provide a concise summary, key points, and offer to answer questions about the document.";
+
+        $prompt = $promptOverride ?: "Please analyze this document ($fileName). Explain what it is about and list the 5 most important points a student should know from it.";
+
+        // For files, we MUST use Gemini because Groq doesn't support PDF/complex vision yet
+        $apiKeysPath = __DIR__ . '/../../config/api-keys.php';
+        $api_keys = [];
+        if (file_exists($apiKeysPath)) {
+            include $apiKeysPath;
+        }
+        $geminiKey = getenv('GEMINI_API_KEY') ?: ($api_keys['GEMINI_API_KEY'] ?? '');
+
+        if (!$geminiKey) {
+            $this->json(['success' => false, 'message' => 'Gemini API Key is required for file analysis. Please add it in Admin > API Settings.'], 400);
+            return;
+        }
+
+        $result = callGeminiAI($prompt, $system, $geminiKey, $fileData);
+        $this->json($result);
+    }
 }
