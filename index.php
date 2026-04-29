@@ -45,6 +45,7 @@ $router->post('/attendance', 'App\Controllers\DashboardController@attendance');
 $router->get('/attendance/details', 'App\Controllers\DashboardController@attendanceSubjectDetails');
 $router->get('/calendar', 'App\Controllers\DashboardController@calendar');
 $router->get('/routine', 'App\Controllers\DashboardController@routine');
+$router->get('/prospectus', 'App\Controllers\DashboardController@prospectus');
 
 // Flashcard routes
 $router->get('/flashcards', 'App\Controllers\FlashcardController@index');

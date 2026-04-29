@@ -386,4 +386,12 @@ class DashboardController extends Controller
 
         $this->render('pages/routine', compact('user', 'routineData', 'selectedBatch', 'currentDay'));
     }
+
+    public function prospectus(): void
+    {
+        $this->requireLogin();
+        $userId = $this->session->userId();
+        $user = User::findById($userId);
+        $this->render('pages/prospectus', compact('user'));
+    }
 }
