@@ -8,6 +8,14 @@
 // Autoload classes via Composer
 require_once __DIR__ . '/vendor/autoload.php';
 
+// Serve static files if they exist (for PHP built-in server)
+if (php_sapi_name() === 'cli-server') {
+    $urlPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+    if (is_file(__DIR__ . $urlPath)) {
+        return false;
+    }
+}
+
 // Load environment variables
 require_once __DIR__ . '/config/database.php';
 
