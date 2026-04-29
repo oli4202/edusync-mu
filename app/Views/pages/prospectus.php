@@ -290,7 +290,7 @@
         <div class="leader-card">
             <div class="flex flex-col md:flex-row gap-6">
                 <div class="w-32 h-40 bg-slate-200 rounded-xl overflow-hidden flex-shrink-0 border-2 border-mu-navy/10">
-                    <img src="/founder_chairman_portrait_1777489249933.png" alt="Dr. Toufique Rahman Chowdhury" class="w-full h-full object-cover">
+                    <img src="/assets/images/founder.png" alt="Dr. Toufique Rahman Chowdhury" class="w-full h-full object-cover">
                 </div>
                 <div>
                     <div class="leader-role">Founder &amp; Chairman</div>
