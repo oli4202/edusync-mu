@@ -31,6 +31,7 @@ $existingAnswersText = implode("\n\n", array_column($answers, 'answer_text'));
 .btn-outline { background: transparent; border: 1px solid #1e2d45; color: #e2e8f0; }
 .btn-bookmark { background: transparent; border: 1px solid #1e2d45; color: #fbbf24; }
 .btn-sm { padding: 8px 14px; font-size: 12px; justify-content: center; }
+.btn-reading { background: rgba(34, 211, 238, 0.15); border: 1px solid #22d3ee; color: #22d3ee; }
 .ai-panel { background: linear-gradient(135deg, rgba(34, 211, 238, 0.06), rgba(129, 140, 248, 0.06)); border-color: rgba(34, 211, 238, 0.20); }
 .ai-panel-title, .submit-title, .widget-title, .answers-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; color: #e2e8f0; }
 .ai-panel-sub { font-size: 13px; color: #94a3b8; margin: 8px 0 16px; }
@@ -106,11 +107,11 @@ $existingAnswersText = implode("\n\n", array_column($answers, 'answer_text'));
                         <span class="badge badge-purple"><?= htmlspecialchars($question['exam_semester']) ?> Semester</span>
                     <?php endif; ?>
                     <span class="badge badge-green"><?= htmlspecialchars(ucfirst($question['question_type'] ?? 'Theory')) ?></span>
-                    <?php if (($question['is_approved'] ?? 0) == 0): ?>
-                        <span class="badge" style="background:rgba(251,191,36,0.1); border:1px solid #fbbf24; color:#fbbf24;">Pending Approval</span>
-                    <?php endif; ?>
                     <?php if (!empty($question['marks'])): ?>
                         <span class="badge badge-yellow"><?= htmlspecialchars($question['marks']) ?> marks</span>
+                    <?php endif; ?>
+                    <?php if (($question['is_approved'] ?? 0) == 0): ?>
+                        <span class="badge" style="background:rgba(251,191,36,0.1); border:1px solid #fbbf24; color:#fbbf24;">Pending Approval</span>
                     <?php endif; ?>
                 </div>
 
@@ -144,7 +145,11 @@ $existingAnswersText = implode("\n\n", array_column($answers, 'answer_text'));
                     <button class="btn <?= $isBookmarked ? 'btn-bookmark' : 'btn-outline' ?>" id="bookmarkBtn" onclick="toggleBookmark(<?= (int) $question['id'] ?>)">
                         <?= $isBookmarked ? 'Bookmarked' : 'Bookmark' ?>
                     </button>
-                    <a href="/suggestions?course=<?= (int) $question['course_id'] ?>" class="btn btn-outline">Exam Suggestions for this Course</a>
+                    <button class="btn btn-outline" id="readAloudBtn" onclick="toggleReadAloud()">
+                        <i data-lucide="volume-2" style="width:14px;height:14px;margin-right:4px;"></i>
+                        <span id="readAloudText">Read Aloud</span>
+                    </button>
+                    <a href="/suggestions?course=<?= (int) $question['course_id'] ?>" class="btn btn-outline">Exam Suggestions</a>
                 </div>
             </div>
 
@@ -176,11 +181,11 @@ $existingAnswersText = implode("\n\n", array_column($answers, 'answer_text'));
                             </button>
                         </div>
 
-                        <div class="answer-text"><?= htmlspecialchars($answer['answer_text']) ?></div>
-
                         <?php if ($answer['is_approved'] == 0): ?>
-                            <div style="font-size:11px; color:#fbbf24; margin-top:8px; font-weight:600;">(Pending Approval — only visible to you)</div>
+                            <div style="font-size:11px; color:#fbbf24; margin-bottom:8px; font-weight:600;">(Pending Approval — only visible to you)</div>
                         <?php endif; ?>
+
+                        <div class="answer-text"><?= htmlspecialchars($answer['answer_text']) ?></div>
 
                         <?php if (!empty($answer['compact_answer'])): ?>
                             <div class="compact-section">
@@ -250,6 +255,79 @@ $existingAnswersText = implode("\n\n", array_column($answers, 'answer_text'));
 const questionText = <?php echo json_encode($question['question_text']); ?>;
 const existingAnswers = <?php echo json_encode($existingAnswersText); ?>;
 
+/* ── Read Aloud (Web Speech API — 100% free, no API key) ── */
+let isSpeaking = false;
+
+function toggleReadAloud() {
+    const btn = document.getElementById('readAloudBtn');
+    const label = document.getElementById('readAloudText');
+
+    if (isSpeaking) {
+        speechSynthesis.cancel();
+        isSpeaking = false;
+        label.textContent = 'Read Aloud';
+        btn.classList.remove('btn-reading');
+        btn.classList.add('btn-outline');
+        return;
+    }
+
+    if (!('speechSynthesis' in window)) {
+        alert('Your browser does not support text-to-speech.');
+        return;
+    }
+
+    // Build the text to read: question + all answers
+    let textToRead = questionText;
+    const answerCards = document.querySelectorAll('.answer-text');
+    if (answerCards.length > 0) {
+        textToRead += '. Here are the answers: ';
+        answerCards.forEach((card, i) => {
+            textToRead += ' Answer ' + (i + 1) + ': ' + card.textContent + '. ';
+        });
+    }
+
+    const utterance = new SpeechSynthesisUtterance(textToRead);
+    utterance.rate = 0.95;
+    utterance.pitch = 1;
+    utterance.lang = 'en-US';
+
+    // Try to pick a good English voice
+    const voices = speechSynthesis.getVoices();
+    const englishVoice = voices.find(v => v.lang.startsWith('en') && v.name.includes('Google'))
+        || voices.find(v => v.lang.startsWith('en'));
+    if (englishVoice) utterance.voice = englishVoice;
+
+    utterance.onstart = () => {
+        isSpeaking = true;
+        label.textContent = 'Stop Reading';
+        btn.classList.remove('btn-outline');
+        btn.classList.add('btn-reading');
+    };
+
+    utterance.onend = () => {
+        isSpeaking = false;
+        label.textContent = 'Read Aloud';
+        btn.classList.remove('btn-reading');
+        btn.classList.add('btn-outline');
+    };
+
+    utterance.onerror = () => {
+        isSpeaking = false;
+        label.textContent = 'Read Aloud';
+        btn.classList.remove('btn-reading');
+        btn.classList.add('btn-outline');
+    };
+
+    speechSynthesis.speak(utterance);
+}
+
+// Pre-load voices (some browsers need this)
+if ('speechSynthesis' in window) {
+    speechSynthesis.getVoices();
+    speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+}
+
+/* ── AI Compact Answer ── */
 function generateCompact() {
     const loading = document.getElementById('aiLoading');
     const result = document.getElementById('aiResult');
@@ -281,6 +359,7 @@ function generateCompact() {
     });
 }
 
+/* ── Bookmark ── */
 function toggleBookmark(questionId) {
     fetch('/api/question-bank/bookmark', {
         method: 'POST',
@@ -295,6 +374,7 @@ function toggleBookmark(questionId) {
     });
 }
 
+/* ── Upvote ── */
 function upvote(answerId, button) {
     fetch('/api/question-bank/upvote', {
         method: 'POST',
@@ -308,4 +388,7 @@ function upvote(answerId, button) {
         }
     });
 }
+
+// Re-render lucide icons for dynamic content
+if (typeof lucide !== 'undefined') lucide.createIcons();
 </script>
