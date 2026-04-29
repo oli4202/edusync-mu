@@ -78,9 +78,25 @@ class QuestionBankController extends Controller
         $userId = $this->session->userId();
         $user = User::findById($userId);
 
+        // Fetch question (even if not approved, if user is submitter or admin)
         $question = Question::findApprovedById($id);
         if (!$question) {
-            redirect('/question-bank');
+            // Check if it exists but is pending
+            $db = getDB();
+            $stmt = $db->prepare("
+                SELECT q.*, c.name AS course_name, c.code AS course_code, u.name AS submitted_by_name
+                FROM questions q
+                JOIN courses c ON q.course_id = c.id
+                LEFT JOIN users u ON q.submitted_by = u.id
+                WHERE q.id = ?
+            ");
+            $stmt->execute([$id]);
+            $question = $stmt->fetch() ?: null;
+
+            if (!$question || ($question['is_approved'] == 0 && $question['submitted_by'] != $userId && ($user['role'] ?? '') !== 'admin')) {
+                $this->session->setFlash('error', 'Question not found or pending approval.');
+                redirect('/question-bank');
+            }
         }
 
         $submitError = '';
@@ -93,8 +109,8 @@ class QuestionBankController extends Controller
             $formData['answer_text'] = trim($_POST['answer_text'] ?? '');
             $formData['solution_steps'] = trim($_POST['solution_steps'] ?? '');
 
-            if (strlen($formData['answer_text']) < 20) {
-                $submitError = 'Answer must be at least 20 characters.';
+            if (strlen($formData['answer_text']) < 10) {
+                $submitError = 'Answer must be at least 10 characters.';
             } else {
                 Answer::create($id, $userId, $formData['answer_text'], $formData['solution_steps']);
                 $this->session->setFlash('success', 'Answer submitted! It will appear after admin approval.');
@@ -105,7 +121,18 @@ class QuestionBankController extends Controller
         Question::incrementViewCount($id);
         $question['view_count'] = (int) ($question['view_count'] ?? 0) + 1;
 
-        $answers = Answer::findApprovedByQuestionId($id);
+        // Fetch approved answers + user's own pending answers
+        $db = getDB();
+        $stmt = $db->prepare("
+            SELECT a.*, u.name AS author_name, u.avatar AS author_avatar
+            FROM answers a
+            LEFT JOIN users u ON a.user_id = u.id
+            WHERE a.question_id = ? AND (a.is_approved = 1 OR a.user_id = ?)
+            ORDER BY a.is_approved DESC, a.upvotes DESC, a.created_at ASC
+        ");
+        $stmt->execute([$id, $userId]);
+        $answers = $stmt->fetchAll();
+
         $isBookmarked = Question::isBookmarkedByUser($userId, $id);
         $relatedQs = Question::findRelatedApproved((int) $question['course_id'], $id);
         $submitSuccess = $this->session->getFlash('success');

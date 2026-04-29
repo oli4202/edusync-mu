@@ -105,7 +105,10 @@ $existingAnswersText = implode("\n\n", array_column($answers, 'answer_text'));
                     <?php if (!empty($question['exam_semester'])): ?>
                         <span class="badge badge-purple"><?= htmlspecialchars($question['exam_semester']) ?> Semester</span>
                     <?php endif; ?>
-                    <span class="badge badge-green"><?= htmlspecialchars(ucfirst($question['question_type'])) ?></span>
+                    <span class="badge badge-green"><?= htmlspecialchars(ucfirst($question['question_type'] ?? 'Theory')) ?></span>
+                    <?php if (($question['is_approved'] ?? 0) == 0): ?>
+                        <span class="badge" style="background:rgba(251,191,36,0.1); border:1px solid #fbbf24; color:#fbbf24;">Pending Approval</span>
+                    <?php endif; ?>
                     <?php if (!empty($question['marks'])): ?>
                         <span class="badge badge-yellow"><?= htmlspecialchars($question['marks']) ?> marks</span>
                     <?php endif; ?>
@@ -174,6 +177,10 @@ $existingAnswersText = implode("\n\n", array_column($answers, 'answer_text'));
                         </div>
 
                         <div class="answer-text"><?= htmlspecialchars($answer['answer_text']) ?></div>
+
+                        <?php if ($answer['is_approved'] == 0): ?>
+                            <div style="font-size:11px; color:#fbbf24; margin-top:8px; font-weight:600;">(Pending Approval — only visible to you)</div>
+                        <?php endif; ?>
 
                         <?php if (!empty($answer['compact_answer'])): ?>
                             <div class="compact-section">
