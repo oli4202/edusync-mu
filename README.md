@@ -29,7 +29,7 @@ Core areas currently available in the app:
 - Database: MySQL / MariaDB with PDO
 - Frontend: HTML, CSS, vanilla JavaScript
 - Charts/UI libraries: Chart.js, CodeMirror
-- AI integrations: Gemini, Hugging Face, Claude fallback
+- AI integrations:Groq,gemini
 
 ## Project Structure
 
