@@ -265,11 +265,7 @@
     <!-- ═══ COVER ═══ -->
     <div class="cover">
       <div class="cover-logo-row">
-        <div class="cover-logo-icon">M</div>
-        <div class="cover-logo-text">
-          <div class="big">Metropolitan</div>
-          <div class="small">University · Sylhet</div>
-        </div>
+        <img src="/assets/images/logo.png" alt="Metropolitan University" style="max-width: 300px; height: auto;">
       </div>
 
       <div class="cover-badge">
