@@ -25,14 +25,38 @@ class DashboardController extends Controller
 
         if ($this->session->isFaculty()) {
             // Faculty Dashboard
-            $pendingQuestions = Question::findPending();
-            $pendingAnswers = \App\Models\Answer::findPending();
-            
-            $todayAttendanceCount = Attendance::getTodayCount();
-
             $studentCount = User::getStudentCount();
 
-            $this->render('dashboard/faculty', compact('user', 'pendingQuestions', 'pendingAnswers', 'todayAttendanceCount', 'studentCount'));
+            // Find assigned subjects from routine
+            $facultyRoster = require __DIR__ . '/../Data/faculty_data.php';
+            $myShort = '';
+            foreach ($facultyRoster as $short => $data) {
+                if ($data['name'] === $user['name']) {
+                    $myShort = $short;
+                    break;
+                }
+            }
+
+            $assignedSubjects = [];
+            if ($myShort) {
+                $routineData = require __DIR__ . '/../Data/routine_data.php';
+                foreach ($routineData['schedule'] as $day => $batches) {
+                    foreach ($batches as $batchName => $slots) {
+                        foreach ($slots as $slot) {
+                            if ($slot[3] === $myShort) {
+                                $assignedSubjects[$batchName . '|' . $slot[1]] = [
+                                    'batch' => $batchName,
+                                    'course' => $slot[1],
+                                    'day' => $day
+                                ];
+                            }
+                        }
+                    }
+                }
+            }
+            $assignedSubjects = array_values($assignedSubjects);
+
+            $this->render('dashboard/faculty', compact('user', 'pendingQuestions', 'pendingAnswers', 'todayAttendanceCount', 'studentCount', 'assignedSubjects'));
         } else {
             // Get stats
             $tasksDueCount = Task::getTasksDueSoon($userId);
@@ -219,7 +243,30 @@ class DashboardController extends Controller
         $batchAttendance = Attendance::findByBatch($user['batch'] ?? '');
         $batchStats = Attendance::getBatchStats($user['batch'] ?? '');
 
-        $this->render('pages/attendance', compact('user', 'myAttendance', 'batchAttendance', 'batchStats'));
+        // Detailed Report (Jan to April 2026 as requested)
+        $startDate = '2026-01-01';
+        $endDate = date('Y-m-d'); // Use current date for "up to now"
+        $batchLabel = $user['batch'] ? $user['batch'] . 'th (' . preg_replace('/[^0-9]/', '', $user['batch']) . ')' : '';
+        
+        // Find the actual label in routine data if possible
+        $routineData = require __DIR__ . '/../Data/routine_data.php';
+        $foundLabel = '';
+        if ($user['batch']) {
+            $bNum = preg_replace('/[^0-9]/', '', $user['batch']);
+            foreach ($routineData['batches'] as $b) {
+                if (str_starts_with($b, $bNum)) {
+                    $foundLabel = $b;
+                    break;
+                }
+            }
+        }
+
+        $subjectReport = [];
+        if ($foundLabel) {
+            $subjectReport = \App\Support\AttendanceHelper::getStudentSubjectReport($userId, $foundLabel, $startDate, $endDate);
+        }
+
+        $this->render('pages/attendance', compact('user', 'myAttendance', 'batchAttendance', 'batchStats', 'subjectReport'));
     }
 
     public function calendar(): void

@@ -107,51 +107,43 @@
             </div>
         </div>
 
-        <!-- Pending Approvals Preview -->
+        </div>
+
+        <!-- My Assigned Subjects (New) -->
         <div class="glass-card rounded-2xl border border-white/5 overflow-hidden flex flex-col">
             <div class="p-4 border-b border-white/5 bg-white/[0.02] flex justify-between items-center">
                 <h2 class="text-sm font-bold text-white flex items-center gap-2">
-                    <i data-lucide="clock" class="w-4 h-4 text-yellow-500"></i>
-                    Pending Approvals
+                    <i data-lucide="book-open" class="w-4 h-4 text-accent-cyan"></i>
+                    My Assigned Subjects
                 </h2>
-                <?php if ($this->session->userRole() === 'admin'): ?>
-                <a href="/admin" class="text-xs text-accent-cyan hover:underline">View All</a>
-                <?php endif; ?>
+                <span class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Spring 2026</span>
             </div>
-            <div class="p-0 flex-1 flex flex-col">
-                <?php if (empty($pendingQuestions) && empty($pendingAnswers)): ?>
-                    <div class="flex-1 flex flex-col items-center justify-center p-8 text-center opacity-50">
-                        <i data-lucide="check-circle" class="w-12 h-12 text-green-500 mb-3"></i>
-                        <p class="text-sm font-medium text-white">All caught up!</p>
-                        <p class="text-xs text-slate-400">No pending items to approve.</p>
+            <div class="p-4 flex-1">
+                <?php if (empty($assignedSubjects)): ?>
+                    <div class="flex flex-col items-center justify-center p-8 text-center opacity-40">
+                        <i data-lucide="book-x" class="w-10 h-10 mb-2"></i>
+                        <p class="text-xs font-medium">No subjects assigned in routine.</p>
                     </div>
                 <?php else: ?>
-                    <div class="divide-y divide-white/5 overflow-y-auto max-h-[300px] custom-scrollbar">
-                        <?php foreach(array_slice($pendingQuestions, 0, 3) as $q): ?>
-                        <div class="p-4 hover:bg-white/5 transition-colors flex items-start gap-3">
-                            <div class="w-8 h-8 rounded-full bg-yellow-500/20 text-yellow-500 flex items-center justify-center shrink-0">
-                                <i data-lucide="help-circle" class="w-4 h-4"></i>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <?php foreach ($assignedSubjects as $subject): ?>
+                            <div class="p-3 rounded-xl bg-white/5 border border-white/5 hover:border-accent-cyan/20 transition-all group">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-accent-cyan/10 text-accent-cyan flex items-center justify-center text-[10px] font-bold">
+                                        <?php echo explode('-', $subject['course'])[0]; ?>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="text-xs font-bold text-white truncate"><?php echo htmlspecialchars($subject['course']); ?></p>
+                                        <p class="text-[10px] text-slate-500 font-medium">Batch <?php echo htmlspecialchars($subject['batch']); ?></p>
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <p class="text-xs font-bold text-white truncate max-w-[200px] sm:max-w-[300px]"><?php echo htmlspecialchars($q['course_code']); ?> Question</p>
-                                <p class="text-[10px] text-slate-400 mt-1 line-clamp-1"><?php echo htmlspecialchars($q['question_text']); ?></p>
-                            </div>
-                        </div>
-                        <?php endforeach; ?>
-                        
-                        <?php foreach(array_slice($pendingAnswers, 0, 3) as $a): ?>
-                        <div class="p-4 hover:bg-white/5 transition-colors flex items-start gap-3">
-                            <div class="w-8 h-8 rounded-full bg-green-500/20 text-green-500 flex items-center justify-center shrink-0">
-                                <i data-lucide="message-square" class="w-4 h-4"></i>
-                            </div>
-                            <div>
-                                <p class="text-xs font-bold text-white truncate max-w-[200px] sm:max-w-[300px]">Answer to Q#<?php echo $a['question_id']; ?></p>
-                                <p class="text-[10px] text-slate-400 mt-1 line-clamp-1"><?php echo htmlspecialchars($a['compact_answer']); ?></p>
-                            </div>
-                        </div>
                         <?php endforeach; ?>
                     </div>
                 <?php endif; ?>
+            </div>
+            <div class="p-3 bg-white/[0.02] border-t border-white/5 text-center">
+                <a href="/admin/attendance" class="text-[10px] font-bold text-accent-cyan uppercase tracking-widest hover:underline">Manage All Attendance →</a>
             </div>
         </div>
     </div>

@@ -18,10 +18,23 @@ class StudentRoster
                 }
 
                 $name = trim((string) ($row['name'] ?? ''));
+                $batchStr = (string) ($row['batch'] ?? '');
+                $batchNum = (int) $batchStr;
+                
+                // Dynamically calculate semester:
+                // Reference: Batch 6 is Semester 5
+                // Formula: 5 + (6 - Batch)
+                $semesterNum = 5 + (6 - $batchNum);
+                if ($semesterNum < 1) $semesterNum = 1;
+
+                // Determine Season (Spring = Jan-Jun, Fall/Summer = Jul-Dec)
+                $currentMonth = (int) date('n');
+                $season = ($currentMonth >= 1 && $currentMonth <= 6) ? 'Spring' : 'Fall';
 
                 return [
-                    'batch' => (string) ($row['batch'] ?? ''),
-                    'semester' => (int) ($row['semester'] ?? 1),
+                    'batch' => $batchStr,
+                    'semester' => $semesterNum,
+                    'season' => $season,
                     'label' => trim((string) ($row['label'] ?? '')),
                     'student_id' => $studentId,
                     'name' => $name !== '' ? $name : 'Student ' . $studentId,

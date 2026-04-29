@@ -240,7 +240,8 @@
                 .then(data => {
                     if (data.success) {
                         previewName.textContent = data.data.name;
-                        previewBatch.textContent = `Batch ${data.data.batch} • Semester ${data.data.semester}`;
+                        const season = data.data.season ? ` (${data.data.season})` : '';
+                        previewBatch.textContent = `Batch ${data.data.batch} • Semester ${data.data.semester}${season}`;
                         studentPreview.classList.remove('hidden');
                         
                         // Auto-fill name if empty or default
