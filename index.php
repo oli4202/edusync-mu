@@ -111,6 +111,7 @@ $router->get('/admin', 'App\Controllers\AdminController@index');
 $router->get('/admin/attendance', 'App\Controllers\AdminController@manageAttendance');
 $router->post('/admin/attendance', 'App\Controllers\AdminController@manageAttendance');
 $router->get('/admin/attendance/sheet', 'App\Controllers\AdminController@attendanceSheet');
+$router->get('/admin/attendance/details', 'App\Controllers\AdminController@detailedAssessment');
 $router->get('/admin/students', 'App\Controllers\AdminController@studentDirectory');
 $router->get('/admin/api-settings', 'App\Controllers\AdminController@apiSettings');
 $router->post('/admin/api-settings', 'App\Controllers\AdminController@apiSettings');

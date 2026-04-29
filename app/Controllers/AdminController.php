@@ -254,4 +254,43 @@ class AdminController extends Controller
 
         $this->render('pages/admin/api-settings', compact('user', 'message', 'api_keys'));
     }
+
+    public function detailedAssessment(): void
+    {
+        User::ensureRosterSynced();
+        $selCourseId = (int)($_GET['course_id'] ?? 0);
+        $selBatch = clean($_GET['batch'] ?? '');
+        $selSemester = (int)($_GET['semester'] ?? 0);
+
+        if (!$selCourseId || !$selBatch) {
+            $this->session->setFlash('error', 'Select a course and batch to view the full assessment grid.');
+            redirect('/admin/attendance');
+        }
+
+        $course = Course::findById($selCourseId);
+        $students = User::getStudentsForAttendance($selBatch, $selSemester, $selCourseId);
+        
+        $dates = Attendance::getUniqueDatesForCourse($selCourseId, $selBatch);
+        $attendanceGrid = Attendance::getGridReport($selCourseId, $selBatch);
+        
+        // Fetch grades for each student for this specific course
+        $grades = [];
+        foreach ($students as $s) {
+            // Find the subject entry for this student and course code
+            $db = getDB();
+            $subjStmt = $db->prepare("SELECT id FROM subjects WHERE user_id = ? AND code = ?");
+            $subjStmt->execute([$s['id'], $course['code']]);
+            $subjectId = (int)$subjStmt->fetchColumn();
+            
+            if ($subjectId) {
+                $grades[$s['id']] = Grade::findBySubject($subjectId);
+            } else {
+                $grades[$s['id']] = [];
+            }
+        }
+
+        $this->render('pages/admin/continuous-assessment', compact(
+            'course', 'students', 'selBatch', 'selSemester', 'dates', 'attendanceGrid', 'grades'
+        ));
+    }
 }

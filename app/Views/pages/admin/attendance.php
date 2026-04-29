@@ -110,7 +110,8 @@
         <button type="button" class="bulk-btn-admin" onclick="setAll('present')">✅ All Present</button>
         <button type="button" class="bulk-btn-admin" onclick="setAll('absent')">❌ All Absent</button>
         <button type="button" class="bulk-btn-admin" onclick="setAll('late')">⏰ All Late</button>
-        <a href="/admin/attendance/sheet?course_id=<?= $selCourse ?>&batch=<?= urlencode($selBatch) ?>&semester=<?= $selSemester ?>" class="bulk-btn-admin no-print" target="_blank" style="margin-left:auto; text-decoration:none;">🖨️ Printable Sheet</a>
+        <a href="/admin/attendance/details?course_id=<?= $selCourse ?>&batch=<?= urlencode($selBatch) ?>&semester=<?= $selSemester ?>" class="bulk-btn-admin no-print" style="text-decoration:none; border-color: #22d3ee; color: #22d3ee; margin-left:auto;">📊 Full Assessment Grid</a>
+        <a href="/admin/attendance/sheet?course_id=<?= $selCourse ?>&batch=<?= urlencode($selBatch) ?>&semester=<?= $selSemester ?>" class="bulk-btn-admin no-print" target="_blank" style="text-decoration:none;">🖨️ Printable Sheet</a>
     </div>
 
     <form method="POST">

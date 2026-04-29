@@ -117,4 +117,37 @@ class Attendance
         $stmt->execute([date('Y-m-d')]);
         return (int)$stmt->fetchColumn();
     }
+
+    public static function getGridReport(int $courseId, string $batch): array
+    {
+        $db = getDB();
+        $stmt = $db->prepare("
+            SELECT a.user_id, a.class_date, a.status 
+            FROM attendance a
+            INNER JOIN users u ON u.id = a.user_id
+            WHERE a.course_id = ? AND u.batch = ?
+            ORDER BY a.class_date ASC
+        ");
+        $stmt->execute([$courseId, $batch]);
+        
+        $data = [];
+        foreach ($stmt->fetchAll() as $row) {
+            $data[$row['user_id']][$row['class_date']] = $row['status'];
+        }
+        return $data;
+    }
+
+    public static function getUniqueDatesForCourse(int $courseId, string $batch): array
+    {
+        $db = getDB();
+        $stmt = $db->prepare("
+            SELECT DISTINCT class_date 
+            FROM attendance a
+            INNER JOIN users u ON u.id = a.user_id
+            WHERE a.course_id = ? AND u.batch = ?
+            ORDER BY class_date ASC
+        ");
+        $stmt->execute([$courseId, $batch]);
+        return $stmt->fetchAll(\PDO::FETCH_COLUMN);
+    }
 }

@@ -126,18 +126,24 @@
                     </div>
                 <?php else: ?>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <?php foreach ($assignedSubjects as $subject): ?>
-                            <div class="p-3 rounded-xl bg-white/5 border border-white/5 hover:border-accent-cyan/20 transition-all group">
+                        <?php foreach ($assignedSubjects as $subject): 
+                            // Find the course ID for this subject code
+                            $db = getDB();
+                            $stmt = $db->prepare("SELECT id FROM courses WHERE code = ? OR name = ? LIMIT 1");
+                            $stmt->execute([$subject['course'], $subject['course']]);
+                            $cid = $stmt->fetchColumn();
+                        ?>
+                            <a href="/admin/attendance/details?course_id=<?php echo $cid; ?>&batch=<?php echo urlencode($subject['batch']); ?>" class="p-3 rounded-xl bg-white/5 border border-white/5 hover:border-accent-cyan/20 transition-all group block">
                                 <div class="flex items-center gap-3">
                                     <div class="w-8 h-8 rounded-lg bg-accent-cyan/10 text-accent-cyan flex items-center justify-center text-[10px] font-bold">
-                                        <?php echo explode('-', $subject['course'])[0]; ?>
+                                        <?php echo explode(' ', $subject['course'])[0]; ?>
                                     </div>
                                     <div class="min-w-0">
-                                        <p class="text-xs font-bold text-white truncate"><?php echo htmlspecialchars($subject['course']); ?></p>
-                                        <p class="text-[10px] text-slate-500 font-medium">Batch <?php echo htmlspecialchars($subject['batch']); ?></p>
+                                        <p class="text-xs font-bold text-white truncate group-hover:text-accent-cyan transition-colors"><?php echo htmlspecialchars($subject['course']); ?></p>
+                                        <p class="text-[10px] text-slate-500 font-medium italic">Batch <?php echo htmlspecialchars($subject['batch']); ?></p>
                                     </div>
                                 </div>
-                            </div>
+                            </a>
                         <?php endforeach; ?>
                     </div>
                 <?php endif; ?>

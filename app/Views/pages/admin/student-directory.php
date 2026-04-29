@@ -104,6 +104,10 @@
             <div class="lookup-item">No attendance records yet.</div>
             <?php endif; ?>
         </div>
+        <div style="margin-top: 30px; display: flex; gap: 12px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px;">
+            <a href="/admin/attendance?batch=<?= urlencode($student['batch']) ?>&semester=<?= (int)$student['semester'] ?>" class="btn btn-primary btn-sm">Manage Attendance</a>
+            <a href="/admin/attendance/details?batch=<?= urlencode($student['batch']) ?>&semester=<?= (int)$student['semester'] ?>&course_id=1" class="btn btn-outline btn-sm">📊 View Full Assessment Grid</a>
+        </div>
     </div>
     <?php endif; ?>
 </div>
