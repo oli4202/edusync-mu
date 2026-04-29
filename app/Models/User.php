@@ -294,6 +294,21 @@ class User
         }
     }
 
+    public static function getAllStudentsWithStats(): array
+    {
+        self::ensureRosterSynced();
+        $db = getDB();
+        $stmt = $db->query("
+            SELECT u.id, u.name, u.student_id, u.batch, u.semester, u.avatar,
+                   (SELECT COUNT(*) FROM attendance WHERE user_id = u.id) as total_classes,
+                   (SELECT ROUND((SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) / NULLIF(COUNT(*), 0)) * 100, 1) FROM attendance WHERE user_id = u.id) as attendance_rate
+            FROM users u
+            WHERE u.role = 'student'
+            ORDER BY u.batch ASC, u.student_id ASC
+        ");
+        return $stmt->fetchAll();
+    }
+
     /**
      * Get all users (admin)
      */

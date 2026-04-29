@@ -226,8 +226,13 @@ class AdminController extends Controller
         $studentId = clean($_GET['student_id'] ?? '');
         $overview = $studentId !== '' ? User::getStudentOverviewByStudentId($studentId) : null;
         $notFound = $studentId !== '' && $overview === null;
+        
+        $allStudents = [];
+        if ($studentId === '') {
+            $allStudents = User::getAllStudentsWithStats();
+        }
 
-        $this->render('pages/admin/student-directory', compact('user', 'studentId', 'overview', 'notFound'));
+        $this->render('pages/admin/student-directory', compact('user', 'studentId', 'overview', 'notFound', 'allStudents'));
     }
 
     public function apiSettings(): void

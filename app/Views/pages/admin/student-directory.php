@@ -109,5 +109,54 @@
             <a href="/admin/attendance/details?batch=<?= urlencode($student['batch']) ?>&semester=<?= (int)$student['semester'] ?>&course_id=1" class="btn btn-outline btn-sm">📊 View Full Assessment Grid</a>
         </div>
     </div>
+    <?php if (empty($studentId) && !empty($allStudents)): ?>
+    <div class="lookup-card">
+        <div class="lookup-title">All Software Engineering Students (<?= count($allStudents) ?>)</div>
+        <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse: collapse; min-width: 600px;">
+                <thead>
+                    <tr style="text-align:left; border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <th style="padding:12px; font-size:10px; text-transform:uppercase; color:var(--muted);">Student Name</th>
+                        <th style="padding:12px; font-size:10px; text-transform:uppercase; color:var(--muted);">Student ID</th>
+                        <th style="padding:12px; font-size:10px; text-transform:uppercase; color:var(--muted);">Batch</th>
+                        <th style="padding:12px; font-size:10px; text-transform:uppercase; color:var(--muted);">Sem</th>
+                        <th style="padding:12px; font-size:10px; text-transform:uppercase; color:var(--muted);">Presence</th>
+                        <th style="padding:12px; font-size:10px; text-transform:uppercase; color:var(--muted);">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                    <?php foreach ($allStudents as $s): ?>
+                    <tr class="hover:bg-white/[0.02] transition-colors">
+                        <td style="padding:12px;">
+                            <div class="text-sm font-bold text-white"><?= htmlspecialchars($s['name']) ?></div>
+                        </td>
+                        <td style="padding:12px;">
+                            <div class="text-xs text-slate-400 font-mono"><?= htmlspecialchars($s['student_id']) ?></div>
+                        </td>
+                        <td style="padding:12px;">
+                            <div class="text-xs text-slate-300"><?= htmlspecialchars($s['batch']) ?></div>
+                        </td>
+                        <td style="padding:12px;">
+                            <div class="text-xs text-slate-300"><?= (int)$s['semester'] ?></div>
+                        </td>
+                        <td style="padding:12px;">
+                            <div class="flex flex-col gap-1">
+                                <div class="text-xs font-bold <?= ($s['attendance_rate'] ?? 0) >= 75 ? 'text-emerald-400' : 'text-orange-400' ?>">
+                                    <?= (float)($s['attendance_rate'] ?? 0) ?>%
+                                </div>
+                                <div class="text-[9px] text-slate-500 uppercase tracking-tighter italic">
+                                    <?= (int)($s['total_classes'] ?? 0) ?> classes
+                                </div>
+                            </div>
+                        </td>
+                        <td style="padding:12px;">
+                            <a href="/admin/students?student_id=<?= urlencode($s['student_id']) ?>" class="btn btn-outline btn-xs" style="font-size:9px; padding:4px 8px;">View Full Profile</a>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
     <?php endif; ?>
 </div>
