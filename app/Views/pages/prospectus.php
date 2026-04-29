@@ -302,8 +302,8 @@
 
         <div class="leader-card">
             <div class="flex flex-col md:flex-row gap-6">
-                <div class="w-32 h-40 bg-mu-navy/5 rounded-xl overflow-hidden flex-shrink-0 border-2 border-mu-navy/10 flex items-center justify-center">
-                    <i data-lucide="user" class="w-12 h-12 text-mu-navy/20"></i>
+                <div class="w-32 h-40 bg-slate-200 rounded-xl overflow-hidden flex-shrink-0 border-2 border-mu-navy/10">
+                    <img src="/assets/images/vc.png" alt="Prof. Dr. Mohammad Jahirul Hoque" class="w-full h-full object-cover">
                 </div>
                 <div>
                     <div class="leader-role">Vice Chancellor</div>
