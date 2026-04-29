@@ -284,4 +284,34 @@ class DashboardController extends Controller
             'prevMonth', 'nextMonth', 'today', 'holidays', 'monthNotes'
         ));
     }
+
+    public function routine(): void
+    {
+        $this->requireLogin();
+        $userId = $this->session->userId();
+        $user = User::findById($userId);
+
+        // Load routine data from file
+        $routineData = require __DIR__ . '/../Data/routine_data.php';
+
+        // Get selected batch from query params
+        $selectedBatch = $_GET['batch'] ?? '';
+
+        // Map user batch number to routine batch label
+        if (empty($selectedBatch) && !empty($user['batch'])) {
+            $batchNum = preg_replace('/[^0-9]/', '', $user['batch']);
+            foreach ($routineData['batches'] as $b) {
+                if (preg_replace('/[^0-9]/', '', explode(' ', $b)[0]) === $batchNum) {
+                    $selectedBatch = $b;
+                    break;
+                }
+            }
+        }
+
+        // Determine current day for highlighting
+        $dayMap = [0 => 'SUN', 1 => 'MON', 2 => 'TUES', 3 => 'WED', 4 => 'THU', 5 => 'FRI', 6 => 'SAT'];
+        $currentDay = $dayMap[(int)date('w')] ?? '';
+
+        $this->render('pages/routine', compact('user', 'routineData', 'selectedBatch', 'currentDay'));
+    }
 }
