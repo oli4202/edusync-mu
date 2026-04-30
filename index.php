@@ -102,6 +102,7 @@ $router->post('/partners/unfollow', 'App\Controllers\JobController@unfollow');
 // AI & Productivity
 $router->get('/ai', 'App\Controllers\AiController@index');
 $router->get('/ai/playground', 'App\Controllers\AiController@playground');
+$router->get('/playground', 'App\Controllers\AiController@playground'); // Alias for /ai/playground
 $router->get('/ai/suggestions', 'App\Controllers\AiController@suggestions');
 $router->get('/ai/study', 'App\Controllers\AiController@studyTool');
 

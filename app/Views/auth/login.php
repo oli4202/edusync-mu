@@ -22,8 +22,7 @@
             <h2 class="text-xl font-bold text-white mb-8 text-center font-syne uppercase tracking-tighter">Sign in to your account</h2>
 
             <?php if (isset($error) && $error): ?>
-                <div class="mb-6 p-4 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
-                    <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                <div class="mb-6 p-4 bg-red-500/10 border border-red-500/20 
                     <span class="text-xs font-bold"><?php echo htmlspecialchars($error); ?></span>
                 </div>
             <?php endif; ?>

@@ -1,3 +1,23 @@
+<?php
+/**
+ * Layout Template — app/Views/layouts/layout.php
+ * Main layout wrapper for authenticated pages
+ * 
+ * @var string $content The rendered view content (passed by Controller::render())
+ * @var array|null $user Current logged-in user data
+ * @var array|null $flash Flash messages (success/error)
+ * @var string $currentPage Current page identifier for nav highlighting
+ * @var string $pageTitle Page title
+ * @var Session $session Session management
+ */
+
+// Variables are defined by Controller::render() before including this file
+if (!isset($content)) $content = '';
+if (!isset($user)) $user = null;
+if (!isset($flash)) $flash = null;
+if (!isset($currentPage)) $currentPage = '';
+if (!isset($pageTitle)) $pageTitle = 'EduSync MU';
+?>
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
@@ -45,9 +65,11 @@
     <style type="text/tailwindcss">
         @layer components {
             .glass-card {
+                /* @web-ignore @apply is valid Tailwind CSS */
                 @apply bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl;
             }
             .nav-link-active {
+                /* @web-ignore @apply is valid Tailwind CSS */
                 @apply bg-gradient-to-r from-accent-cyan/10 to-accent-purple/10 border-accent-purple/20 text-white;
             }
         }
@@ -299,7 +321,7 @@
                 </main>
             </div>
         <?php else: ?>
-            <!-- Auth Pages -->
+            <!-- Auth Pages -->-
             <main class="flex-1">
                 <?php echo $content; ?>
             </main>

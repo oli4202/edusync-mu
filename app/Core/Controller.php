@@ -40,6 +40,8 @@ abstract class Controller
     protected function render(string $view, array $data = []): void
     {
         $this->viewData = $data;
+        
+        // Extract data variables for view access
         extract($data);
 
         // Start output buffering to capture view content
@@ -50,7 +52,13 @@ abstract class Controller
         }
         $content = ob_get_clean();
 
-        // Include layout and make $content available
+        // Make session and user available to layout
+        $user = $this->session->getUser() ?? ($data['user'] ?? null);
+        $currentPage = $data['currentPage'] ?? '';
+        $pageTitle = $data['pageTitle'] ?? 'EduSync MU';
+        $flash = $this->session->getFlash();
+
+        // Include layout and make all variables available
         include __DIR__ . '/../Views/layouts/layout.php';
     }
 
