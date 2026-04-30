@@ -39,6 +39,37 @@ CREATE TABLE student_batch_memberships (
 );
 
 -- ============================================================
+-- 2A. TEACHER COURSE ASSIGNMENTS
+-- ============================================================
+CREATE TABLE IF NOT EXISTS teacher_course_assignments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    teacher_id INT NOT NULL,
+    course_id INT NOT NULL,
+    batch VARCHAR(20),
+    semester INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_teacher_course (teacher_id, course_id, batch),
+    FOREIGN KEY (teacher_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+);
+
+-- ============================================================
+-- 2B. STUDENT COURSE ENROLLMENTS
+-- ============================================================
+CREATE TABLE IF NOT EXISTS student_course_enrollments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    course_id INT NOT NULL,
+    batch VARCHAR(20) NOT NULL,
+    semester INT NOT NULL,
+    enrolled_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_enrollment (user_id, course_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+);
+
+-- ============================================================
 -- 2. SUBJECTS
 -- ============================================================
 CREATE TABLE subjects (
@@ -392,6 +423,30 @@ INSERT INTO users (name, email, password, role) VALUES
 ('Admin', 'admin@edusync.mu', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.ucrm3a', 'admin');
 
 -- ============================================================
+-- SEED DATA — Faculty Users (password: teacher123)
+-- ============================================================
+INSERT INTO users (name, email, password, role) VALUES
+('Al Akram Chowdhury', 'akram@edusync.mu', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.ucrm3a', 'faculty'),
+('Lukman Hosain Nakib', 'lukman@edusync.mu', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.ucrm3a', 'faculty'),
+('Md. Zia Uddin Khan', 'zia@edusync.mu', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.ucrm3a', 'faculty'),
+('Ruma Das(CSE)', 'ruma@edusync.mu', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.ucrm3a', 'faculty');
+
+-- ============================================================
+-- SEED DATA — Teacher Course Assignments
+-- Note: Al Akram = AI (6th batch), CP (7th batch)
+--       Lukman = Web Programming (6th batch)
+-- ============================================================
+INSERT IGNORE INTO teacher_course_assignments (teacher_id, course_id, batch, semester) VALUES
+-- Al Akram: AI and CP
+(2, (SELECT id FROM courses WHERE code = 'SWE 315' LIMIT 1), '6', 2), -- AI 6th Batch
+(2, (SELECT id FROM courses WHERE code = 'SWE 316' LIMIT 1), '6', 2), -- AI Lab 6th Batch
+-- Lukman: Web Programming
+(3, (SELECT id FROM courses WHERE code = 'SWE 322' LIMIT 1), '6', 2), -- Web Programming 6th Batch
+-- Zia: Multiple courses
+(4, (SELECT id FROM courses WHERE code = 'SWE 221' LIMIT 1), '8', 3), -- Algorithms
+(4, (SELECT id FROM courses WHERE code = 'SWE 225' LIMIT 1), '8', 3); -- Database Management
+
+-- ============================================================
 -- 18. ATTENDANCE
 -- ============================================================
 CREATE TABLE IF NOT EXISTS attendance (
@@ -407,6 +462,32 @@ CREATE TABLE IF NOT EXISTS attendance (
     FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
     UNIQUE KEY unique_att (user_id, course_id, class_date)
 );
+
+-- ============================================================
+-- SEED — Random Attendance (Batch 6, SWE 322)
+-- ============================================================
+INSERT IGNORE INTO attendance (user_id, course_id, class_date, status, notes, marked_by)
+SELECT
+    u.id,
+    c.id,
+    d.class_date,
+    CASE FLOOR(RAND() * 10)
+        WHEN 0 THEN 'absent'
+        WHEN 1 THEN 'late'
+        ELSE 'present'
+    END AS status,
+    'Seeded sample attendance for Web Programming Practice Lab',
+    3
+FROM users u
+JOIN courses c ON c.code = 'SWE 322'
+JOIN (
+    SELECT DATE('2026-04-15') AS class_date
+    UNION ALL SELECT DATE('2026-04-17')
+    UNION ALL SELECT DATE('2026-04-21')
+    UNION ALL SELECT DATE('2026-04-24')
+    UNION ALL SELECT DATE('2026-04-28')
+) d
+WHERE u.role = 'student' AND u.batch = '6';
 
 -- ============================================================
 -- 19. ANNOUNCEMENTS

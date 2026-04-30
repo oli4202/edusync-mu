@@ -39,6 +39,21 @@ class Session
     }
 
     /**
+     * Get current user data (id, name, role)
+     */
+    public function getUser(): ?array
+    {
+        if (!$this->isLoggedIn()) {
+            return null;
+        }
+        return [
+            'id' => $_SESSION['user_id'] ?? null,
+            'name' => $_SESSION['user_name'] ?? null,
+            'role' => $_SESSION['user_role'] ?? null,
+        ];
+    }
+
+    /**
      * Check if user is a student
      */
     public function isStudent(): bool

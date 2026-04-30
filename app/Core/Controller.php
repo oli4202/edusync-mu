@@ -53,7 +53,7 @@ abstract class Controller
         $content = ob_get_clean();
 
         // Make session and user available to layout
-        $user = $this->session->getUser() ?? ($data['user'] ?? null);
+        $user = $data['user'] ?? $this->session->getUser();
         $currentPage = $data['currentPage'] ?? '';
         $pageTitle = $data['pageTitle'] ?? 'EduSync MU';
         $flash = $this->session->getFlash();

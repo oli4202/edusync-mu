@@ -31,7 +31,7 @@ class PageController extends Controller
         'learn' => '/learn',
         'ai' => '/ai',
         'playground' => '/playground',
-        'suggestions' => '/suggestions',
+        'suggestions' => '/ai/suggestions',
         'question-bank' => '/question-bank',
         'submit-question' => '/question-bank/submit',
         'question-detail' => '/question-bank',

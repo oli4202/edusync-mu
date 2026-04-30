@@ -96,6 +96,13 @@
                     <span class="text-xs font-medium text-slate-300">Find Student</span>
                 </a>
 
+                <a href="/faculty/results" class="flex flex-col items-center justify-center gap-3 p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-amber-300/30 transition-all group">
+                    <div class="w-10 h-10 rounded-full bg-amber-400/20 text-amber-300 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <i data-lucide="clipboard-list" class="w-5 h-5"></i>
+                    </div>
+                    <span class="text-xs font-medium text-slate-300">Evaluate Results</span>
+                </a>
+
                 <?php if ($this->session->userRole() === 'admin'): ?>
                 <a href="/admin" class="flex flex-col items-center justify-center gap-3 p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-red-400/30 transition-all group">
                     <div class="w-10 h-10 rounded-full bg-red-400/20 text-red-400 flex items-center justify-center group-hover:scale-110 transition-transform">

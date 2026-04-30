@@ -25,12 +25,12 @@ class QuestionBankController extends Controller
             'q' => $_GET['q'] ?? ''
         ];
 
-        $usingDb = Question::hasApprovedQuestions();
+        $usingDb = Question::hasAnyQuestions();
         $availableBatches = \App\Models\Course::getDistinctBatches();
 
         if ($usingDb) {
-            $courses = Question::getCourseSummariesFromDb();
-            $filteredQs = Question::findFilteredFromDb($filters);
+            $courses = Question::getCourseSummariesFromDb($userId);
+            $filteredQs = Question::findFilteredFromDb($filters, $userId);
             $hotTopics = Question::getHotTopicsFromDb();
             $allTypes = Question::getTypesFromDb();
             $examHistory = !empty($filters['course']) ? Question::getExamHistoryByCourseCode($filters['course']) : [];
@@ -159,12 +159,14 @@ class QuestionBankController extends Controller
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $courseCode = strtoupper(trim($_POST['course_code'] ?? ''));
+            $batch = trim((string)($_POST['batch'] ?? ''));
+            $semester = (int)($_POST['semester'] ?? 0);
             $questionText = trim($_POST['question_text'] ?? '');
             $questionImageBase64 = $_POST['question_image'] ?? ''; // Base64 image data from canvas/file input
 
-            if ($courseCode === '' || ($questionText === '' && $questionImageBase64 === '')) {
-                $error = 'Course code and either question text or an image are required.';
-                $old = ['course_code' => $courseCode, 'question_text' => $questionText];
+            if ($batch === '' || $semester <= 0 || $courseCode === '' || ($questionText === '' && $questionImageBase64 === '')) {
+                $error = 'Batch, semester, course code, and either question text or an image are required.';
+                $old = ['batch' => $batch, 'semester' => $semester, 'course_code' => $courseCode, 'question_text' => $questionText];
                 $this->render('pages/submit-question', compact('user', 'courses', 'error', 'old', 'availableBatches'));
                 return;
             }
@@ -172,7 +174,7 @@ class QuestionBankController extends Controller
             $course = Course::findByCode($courseCode);
             if (!$course) {
                 $error = 'Course code not found. Please choose a valid course.';
-                $old = ['course_code' => $courseCode, 'question_text' => $questionText];
+                $old = ['batch' => $batch, 'semester' => $semester, 'course_code' => $courseCode, 'question_text' => $questionText];
                 $this->render('pages/submit-question', compact('user', 'courses', 'error', 'old', 'availableBatches'));
                 return;
             }
@@ -208,11 +210,15 @@ class QuestionBankController extends Controller
             $stmt->execute([(int) $course['id'], $userId, clean($questionText), $imagePath]);
 
             $this->session->setFlash('success', 'Question submitted for review. Thank you.');
-            redirect('/question-bank');
+            $query = http_build_query([
+                'batch' => preg_replace('/[^0-9]/', '', $batch),
+                'course' => $courseCode,
+            ]);
+            redirect('/question-bank' . ($query ? ('?' . $query) : ''));
         }
 
         $error = '';
-        $old = ['course_code' => '', 'question_text' => ''];
+        $old = ['batch' => '', 'semester' => 0, 'course_code' => '', 'question_text' => ''];
         $this->render('pages/submit-question', compact('user', 'courses', 'error', 'old', 'availableBatches'));
     }
 

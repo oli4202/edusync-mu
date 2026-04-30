@@ -12,6 +12,10 @@
     planDays: '14',
     planHours: '4',
     extraAns: '',
+    toolImageBase64: '',
+    toolImagePreview: '',
+    ocrStatus: '',
+    isReadingImage: false,
 
     tools: {
         chat: { title: 'AI Chat Assistant', sub: 'Ask any academic question about your SE courses at MU Sylhet', icon: 'message-square', color: 'text-accent-cyan', bg: 'bg-accent-cyan/10' },
@@ -119,6 +123,75 @@
         }
     },
 
+    async readImageWithAI() {
+        if (!this.toolImageBase64 || this.isReadingImage) return;
+        this.isReadingImage = true;
+        this.ocrStatus = 'AI is reading image...';
+        try {
+            const resp = await fetch('/api/ai/ocr', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: this.toolImageBase64 })
+            });
+            const data = await resp.json();
+            if (data.success && data.text) {
+                this.toolInput = this.toolInput
+                    ? (this.toolInput + '\n\n' + data.text)
+                    : data.text;
+                this.ocrStatus = 'Text extracted successfully.';
+            } else {
+                this.ocrStatus = data.message || 'Failed to extract text.';
+            }
+        } catch (e) {
+            this.ocrStatus = 'Error connecting to AI.';
+        } finally {
+            this.isReadingImage = false;
+        }
+    },
+
+    handleImageFile(file) {
+        if (!file || !file.type || !file.type.startsWith('image/')) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            this.toolImageBase64 = event.target.result || '';
+            this.toolImagePreview = event.target.result || '';
+            this.ocrStatus = '';
+        };
+        reader.readAsDataURL(file);
+    },
+
+    onPasteImage(e) {
+        if (this.currentTool === 'study') return;
+        const items = (e.clipboardData || e.originalEvent?.clipboardData)?.items || [];
+        for (const item of items) {
+            if (item.type && item.type.indexOf('image') !== -1) {
+                const blob = item.getAsFile();
+                if (blob) this.handleImageFile(blob);
+            }
+        }
+    },
+
+    clearImage() {
+        this.toolImageBase64 = '';
+        this.toolImagePreview = '';
+        this.ocrStatus = '';
+    },
+
+    onToolChange(id, tool) {
+        if (tool.url) {
+            window.location.href = tool.url;
+            return;
+        }
+        this.currentTool = id;
+        this.toolResult = '';
+        this.toolInput = '';
+        this.clearImage();
+    },
+
+    init() {
+        window.addEventListener('paste', this.onPasteImage.bind(this));
+    },
+
     copyResult() {
         navigator.clipboard.writeText(this.toolResult);
         alert('Copied to clipboard!');
@@ -132,7 +205,7 @@
             <nav class="flex-1 space-y-1 overflow-y-auto custom-scrollbar pr-2">
                 <template x-for="(tool, id) in tools" :key="id">
                     <button 
-                        @click="if(tool.url) { window.location.href = tool.url; } else { currentTool = id; toolResult = ''; toolInput = ''; }"
+                        @click="onToolChange(id, tool)"
                         class="w-full flex items-center gap-3 p-3 rounded-xl transition-all duration-200 group text-left"
                         :class="currentTool === id ? 'bg-white/10 text-white border border-white/10' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200 border border-transparent'"
                     >
@@ -172,6 +245,40 @@
 
         <!-- Body -->
         <div class="flex-1 overflow-y-auto p-6 custom-scrollbar" x-ref="chatMessages">
+            <div x-show="currentTool !== 'study'" class="mb-6 p-4 rounded-2xl border border-white/10 bg-white/5">
+                <div class="flex items-center justify-between gap-3 mb-3">
+                    <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Image Input (Paste/Drop)</h3>
+                    <span class="text-[10px] text-slate-500">Works for all study tools</span>
+                </div>
+                <div
+                    class="border-2 border-dashed border-white/15 rounded-2xl p-4 text-center transition-colors"
+                    @dragover.prevent="$event.currentTarget.classList.add('border-accent-cyan')"
+                    @dragleave.prevent="$event.currentTarget.classList.remove('border-accent-cyan')"
+                    @drop.prevent="$event.currentTarget.classList.remove('border-accent-cyan'); handleImageFile($event.dataTransfer.files[0])"
+                >
+                    <template x-if="!toolImagePreview">
+                        <div class="space-y-2">
+                            <i data-lucide="image" class="w-7 h-7 mx-auto text-slate-500"></i>
+                            <p class="text-xs text-slate-400">Click and paste (`Ctrl+V`) or drag & drop an image</p>
+                            <input type="file" accept="image/*" class="hidden" x-ref="imgFileInput" @change="handleImageFile($event.target.files[0])">
+                            <button type="button" @click="$refs.imgFileInput.click()" class="px-3 py-1.5 rounded-lg text-xs bg-white/10 hover:bg-white/15 text-white transition-colors">Choose Image</button>
+                        </div>
+                    </template>
+                    <template x-if="toolImagePreview">
+                        <div class="space-y-3">
+                            <img :src="toolImagePreview" alt="Pasted Preview" class="max-h-56 mx-auto rounded-xl border border-white/10">
+                            <div class="flex flex-wrap items-center justify-center gap-2">
+                                <button type="button" @click="readImageWithAI()" :disabled="isReadingImage" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-accent-cyan/20 text-accent-cyan border border-accent-cyan/30 disabled:opacity-50">
+                                    <span x-text="isReadingImage ? 'Reading...' : 'Read Text with AI'"></span>
+                                </button>
+                                <button type="button" @click="clearImage()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-400/20 text-rose-300 border border-rose-400/30">Remove</button>
+                            </div>
+                            <p class="text-xs text-slate-400" x-text="ocrStatus"></p>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
             <!-- Chat View -->
             <template x-if="currentTool === 'chat'">
                 <div class="space-y-6">

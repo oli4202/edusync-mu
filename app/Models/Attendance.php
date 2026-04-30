@@ -104,6 +104,22 @@ class Attendance
         return $stmt->fetchAll();
     }
 
+    public static function getStudentHistoryForCourse(int $studentId, int $courseId, int $limit = 200): array
+    {
+        $db = getDB();
+        $stmt = $db->prepare("
+            SELECT a.*, c.code AS course_code, c.name AS course_name, u.name AS student_name, u.student_id AS sid
+            FROM attendance a
+            INNER JOIN courses c ON c.id = a.course_id
+            INNER JOIN users u ON u.id = a.user_id
+            WHERE a.user_id = ? AND a.course_id = ?
+            ORDER BY a.class_date DESC
+            LIMIT ?
+        ");
+        $stmt->execute([$studentId, $courseId, $limit]);
+        return $stmt->fetchAll();
+    }
+
     public static function getTotalCount(): int
     {
         $db = getDB();

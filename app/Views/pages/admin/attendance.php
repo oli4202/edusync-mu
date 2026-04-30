@@ -129,6 +129,7 @@
                     <th>ID</th>
                     <th>Status</th>
                     <th>Notes</th>
+                    <th>Previous</th>
                 </tr>
             </thead>
             <tbody>
@@ -158,6 +159,15 @@
                     </td>
                     <td>
                         <input type="text" name="note[<?= $s['id'] ?>]" value="<?= htmlspecialchars($curNote) ?>" placeholder="Optional note..." style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--text);font-size:13px;width:100%;outline:none;">
+                    </td>
+                    <td>
+                        <a
+                            href="/admin/attendance/student-history?course_id=<?= (int)$selCourse ?>&student_id=<?= (int)$s['id'] ?>&batch=<?= urlencode($selBatch) ?>&semester=<?= (int)$selSemester ?>"
+                            class="bulk-btn-admin"
+                            style="text-decoration:none;display:inline-block;"
+                        >
+                            View
+                        </a>
                     </td>
                 </tr>
                 <?php endforeach; ?>

@@ -32,6 +32,7 @@
     .badge-type { background: rgba(129, 140, 248, .12); color: var(--accent2); }
     .badge-marks { background: rgba(52, 211, 153, .12); color: #34d399; }
     .badge-topic { background: rgba(251, 191, 36, .1); color: var(--warn); }
+    .badge-pending { background: rgba(248, 113, 113, .14); color: #f87171; }
     .qc-text { font-size: 13px; color: var(--text); line-height: 1.7; white-space: pre-line; flex: 1; }
     .qc-bottom { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; flex-wrap: wrap; gap: 8px; }
     .freq-bar { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
@@ -58,12 +59,24 @@
 </div>
 
 <div class="qb-layout">
+    <?php
+    $buildQbUrl = static function (array $overrides = []) use ($filters): string {
+        $query = array_merge($filters, $overrides);
+        foreach ($query as $key => $value) {
+            if ($value === '' || $value === null) {
+                unset($query[$key]);
+            }
+        }
+        $qs = http_build_query($query);
+        return '/question-bank' . ($qs ? ('?' . $qs) : '');
+    };
+    ?>
     <div class="qb-sidebar">
         <div class="filter-panel">
             <div class="fp-title">Batches</div>
-            <a href="/question-bank" class="course-btn <?= !$filters['batch'] ? 'on' : '' ?>">All Batches</a>
+            <a href="<?= $buildQbUrl(['batch' => '']) ?>" class="course-btn <?= !$filters['batch'] ? 'on' : '' ?>">All Batches</a>
             <?php foreach ($availableBatches as $batch): ?>
-                <a href="/question-bank?batch=<?= urlencode($batch) ?>" class="course-btn <?= $filters['batch'] == $batch ? 'on' : '' ?>">
+                <a href="<?= $buildQbUrl(['batch' => $batch]) ?>" class="course-btn <?= $filters['batch'] == $batch ? 'on' : '' ?>">
                     Batch <?= htmlspecialchars($batch) ?>
                 </a>
             <?php endforeach; ?>
@@ -71,11 +84,11 @@
 
         <div class="filter-panel">
             <div class="fp-title">Courses</div>
-            <a href="/question-bank" class="course-btn <?= !$filters['course'] ? 'on' : '' ?>">
+            <a href="<?= $buildQbUrl(['course' => '']) ?>" class="course-btn <?= !$filters['course'] ? 'on' : '' ?>">
                 All Courses <span class="cnt"><?= $totalQuestionCount ?></span>
             </a>
             <?php foreach ($courses as $code => $course): ?>
-                <a href="/question-bank?course=<?= urlencode($code) ?>" class="course-btn <?= $filters['course'] === $code ? 'on' : '' ?>">
+                <a href="<?= $buildQbUrl(['course' => $code]) ?>" class="course-btn <?= $filters['course'] === $code ? 'on' : '' ?>">
                     <span><?= htmlspecialchars($code) ?><br><span style="font-size:10px;font-weight:400"><?= htmlspecialchars(mb_substr($course['name'], 0, 22)) ?></span></span>
                     <span class="cnt"><?= (int) $course['question_count'] ?></span>
                 </a>
@@ -97,9 +110,9 @@
 
         <div class="filter-panel">
             <div class="fp-title">Question Types</div>
-            <a href="/question-bank" class="course-btn <?= !$filters['type'] ? 'on' : '' ?>">All Types</a>
+            <a href="<?= $buildQbUrl(['type' => '']) ?>" class="course-btn <?= !$filters['type'] ? 'on' : '' ?>">All Types</a>
             <?php foreach ($allTypes as $type => $count): ?>
-                <a href="/question-bank?type=<?= urlencode($type) ?>" class="course-btn <?= $filters['type'] === $type ? 'on' : '' ?>">
+                <a href="<?= $buildQbUrl(['type' => $type]) ?>" class="course-btn <?= $filters['type'] === $type ? 'on' : '' ?>">
                     <?= htmlspecialchars($type) ?> <span class="cnt"><?= (int) $count ?></span>
                 </a>
             <?php endforeach; ?>
@@ -111,12 +124,12 @@
             <?php if ($filters['course']): ?><input type="hidden" name="course" value="<?= htmlspecialchars($filters['course']) ?>"><?php endif; ?>
             <input type="text" name="q" placeholder="Search questions, topics, theorems..." value="<?= htmlspecialchars($filters['q']) ?>">
             <button type="submit" class="btn btn-primary">Search</button>
-            <?php if ($filters['q'] || $filters['topic']): ?><a href="/question-bank<?= $filters['course'] ? '?course=' . urlencode($filters['course']) : '' ?>" class="btn btn-outline">Clear</a><?php endif; ?>
+            <?php if ($filters['q'] || $filters['topic']): ?><a href="<?= $buildQbUrl(['q' => '', 'topic' => '']) ?>" class="btn btn-outline">Clear</a><?php endif; ?>
         </form>
 
         <div style="margin-bottom:14px;">
             <?php $topicIndex = 0; foreach ($hotTopics as $topic => $data): $topicIndex++; $class = $topicIndex <= 3 ? 'ht-1' : ($topicIndex <= 6 ? 'ht-2' : 'ht-3'); ?>
-                <a href="/question-bank?topic=<?= urlencode($topic) ?><?= $filters['course'] ? '&course=' . urlencode($filters['course']) : '' ?>" class="hot-topic <?= $class ?> <?= $filters['topic'] === $topic ? 'on' : '' ?>">
+                <a href="<?= $buildQbUrl(['topic' => $topic]) ?>" class="hot-topic <?= $class ?> <?= $filters['topic'] === $topic ? 'on' : '' ?>">
                     <?= htmlspecialchars($topic) ?> <span style="opacity:.6"><?= (int) $data['count'] ?></span>
                 </a>
             <?php endforeach; ?>
@@ -164,6 +177,9 @@
                         <span class="badge badge-course"><?= htmlspecialchars($q['course_code']) ?></span>
                         <span class="badge badge-type"><?= htmlspecialchars($q['type']) ?></span>
                         <span class="badge badge-marks"><?= (int) $q['marks'] ?> marks</span>
+                        <?php if ((int)($q['is_approved'] ?? 1) === 0): ?>
+                            <span class="badge badge-pending">Pending Approval</span>
+                        <?php endif; ?>
                         <?php if (!empty($q['topic'])): ?>
                             <span class="badge badge-topic"><?= htmlspecialchars($q['topic']) ?></span>
                         <?php endif; ?>

@@ -17,8 +17,11 @@ class LearnController extends Controller
         $courses = Learn::getAllCourses();
         $selectedCourseId = (int)($_GET['course'] ?? 0);
         $courseData = $selectedCourseId ? Learn::getCourseById($selectedCourseId) : null;
+        
+        $userBatch = $user['batch'] ?? '';
+        $batchResources = $userBatch ? Learn::getResourcesByBatch($userBatch) : [];
         $youtubeResources = Learn::getYoutubeResources();
 
-        $this->render('pages/learn', compact('user', 'courses', 'courseData', 'youtubeResources', 'selectedCourseId'));
+        $this->render('pages/learn', compact('user', 'courses', 'courseData', 'youtubeResources', 'batchResources', 'selectedCourseId'));
     }
 }

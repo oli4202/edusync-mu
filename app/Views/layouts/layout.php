@@ -144,6 +144,11 @@ if (!isset($pageTitle)) $pageTitle = 'EduSync MU';
                             <i data-lucide="clipboard-check" class="w-5 h-5"></i>
                             <span class="text-sm font-medium">Mark Attendance</span>
                         </a>
+
+                        <a href="/faculty/results" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'faculty-results' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
+                            <i data-lucide="clipboard-list" class="w-5 h-5"></i>
+                            <span class="text-sm font-medium">Result Evaluation</span>
+                        </a>
                         <?php endif; ?>
 
                         <a href="/routine" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'routine' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
@@ -258,6 +263,10 @@ if (!isset($pageTitle)) $pageTitle = 'EduSync MU';
                             <a href="/admin" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'admin' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
                                 <i data-lucide="shield-check" class="w-5 h-5"></i>
                                 <span class="text-sm font-medium">Admin Panel</span>
+                            </a>
+                            <a href="/admin/manage" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group <?php echo ($currentPage ?? '') === 'admin-manage' ? 'nav-link-active' : 'text-slate-400 hover:bg-white/5 hover:text-white'; ?>">
+                                <i data-lucide="settings-2" class="w-5 h-5"></i>
+                                <span class="text-sm font-medium">System Management</span>
                             </a>
                         <?php endif; ?>
                     </nav>

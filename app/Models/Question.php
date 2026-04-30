@@ -396,16 +396,30 @@ class Question
         return (int) $db->query("SELECT COUNT(*) FROM questions WHERE is_approved = 1")->fetchColumn() > 0;
     }
 
-    public static function getCourseSummariesFromDb(): array
+    public static function hasAnyQuestions(): bool
     {
         $db = getDB();
-        $stmt = $db->query("
+        return (int) $db->query("SELECT COUNT(*) FROM questions")->fetchColumn() > 0;
+    }
+
+    public static function getCourseSummariesFromDb(?int $userId = null): array
+    {
+        $db = getDB();
+        $params = [];
+        $visibilityCondition = 'q.is_approved = 1';
+        if ($userId !== null && $userId > 0) {
+            $visibilityCondition = '(q.is_approved = 1 OR q.submitted_by = ?)';
+            $params[] = $userId;
+        }
+
+        $stmt = $db->prepare("
             SELECT c.id, c.code, c.name, c.year, c.semester, COUNT(q.id) AS question_count
             FROM courses c
-            JOIN questions q ON q.course_id = c.id AND q.is_approved = 1
+            JOIN questions q ON q.course_id = c.id AND $visibilityCondition
             GROUP BY c.id, c.code, c.name, c.year, c.semester
             ORDER BY c.year ASC, c.semester ASC, c.code ASC
         ");
+        $stmt->execute($params);
 
         $courses = [];
         foreach ($stmt->fetchAll() as $row) {
@@ -423,11 +437,16 @@ class Question
         return $courses;
     }
 
-    public static function findFilteredFromDb(array $filters): array
+    public static function findFilteredFromDb(array $filters, ?int $userId = null): array
     {
         $db = getDB();
         $conditions = ['q.is_approved = 1'];
         $params = [];
+
+        if ($userId !== null && $userId > 0) {
+            $conditions[0] = '(q.is_approved = 1 OR q.submitted_by = ?)';
+            $params[] = $userId;
+        }
 
         if (!empty($filters['course'])) {
             $conditions[] = 'c.code = ?';
@@ -466,6 +485,7 @@ class Question
                 q.exam_year,
                 q.exam_semester,
                 q.view_count,
+                q.is_approved,
                 c.id AS course_id,
                 c.code AS course_code,
                 c.name AS course_name,
@@ -487,6 +507,7 @@ class Question
         foreach ($stmt->fetchAll() as $row) {
             $row['marks'] = (int) $row['marks'];
             $row['freq'] = max(1, min(5, (int) $row['freq']));
+            $row['is_approved'] = (int) $row['is_approved'];
             $questions[] = $row;
         }
 

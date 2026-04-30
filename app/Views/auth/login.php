@@ -13,7 +13,7 @@
             <h1 class="font-syne text-5xl font-extrabold bg-gradient-to-r from-accent-cyan to-accent-purple bg-clip-text text-transparent italic tracking-tight">
                 EduSync
             </h1>
-            <p class="mt-3 text-slate-500 font-medium text-sm uppercase tracking-widest">Student Portal — MU Sylhet</p>
+            <p class="mt-3 text-slate-500 font-medium text-sm uppercase tracking-widest">University Portal — MU Sylhet</p>
         </div>
 
         <div class="glass-card p-8 shadow-2xl relative overflow-hidden group">
@@ -22,7 +22,8 @@
             <h2 class="text-xl font-bold text-white mb-8 text-center font-syne uppercase tracking-tighter">Sign in to your account</h2>
 
             <?php if (isset($error) && $error): ?>
-                <div class="mb-6 p-4 bg-red-500/10 border border-red-500/20 
+                <div class="mb-6 p-4 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
+                    <i data-lucide="alert-circle" class="w-5 h-5"></i>
                     <span class="text-xs font-bold"><?php echo htmlspecialchars($error); ?></span>
                 </div>
             <?php endif; ?>
@@ -36,18 +37,18 @@
 
             <form method="POST" action="/auth/login" class="space-y-6">
                 <div class="space-y-2">
-                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">Student ID or Email</label>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">Email or ID</label>
                     <div class="relative group">
-                        <i data-lucide="id-card" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-accent-cyan transition-colors"></i>
+                        <i data-lucide="user" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-accent-cyan transition-colors"></i>
                         <input 
                             type="text" 
                             name="identifier" 
                             required 
                             class="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3.5 text-sm text-white focus:outline-none focus:border-accent-cyan transition-all"
-                            placeholder="e.g. 252-134-021 or your@email.com"
+                            placeholder="your@email.com or Student ID"
                         >
                     </div>
-                    <p class="text-[10px] text-slate-500 px-1">Roster accounts are auto-created. Default student password is the same as the student ID until changed.</p>
+                    <p class="text-[10px] text-slate-500 px-1">Students can use their Student ID. Faculty should use their registered email address.</p>
                 </div>
 
                 <div class="space-y-2">

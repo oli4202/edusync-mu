@@ -26,6 +26,9 @@ class DashboardController extends Controller
         if ($this->session->isFaculty()) {
             // Faculty Dashboard
             $studentCount = User::getStudentCount();
+            $pendingQuestions = Question::findPending();
+            $pendingAnswers = \App\Models\Answer::findPending();
+            $todayAttendanceCount = Attendance::getTodayCount();
 
             // Find assigned subjects from routine
             $facultyRoster = require __DIR__ . '/../Data/faculty_data.php';
@@ -113,13 +116,51 @@ class DashboardController extends Controller
                         'year' => $year,
                         'target_hours_per_week' => $target_hours
                     ]);
-                    $this->session->setFlash('success', 'Subject added successfully!');
+                    
+                    // Auto-enroll student in the corresponding course if it exists
+                    $selectedCode = $code;
+                    if ($selectedCode === '' && str_contains($name, ':')) {
+                        $selectedCode = trim((string) strtok($name, ':'));
+                    }
+
+                    if ($selectedCode !== '') {
+                        $course = Course::findByCodeFlexible($selectedCode);
+                        if ($course) {
+                            $user = User::findById($userId);
+                            $enrollResult = Course::enrollStudent(
+                                $userId,
+                                (int)$course['id'],
+                                (string)($course['batch'] ?? $user['batch'] ?? ''),
+                                (int)($course['semester'] ?? $semester)
+                            );
+                            
+                            if ($enrollResult['success']) {
+                                $this->session->setFlash('success', 'Subject added and enrolled successfully!');
+                            } else {
+                                $this->session->setFlash('success', 'Subject added (enrollment: ' . $enrollResult['message'] . ')');
+                            }
+                        } else {
+                            $this->session->setFlash('success', 'Subject added successfully!');
+                        }
+                    } else {
+                        $this->session->setFlash('success', 'Subject added successfully!');
+                    }
                 }
             } elseif ($action === 'delete') {
                 $subjectId = (int)($_POST['subject_id'] ?? 0);
                 if ($subjectId) {
+                    // Get the subject to find its course code
+                    $subject = Subject::findById($subjectId);
+                    if ($subject && $subject['code']) {
+                        // Unenroll from the corresponding course
+                        $course = Course::findByCode($subject['code']);
+                        if ($course) {
+                            Course::unenrollStudent($userId, (int)$course['id']);
+                        }
+                    }
+                    
                     Subject::delete($subjectId);
-                    $this->session->setFlash('success', 'Subject removed.');
+                    $this->session->setFlash('success', 'Subject removed and unenrolled from course.');
                 }
             }
             redirect('/subjects');

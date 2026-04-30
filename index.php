@@ -104,6 +104,7 @@ $router->get('/ai', 'App\Controllers\AiController@index');
 $router->get('/ai/playground', 'App\Controllers\AiController@playground');
 $router->get('/playground', 'App\Controllers\AiController@playground'); // Alias for /ai/playground
 $router->get('/ai/suggestions', 'App\Controllers\AiController@suggestions');
+$router->get('/suggestions', 'App\Controllers\AiController@suggestions'); // Legacy/short alias
 $router->get('/ai/study', 'App\Controllers\AiController@studyTool');
 
 $router->post('/api/ai/chat', 'App\Controllers\AiController@chat');
@@ -122,10 +123,16 @@ $router->post('/api/result-lookup', 'App\Controllers\MiscController@lookupOffici
 
 // Admin routes
 $router->get('/admin', 'App\Controllers\AdminController@index');
+$router->get('/admin/manage', 'App\Controllers\AdminController@manageSystem');
+$router->post('/admin/manage', 'App\Controllers\AdminController@manageSystem');
 $router->get('/admin/attendance', 'App\Controllers\AdminController@manageAttendance');
 $router->post('/admin/attendance', 'App\Controllers\AdminController@manageAttendance');
+$router->get('/admin/attendance/student-history', 'App\Controllers\AdminController@studentAttendanceHistory');
 $router->get('/admin/attendance/sheet', 'App\Controllers\AdminController@attendanceSheet');
+$router->get('/admin/results', 'App\Controllers\AdminController@batchSemesterResults');
 $router->get('/admin/attendance/details', 'App\Controllers\AdminController@detailedAssessment');
+$router->get('/faculty/results', 'App\Controllers\AdminController@facultyResults');
+$router->post('/faculty/results', 'App\Controllers\AdminController@facultyResults');
 $router->get('/admin/students', 'App\Controllers\AdminController@studentDirectory');
 $router->get('/admin/api-settings', 'App\Controllers\AdminController@apiSettings');
 $router->post('/admin/api-settings', 'App\Controllers\AdminController@apiSettings');
@@ -137,7 +144,15 @@ $router->post('/admin/answers/reject', 'App\Controllers\AdminController@rejectAn
 // Course API routes
 $router->get('/api/courses/semesters', 'App\Controllers\CourseController@semesters');
 $router->get('/api/courses/filter', 'App\Controllers\CourseController@filter');
+$router->get('/api/courses/filter_all', 'App\Controllers\CourseController@filterAll');
 $router->get('/api/students/lookup', 'App\Controllers\AuthController@lookupStudent');
+
+// Student Course Enrollment routes
+$router->get('/enrollments', 'App\Controllers\CourseController@myEnrollments');
+$router->get('/enroll/:courseId', 'App\Controllers\CourseController@enrollForm');
+$router->post('/api/enroll', 'App\Controllers\CourseController@enroll');
+$router->post('/api/unenroll', 'App\Controllers\CourseController@unenroll');
+$router->get('/api/course/:courseId/students', 'App\Controllers\CourseController@getEnrolledStudents');
 
 // Page routes (dynamic)
 $router->get('/:page', 'App\Controllers\PageController@page');

@@ -23,7 +23,9 @@
 </style>
 
 <div class="admin-nav">
+    <a href="/admin/manage" class="btn btn-outline btn-sm">🛠 System Management</a>
     <a href="/admin/attendance" class="btn btn-outline btn-sm">📋 Manage Attendance</a>
+    <a href="/admin/results" class="btn btn-outline btn-sm">📊 Batch Result Sheets</a>
     <a href="/admin/students" class="btn btn-outline btn-sm">Student Lookup</a>
     <?php if ($this->session->userRole() === 'admin'): ?>
     <a href="/admin/api-settings" class="btn btn-outline btn-sm">⚙️ API Settings</a>

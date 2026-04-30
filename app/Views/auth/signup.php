@@ -48,11 +48,11 @@
                     <!-- Faculty Name Select -->
                     <div class="relative group hidden" id="facultyNameContainer">
                         <i data-lucide="user-check" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-accent-cyan transition-colors z-10"></i>
-                        <select name="name_faculty" id="facultyNameSelect" class="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-sm text-white focus:outline-none focus:border-accent-cyan transition-all appearance-none relative z-0">
-                            <option value="" disabled selected>Select your official name</option>
+                        <select name="name_faculty" id="facultyNameSelect" class="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-sm text-white focus:outline-none focus:border-accent-cyan transition-all appearance-none relative z-0 cursor-pointer hover:bg-white/10">
+                            <option value="" disabled selected style="color: #64748b;">Select your official name</option>
                             <?php if (isset($facultyRoster)): ?>
                                 <?php foreach ($facultyRoster as $code => $faculty): ?>
-                                    <option value="<?php echo htmlspecialchars($faculty['name']); ?>" class="text-slate-900">
+                                    <option value="<?php echo htmlspecialchars($faculty['name']); ?>" style="color: #1e293b; background-color: #0f172a; padding: 8px;">
                                         <?php echo htmlspecialchars($faculty['name']); ?>
                                     </option>
                                 <?php endforeach; ?>
@@ -105,9 +105,9 @@
                     <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">Role</label>
                     <div class="relative group">
                         <i data-lucide="briefcase" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-accent-cyan transition-colors z-10"></i>
-                        <select name="role" id="roleSelect" required class="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-sm text-white focus:outline-none focus:border-accent-cyan transition-all appearance-none relative z-0">
-                            <option value="student" class="text-slate-900">Student</option>
-                            <option value="faculty" class="text-slate-900">Faculty</option>
+                        <select name="role" id="roleSelect" required class="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-sm text-white focus:outline-none focus:border-accent-cyan transition-all appearance-none relative z-0 cursor-pointer hover:bg-white/10">
+                            <option value="student" style="color: #1e293b; background-color: #0f172a; padding: 8px;">Student</option>
+                            <option value="faculty" style="color: #1e293b; background-color: #0f172a; padding: 8px;">Faculty</option>
                         </select>
                         <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none z-10"></i>
                     </div>

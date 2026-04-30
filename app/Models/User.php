@@ -11,6 +11,7 @@ use function getDB;
 class User
 {
     private static bool $rosterSynced = false;
+    private static bool $defaultAdminEnsured = false;
 
     private static function normalizeGeneratedEmail(string $studentId): string
     {
@@ -39,8 +40,46 @@ class User
         ");
     }
 
+    private static function ensureDefaultAdminAccount(): void
+    {
+        if (self::$defaultAdminEnsured) {
+            return;
+        }
+
+        $db = getDB();
+        $adminEmail = 'admin@edusync.mu';
+        $adminPasswordHash = password_hash('admin123', PASSWORD_DEFAULT);
+
+        $stmt = $db->prepare("SELECT id FROM users WHERE email = ? LIMIT 1");
+        $stmt->execute([$adminEmail]);
+        $existingId = (int)$stmt->fetchColumn();
+
+        if ($existingId > 0) {
+            $update = $db->prepare("
+                UPDATE users
+                SET
+                    name = COALESCE(NULLIF(name, ''), 'Admin'),
+                    role = 'admin',
+                    password = ?
+                WHERE id = ?
+            ");
+            $update->execute([$adminPasswordHash, $existingId]);
+            self::$defaultAdminEnsured = true;
+            return;
+        }
+
+        $insert = $db->prepare("
+            INSERT INTO users (name, email, password, role, department)
+            VALUES ('Admin', ?, ?, 'admin', 'Software Engineering')
+        ");
+        $insert->execute([$adminEmail, $adminPasswordHash]);
+        self::$defaultAdminEnsured = true;
+    }
+
     public static function ensureRosterSynced(): void
     {
+        self::ensureDefaultAdminAccount();
+
         if (self::$rosterSynced) {
             return;
         }
@@ -152,6 +191,17 @@ class User
     }
 
     /**
+     * Find faculty user by name
+     */
+    public static function findByFacultyName(string $name): ?array
+    {
+        $db = getDB();
+        $stmt = $db->prepare("SELECT * FROM users WHERE name = ? AND role = 'faculty' LIMIT 1");
+        $stmt->execute([$name]);
+        return $stmt->fetch() ?: null;
+    }
+
+    /**
      * Register a new user
      */
     public static function register(
@@ -167,10 +217,8 @@ class User
         $db = getDB();
 
         // Check if email already exists
-        if (self::findByEmail($email)) {
-            return ['success' => false, 'message' => 'Email already registered.'];
-        }
-
+        $existingByEmail = self::findByEmail($email);
+        
         if ($role === 'student' && $studentId !== '') {
             $rosterProfile = StudentRoster::findPrimary($studentId);
             if (!$rosterProfile) {
@@ -182,6 +230,11 @@ class User
 
             $existingStudent = self::findByStudentId($studentId, false);
             if ($existingStudent) {
+                // If the email is already taken by ANOTHER user
+                if ($existingByEmail && (int)$existingByEmail['id'] !== (int)$existingStudent['id']) {
+                    return ['success' => false, 'message' => 'Email already registered.'];
+                }
+
                 $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
                 try {
                     $stmt = $db->prepare("
@@ -202,6 +255,39 @@ class User
                     return ['success' => false, 'message' => 'Registration failed: ' . $e->getMessage()];
                 }
             }
+        }
+
+        if ($role === 'faculty') {
+            $existingFaculty = self::findByFacultyName($name);
+            if ($existingFaculty) {
+                // If the email is already taken by ANOTHER user
+                if ($existingByEmail && (int)$existingByEmail['id'] !== (int)$existingFaculty['id']) {
+                    return ['success' => false, 'message' => 'Email already registered.'];
+                }
+
+                $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+                try {
+                    $stmt = $db->prepare("
+                        UPDATE users
+                        SET email = ?, password = ?
+                        WHERE id = ?
+                    ");
+                    $stmt->execute([$email, $hashedPassword, $existingFaculty['id']]);
+
+                    return [
+                        'success' => true,
+                        'id' => $existingFaculty['id'],
+                        'user' => self::findById((int) $existingFaculty['id']),
+                    ];
+                } catch (\Exception $e) {
+                    return ['success' => false, 'message' => 'Registration failed: ' . $e->getMessage()];
+                }
+            }
+        }
+
+        // Final check for email if no existing account was claimed
+        if ($existingByEmail) {
+            return ['success' => false, 'message' => 'Email already registered.'];
         }
 
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
@@ -419,22 +505,38 @@ class User
     {
         self::ensureRosterSynced();
         $db = getDB();
-        $conditions = ["u.role = 'student'"];
-        $params = [];
-
+        
+        // If courseId is specified, try to get enrolled students for that course
         if ($courseId > 0) {
-            $course = Course::findById($courseId);
-            if ($course && !empty($course['batch'])) {
-                $courseBatches = array_filter(array_map('trim', explode(',', (string) $course['batch'])));
-                if ($courseBatches !== []) {
-                    $placeholders = implode(',', array_fill(0, count($courseBatches), '?'));
-                    $conditions[] = "m.batch IN ($placeholders)";
-                    foreach ($courseBatches as $courseBatch) {
-                        $params[] = $courseBatch;
-                    }
+            try {
+                $sql = "
+                    SELECT DISTINCT u.id, u.name, u.email, u.student_id, u.batch, u.semester, u.avatar,
+                        GROUP_CONCAT(DISTINCT CONCAT('Batch ', m.batch, ' / Sem ', m.semester) ORDER BY m.semester DESC SEPARATOR ', ') AS memberships
+                    FROM users u
+                    INNER JOIN student_course_enrollments sce ON sce.user_id = u.id
+                    INNER JOIN student_batch_memberships m ON m.user_id = u.id
+                    WHERE u.role = 'student' AND sce.course_id = ?
+                    GROUP BY u.id, u.name, u.email, u.student_id, u.batch, u.semester, u.avatar
+                    ORDER BY u.name ASC
+                ";
+                
+                $stmt = $db->prepare($sql);
+                $stmt->execute([$courseId]);
+                $enrolledStudents = $stmt->fetchAll();
+                
+                // If students found, return them
+                if (!empty($enrolledStudents)) {
+                    return $enrolledStudents;
                 }
+                // If no enrollments yet, fall through to get batch/semester students
+            } catch (\Exception $e) {
+                // Table might not exist yet, fall through to original behavior
             }
         }
+        
+        // Original behavior: get students by batch and semester
+        $conditions = ["u.role = 'student'"];
+        $params = [];
 
         if ($batch !== '') {
             $conditions[] = "m.batch = ?";

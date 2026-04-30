@@ -23,7 +23,7 @@
                 <select id="batchSelect" name="batch" class="form-control">
                     <option value="">Select Batch</option>
                     <?php foreach ($availableBatches as $batch): ?>
-                        <option value="<?= htmlspecialchars($batch) ?>" <?= (isset($user['batch']) && strpos($user['batch'], $batch) !== false) ? 'selected' : '' ?>>Batch <?= htmlspecialchars($batch) ?></option>
+                        <option value="<?= htmlspecialchars($batch) ?>" <?= (($old['batch'] ?? '') === $batch || (!isset($old['batch']) && isset($user['batch']) && strpos($user['batch'], $batch) !== false)) ? 'selected' : '' ?>>Batch <?= htmlspecialchars($batch) ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
@@ -75,7 +75,7 @@
                     });
             }
 
-            function updateCourses(batch, semester) {
+            function updateCourses(batch, semester, selectedCourse = null) {
                 const courseSelect = document.getElementById('courseSelect');
                 if (!batch || !semester) {
                     courseSelect.innerHTML = '<option value="">Select semester first</option>';
@@ -96,6 +96,9 @@
                             const opt = document.createElement('option');
                             opt.value = c.code;
                             opt.textContent = `${c.code} — ${c.name}`;
+                            if (selectedCourse && selectedCourse === c.code) {
+                                opt.selected = true;
+                            }
                             courseSelect.appendChild(opt);
                         });
                     });
@@ -113,15 +116,19 @@
             // Initial load if batch is pre-selected
             window.addEventListener('DOMContentLoaded', () => {
                 const initialBatch = document.getElementById('batchSelect').value;
-                const userSemester = <?= (int)($user['semester'] ?? 0) ?>;
+                const initialSemester = <?= (int)($old['semester'] ?? ($user['semester'] ?? 0)) ?>;
+                const initialCourse = <?= json_encode($old['course_code'] ?? '') ?>;
                 if (initialBatch) {
-                    updateSemesters(initialBatch, userSemester);
+                    updateSemesters(initialBatch, initialSemester);
+                    if (initialSemester && initialCourse) {
+                        setTimeout(() => updateCourses(initialBatch, initialSemester, initialCourse), 50);
+                    }
                 }
             });
             </script>
             <div class="field">
                 <label>Question Text (Optional if image is provided)</label>
-                <textarea name="question_text" id="question_text" rows="6" placeholder="Type the question or use AI to extract text from an image..."></textarea>
+                <textarea name="question_text" id="question_text" rows="6" placeholder="Type the question or use AI to extract text from an image..."><?= htmlspecialchars($old['question_text'] ?? '') ?></textarea>
             </div>
 
             <div class="field">

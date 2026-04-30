@@ -42,6 +42,34 @@
 </div>
 
 <div style="margin-bottom:16px;">
+    <?php if (!empty($batchResources)): ?>
+    <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:10px;">
+        <span class="badge badge-accent">My Batch (<?= htmlspecialchars($user['batch']) ?>)</span>
+        Recommended for My Current Semester
+    </div>
+    <div class="grid-2" style="margin-bottom: 30px;">
+        <?php foreach ($batchResources as $subject => $videos): ?>
+            <?php foreach ($videos as $v): ?>
+            <div class="video-card">
+                <div class="video-thumbnail" onclick="window.open('<?= htmlspecialchars($v[1]) ?>','_blank')">
+                    <div class="play-btn">▶</div>
+                    <div class="yt-label">📺 YouTube</div>
+                </div>
+                <div class="video-body">
+                    <div class="video-title"><?= htmlspecialchars($v[0]) ?></div>
+                    <div style="font-size:11px;color:var(--accent);font-weight:700;margin-bottom:4px;"><?= htmlspecialchars($subject) ?></div>
+                    <div style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.5;"><?= htmlspecialchars($v[2]) ?></div>
+                    <div class="video-meta">
+                        <span class="video-channel">👤 <?= htmlspecialchars($v[3]) ?></span>
+                        <span>⏱ <?= htmlspecialchars($v[4]) ?></span>
+                    </div>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
+
     <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:14px;">📚 Browse by Course</div>
     <?php
     $yearGroups = [];
