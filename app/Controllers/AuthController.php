@@ -58,9 +58,80 @@ class AuthController extends Controller
             $this->session->loginUser($loggedUser);
             redirect('/dashboard');
         } else {
-            $this->session->setFlash('error', $result['message']);
+            $message = $result['message'];
+            if (stripos($message, 'invalid') !== false) {
+                $message .= ' Forgot ID or password? Use the Faculty Recover option.';
+            }
+            $this->session->setFlash('error', $message);
             redirect('/login');
         }
+    }
+
+    /**
+     * Show faculty credential recovery form.
+     */
+    public function facultyRecover(): void
+    {
+        if ($this->session->isLoggedIn()) {
+            redirect('/dashboard');
+        }
+
+        $error = '';
+        $flash = $this->session->getFlash();
+        $this->render('auth/faculty-recover', compact('error', 'flash'));
+    }
+
+    /**
+     * Handle faculty credential recovery submission.
+     */
+    public function doFacultyRecover(): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            redirect('/auth/faculty-recover');
+        }
+
+        $facultyCode = clean($_POST['faculty_code'] ?? '');
+        $newIdentifier = clean($_POST['new_identifier'] ?? '');
+        $newPassword = $_POST['new_password'] ?? '';
+        $confirmPassword = $_POST['confirm_password'] ?? '';
+
+        $errors = [];
+        if ($facultyCode === '') {
+            $errors[] = 'Faculty verification code is required.';
+        }
+
+        if ($newIdentifier !== '' && !filter_var($newIdentifier, FILTER_VALIDATE_EMAIL)) {
+            $errors[] = 'New login ID must be a valid email address.';
+        }
+
+        if ($newPassword !== '' && strlen($newPassword) < 6) {
+            $errors[] = 'New password must be at least 6 characters.';
+        }
+
+        if ($newPassword !== '' && $newPassword !== $confirmPassword) {
+            $errors[] = 'New password and confirm password do not match.';
+        }
+
+        if ($newIdentifier === '' && $newPassword === '') {
+            $errors[] = 'Enter a new login ID or a new password.';
+        }
+
+        if (!empty($errors)) {
+            $error = implode(' ', $errors);
+            $flash = null;
+            $this->render('auth/faculty-recover', compact('error', 'flash'));
+            return;
+        }
+
+        $result = User::recoverFacultyCredentials($facultyCode, $newIdentifier, $newPassword);
+        if ($result['success']) {
+            $this->session->setFlash('success', $result['message']);
+            redirect('/login');
+        }
+
+        $error = $result['message'];
+        $flash = null;
+        $this->render('auth/faculty-recover', compact('error', 'flash'));
     }
 
     /**

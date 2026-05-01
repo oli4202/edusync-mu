@@ -35,6 +35,8 @@ $router = new Router();
 // Authentication routes
 $router->get('/login', 'App\Controllers\AuthController@login');
 $router->post('/auth/login', 'App\Controllers\AuthController@doLogin');
+$router->get('/auth/faculty-recover', 'App\Controllers\AuthController@facultyRecover');
+$router->post('/auth/faculty-recover', 'App\Controllers\AuthController@doFacultyRecover');
 $router->get('/signup', 'App\Controllers\AuthController@signup');
 $router->post('/auth/signup', 'App\Controllers\AuthController@doSignup');
 $router->get('/logout', 'App\Controllers\AuthController@logout');

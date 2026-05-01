@@ -202,6 +202,58 @@ class User
     }
 
     /**
+     * Recover faculty login credentials with official verification code.
+     */
+    public static function recoverFacultyCredentials(string $facultyCode, string $newEmail = '', string $newPassword = ''): array
+    {
+        self::ensureRosterSynced();
+        $facultyCode = strtoupper(trim($facultyCode));
+        $facultyRoster = require __DIR__ . '/../Data/faculty_data.php';
+
+        if (!isset($facultyRoster[$facultyCode])) {
+            return ['success' => false, 'message' => 'Invalid faculty verification code.'];
+        }
+
+        $facultyName = $facultyRoster[$facultyCode]['name'];
+        $faculty = self::findByFacultyName($facultyName);
+        if (!$faculty) {
+            return ['success' => false, 'message' => 'No faculty account found for this verification code. Please sign up first.'];
+        }
+
+        $updates = [];
+        $values = [];
+
+        if ($newEmail !== '') {
+            $existing = self::findByEmail($newEmail);
+            if ($existing && (int) $existing['id'] !== (int) $faculty['id']) {
+                return ['success' => false, 'message' => 'That email is already in use by another account.'];
+            }
+            $updates[] = 'email = ?';
+            $values[] = $newEmail;
+        }
+
+        if ($newPassword !== '') {
+            $updates[] = 'password = ?';
+            $values[] = password_hash($newPassword, PASSWORD_DEFAULT);
+        }
+
+        if (empty($updates)) {
+            return ['success' => false, 'message' => 'Provide a new login ID (email) or a new password.'];
+        }
+
+        $values[] = $faculty['id'];
+        $db = getDB();
+
+        try {
+            $sql = 'UPDATE users SET ' . implode(', ', $updates) . ' WHERE id = ?';
+            $db->prepare($sql)->execute($values);
+            return ['success' => true, 'message' => 'Faculty credentials updated successfully. You can sign in now.'];
+        } catch (\Exception $e) {
+            return ['success' => false, 'message' => 'Recovery failed: ' . $e->getMessage()];
+        }
+    }
+
+    /**
      * Register a new user
      */
     public static function register(

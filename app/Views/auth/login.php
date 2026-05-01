@@ -29,10 +29,18 @@
             <?php endif; ?>
 
             <?php if (isset($flash) && $flash): ?>
-                <div class="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
-                    <i data-lucide="check-circle" class="w-5 h-5"></i>
+                <?php $isError = (($flash['type'] ?? '') === 'error'); ?>
+                <div class="mb-6 p-4 <?php echo $isError ? 'bg-red-500/10 border-red-500/20 text-red-400' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'; ?> border rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
+                    <i data-lucide="<?php echo $isError ? 'alert-circle' : 'check-circle'; ?>" class="w-5 h-5"></i>
                     <span class="text-xs font-bold"><?php echo htmlspecialchars($flash['message']); ?></span>
                 </div>
+                <?php if ($isError): ?>
+                    <div class="mb-6 text-center">
+                        <a href="/auth/faculty-recover" class="text-[10px] font-bold text-accent-cyan hover:text-white transition-colors uppercase tracking-widest">
+                            Forgot ID or Password? Recover Faculty Account
+                        </a>
+                    </div>
+                <?php endif; ?>
             <?php endif; ?>
 
             <form method="POST" action="/auth/login" class="space-y-6">
@@ -54,7 +62,7 @@
                 <div class="space-y-2">
                     <div class="flex items-center justify-between px-1">
                         <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Password</label>
-                        <a href="#" class="text-[10px] font-bold text-accent-cyan hover:text-white transition-colors uppercase tracking-widest">Forgot?</a>
+                        <a href="/auth/faculty-recover" class="text-[10px] font-bold text-accent-cyan hover:text-white transition-colors uppercase tracking-widest">Forgot ID/Password?</a>
                     </div>
                     <div class="relative group">
                         <i data-lucide="lock" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-accent-cyan transition-colors"></i>
