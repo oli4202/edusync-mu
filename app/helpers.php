@@ -257,3 +257,58 @@ function callGroqAI_Internal(string $prompt, string $systemPrompt, string $apiKe
 
     return ['success' => false, 'text' => "Groq API Error: $msg (HTTP $httpCode)"];
 }
+
+/**
+ * File upload helper
+ */
+function uploadFile($file, string $category = 'general'): array
+{
+    use App\Support\FileUpload;
+    return FileUpload::save($file, $category);
+}
+
+/**
+ * Delete uploaded file
+ */
+function deleteFile(string $path): bool
+{
+    use App\Support\FileUpload;
+    return FileUpload::delete($path);
+}
+
+/**
+ * Get file path URL
+ */
+function fileUrl(string $path): string
+{
+    use App\Support\FileUpload;
+    return FileUpload::getPath($path);
+}
+
+/**
+ * Create paginator instance
+ */
+function paginate(int $total, int $perPage = 15, int $page = null): \App\Support\Paginator
+{
+    $page = $page ?? ((int)($_GET['page'] ?? 1));
+    use App\Support\Paginator;
+    return new Paginator($total, $perPage, $page);
+}
+
+/**
+ * Search sanitization
+ */
+function searchQuery(string $query): string
+{
+    use App\Support\Search;
+    return Search::sanitize($query);
+}
+
+/**
+ * Search highlight
+ */
+function highlightSearch(string $text, string $query): string
+{
+    use App\Support\Search;
+    return Search::highlight($text, $query);
+}

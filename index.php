@@ -93,6 +93,10 @@ $router->post('/api/question-bank/compact-answer', 'App\Controllers\QuestionBank
 // Learn routes
 $router->get('/learn', 'App\Controllers\LearnController@index');
 
+// Search routes
+$router->get('/search', 'App\Controllers\SearchController@search');
+$router->get('/api/search/suggestions', 'App\Controllers\SearchController@suggestions');
+
 // Job & Partner routes
 $router->get('/jobs', 'App\Controllers\JobController@index');
 $router->post('/jobs/post', 'App\Controllers\JobController@post');
